@@ -1,0 +1,659 @@
+/* @font-face kit by Fonts2u (http://www.fonts2u.com) */ @font-face {font-family:"Pokemon Pixel";src:url("fonts/pokemon_pixel_font.eot?") format("eot"),url("fonts/pokemon_pixel_font.woff") format("woff"),url("fonts/pokemon_pixel_font.ttf") format("truetype"),url("fonts/pokemon_pixel_font.svg#Pokemon-Pixel-Font") format("svg");font-weight:normal;font-style:normal;}
+
+@font-face {
+    font-family: 'FippsRegular';
+    src: url('fonts/fipps-regular-webfont.eot');
+    src: url('fonts/fipps-regular-webfont.eot?#iefix') format('embedded-opentype'),
+    url('fonts/fipps-regular-webfont.woff') format('woff'),
+    url('fonts/fipps-regular-webfont.ttf') format('truetype'),
+    url('fonts/fipps-regular-webfont.svg#FippsRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'emulogic';
+    src: url('fonts/emulogic-webfont.eot');
+    src: url('fonts/emulogic-webfont.eot?#iefix') format('embedded-opentype'),
+    url('fonts/emulogic-webfont.woff') format('woff'),
+    url('fonts/emulogic-webfont.ttf') format('truetype'),
+    url('fonts/emulogic-webfont.svg#emulogicregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Futura';
+    src: url('fonts/FuturaStd-HeavyOblique.eot');
+    src: url('fonts/FuturaStd-HeavyOblique.eot?#iefix') format('embedded-opentype'),
+    url('fonts/FuturaStd-HeavyOblique.woff') format('woff'),
+    url('fonts/FuturaStd-HeavyOblique.ttf') format('truetype');
+    font-weight: 900;
+    font-style: italic;
+}
+
+$screenWidth: 402px;
+$screenHeight: 273px;
+
+$mobileWidth: 600px;
+
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+body {
+    line-height: 1;
+}
+ol, ul {
+    list-style: none;
+}
+blockquote, q {
+    quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+body {
+    font-family: 'Pokemon Pixel', monospace;
+    font-size: 18px;
+    letter-spacing: 1px;
+}
+
+ul {
+    list-style-position: inside;
+}
+
+#gameboy {
+    width: 1000px;
+    height: 600px;
+    margin: 0 auto;
+    background: url('images/gba.png');
+    position: relative;
+
+    @media (max-width: $mobileWidth) {
+        width: 100%;
+        height: auto;
+        background: none;
+    }
+
+    /* styles for elements outside of screen */
+    #start {
+        display: block;
+        position: absolute;
+        top: 365px;
+        left: 126px;
+        width: 100px;
+        height: 25px;
+        transform: rotate(14deg);
+        -webkit-transform: rotate(14deg);
+        -ms-transform: rotate(14deg);
+
+        @media (max-width: $mobileWidth) {
+            display: none;
+        }
+    }
+
+    #back-home {
+        position: absolute;
+        top: 112px;
+        left: 298px;
+        color: white;
+        display: none;
+        text-decoration: none;
+
+        @media (max-width: $mobileWidth) {
+            position: relative;
+            top: 0;
+            left: 0;
+            color: black;
+            float: right;
+            margin-right: 10px;
+        }
+    }
+
+    #email {
+	      position: absolute;
+	      top: 442px;
+	      left: 330px;
+	      text-decoration: none;
+	      color: #CBCBCB;
+	      font: 22px 'Futura', Arial, sans-serif;
+	      text-transform: uppercase;
+	      -webkit-text-stroke: 1px #cbcbcb;
+
+        @media (max-width: $mobileWidth) {
+            display: none;
+        }
+    }
+
+    #instructions {
+        position: absolute;
+        top: 600px;
+        left: 50%;
+        width: 700px;
+        margin-left: -350px;
+        text-align: center;
+        font-size: 36px;
+
+        @media (max-width: $mobileWidth) {
+            position: relative;
+            left: 0;
+            top: 0;
+            width: auto;
+            margin: auto;
+        }
+    }
+
+    #screen {
+        width: $screenWidth;
+        height: $screenHeight;
+        top: 133px;
+        left: 298px;
+        background: rgb(248, 248, 248);
+        position: absolute;
+
+        @media (max-width: $mobileWidth) {
+            width: 100%;
+            position: relative;
+            left: 0;
+            top: 0;
+        }
+    }
+
+    #screen > div {
+        width: $screenWidth;
+        height: $screenHeight;
+    }
+
+    #control-pad {
+        position: absolute;
+        left: 88px;
+        top: 190px;
+
+        div {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            cursor: pointer;
+        }
+
+        #control-up {
+            left: 40px;
+        }
+
+        #control-left {
+            top: 40px;
+        }
+
+        #control-right {
+            top: 40px;
+            left: 80px;
+        }
+
+        #control-down {
+            top: 80px;
+            left: 40px;
+        }
+
+        @media (max-width: $mobileWidth) {
+            display: none;
+        }
+    }
+
+    #control-buttons {
+        position: absolute;
+        left: 765px;
+        top: 205px;
+
+        div {
+            position: absolute;
+            width: 62px;
+            height: 62px;
+            border-radius: 50px;
+            cursor: pointer;
+        }
+
+        #control-a {
+            top: 30px;
+        }
+
+        #control-b {
+            left: 88px;
+        }
+
+        @media (max-width: $mobileWidth) {
+            display: none;
+        }
+    }
+
+    #on-light {
+        position: absolute;
+        left: 790px;
+        top: 111px;
+        width: 17px;
+        height: 17px;
+        background-image: -webkit-gradient(radial, center center, 0, center center, 10, from(rgba(108, 199, 72, 0.6)), to(rgba(0,0,0,0)));
+        background-image: -moz-radial-gradient(center center, circle cover, rgba(108, 199, 72, 0.6) 0%, rgba(0,0,0,0) 200% );
+        border-radius: 10px;
+        display: none;
+    }
+
+    /* styles for each screen view */
+    #home {
+        width: $screenWidth - 20px;
+        height: $screenHeight - 10px;
+        padding: 5px 10px;
+
+        h1 {
+            font: 18px 'FippsRegular', 'Pokemon Pixel', monospace;
+            letter-spacing: 0;
+        }
+
+        #menu {
+            width: 120px;
+            height: 170px;
+            border-image: url(images/border.png) 50 repeat;
+            border-width: 20px;
+            border-style: solid;
+            float: left;
+
+            ul {
+                list-style: none;
+
+                li {
+                    font-size: 28px;
+                    padding-bottom: 5px;
+                    padding-left: 10px;
+                    text-transform: uppercase;
+                    cursor: pointer;
+
+                    a {
+                        text-decoration: none;
+                        color: black;
+                    }
+                }
+
+                li:hover {
+                    background: url(images/arrow.png) no-repeat left 9px;
+                }
+            }
+        }
+
+        #avatar {
+            float: left;
+            width: 218px;
+            height: 210px;
+            text-align: center;
+
+            img {
+                margin-top: 10px;
+                height: 90%;
+            }
+        }
+    }
+
+    #about {
+        background: white;
+
+        img {
+            display: block;
+            margin: 0 auto 16px;
+            position: relative;
+            top: 8px;
+        }
+
+        #text {
+            border-image: url(images/border.png) 50 repeat;
+            border-width: 20px;
+            border-style: solid;
+            font-size: 24px;
+            height: 127px;
+            overflow: auto;
+            line-height: 1.3em;
+            position: relative;
+            overflow: hidden;
+
+            div.section {
+                height: 100%;
+            }
+        }
+
+        [id*=arrow] {
+            position: absolute;
+            background: url(images/arrow.png) no-repeat center center;
+            width: 18px;
+            height: 7px;
+            display: block;
+            right: 25px;
+        }
+
+        #arrow-down {
+            right: 25px;
+            bottom: 45px;
+            transform: rotate(90deg) scale(2);
+            -webkit-transform: rotate(90deg) scale(2);
+            -ms-transform: rotate(90deg);
+        }
+
+        #arrow-up {
+            display: none;
+            top: 110px;
+            transform: rotate(270deg) scale(2);
+            -webkit-transform: rotate(270deg) scale(2);
+            -ms-transform: rotate(270deg);
+        }
+    }
+
+    #contact {
+        overflow: hidden;
+
+        #map {
+            background: black url(images/map.png) no-repeat 0px center;
+            width: 1297px;
+            height: 100%;
+            position: relative;
+
+            input, textarea {
+                position: absolute;
+                padding: 2px 5px;
+                bottom: 120px;
+            }
+
+            [name=name] {
+                left: 130px;
+            }
+
+            [name=email] {
+                left: 440px;
+            }
+
+            [name=message] {
+                left: 700px;
+            }
+
+            [type=submit] {
+                left: 1100px;
+            }
+
+            #message {
+                position: absolute;
+                left: 972px;
+                display: none;
+                width: 250px;
+                top: 90px;
+                text-align: center;
+                font-size: 24px;
+            }
+        }
+
+        .mario {
+            background-image: url(images/mario.png);
+            background-repeat: no-repeat;
+            display: block;
+            position: absolute;
+        }
+
+        .mario-jumpleft {
+            width: 17px;
+            height: 15px;
+            background-position: -5px -4px;
+        }
+
+        .mario-left1 {
+            width: 16px;
+            height: 16px;
+            background-position: -32px -4px;
+        }
+
+        .mario-left2 {
+            width: 12px;
+            height: 16px;
+            background-position: -58px -4px;
+        }
+
+        .mario-left3 {
+            width: 14px;
+            height: 15px;
+            background-position: -5px -29px;
+        }
+
+        .mario-left0 {
+            width: 13px;
+            height: 16px;
+            background-position: -29px -29px;
+        }
+
+        .mario-right0 {
+            width: 13px;
+            height: 16px;
+            background-position: -52px -29px;
+        }
+
+        .mario-right1 {
+            width: 14px;
+            height: 15px;
+            background-position: -5px -54px;
+        }
+
+        .mario-right2 {
+            width: 12px;
+            height: 16px;
+            background-position: -29px -54px;
+        }
+
+        .mario-right3 {
+            width: 16px;
+            height: 16px;
+            background-position: -51px -54px;
+        }
+
+        .mario-jumpright {
+            width: 17px;
+            height: 16px;
+            background-position: -80px -4px;
+        }
+
+    }
+
+    #portfolio {
+
+        background: url('images/portfolio.png');
+
+        #overlay {
+            width: $screenWidth - 60px;
+            height: $screenHeight - 60px;
+            position: absolute;
+            z-index: 5;
+            border-image: url(images/border2.png) 20 repeat;
+            border-width: 20px;
+            border-style: solid;
+            padding: 10px;
+            background: rgb(210, 210, 210);
+            display: none;
+            overflow: auto;
+
+            #back {
+                position: absolute;
+                right: 10px;
+                top: 10px;
+            }
+
+            h2 {
+                font-size: 27px;
+                margin-bottom: 10px;
+            }
+
+            p, ul {
+                font-family: 'Droid Sans Mono', 'Courier New', monospace;
+                font-size: 14px;
+            }
+        }
+
+        #sprite {
+            position: absolute;
+            background-image: url('images/spritesheet.png');
+            background-repeat: no-repeat;
+        }
+
+        .sprite-down0 {
+            width: 18px;
+            height: 23px;
+            background-position: -5px -5px;
+        }
+
+        .sprite-down1 {
+            width: 18px;
+            height: 24px;
+            background-position: -33px -5px;
+        }
+
+        .sprite-down2 {
+            width: 18px;
+            height: 24px;
+            background-position: -61px -5px;
+        }
+
+        .sprite-left0 {
+            width: 17px;
+            height: 22px;
+            background-position: -89px -5px;
+        }
+
+        .sprite-left1 {
+            width: 20px;
+            height: 22px;
+            background-position: -89px -37px;
+        }
+
+        .sprite-left2 {
+            width: 19px;
+            height: 22px;
+            background-position: -5px -69px;
+        }
+
+        .sprite-right0 {
+            width: 17px;
+            height: 22px;
+            background-position: -34px -69px;
+        }
+
+        .sprite-right1 {
+            width: 20px;
+            height: 22px;
+            background-position: -61px -69px;
+        }
+
+        .sprite-right2 {
+            width: 19px;
+            height: 22px;
+            background-position: -91px -69px;
+        }
+
+        .sprite-sworddown {
+            width: 19px;
+            height: 35px;
+            background-position: -119px -5px;
+        }
+
+        .sprite-swordleft {
+            width: 31px;
+            height: 22px;
+            background-position: -120px -50px;
+        }
+
+        .sprite-swordright {
+            width: 36px;
+            height: 20px;
+            background-position: -5px -101px;
+        }
+
+        .sprite-swordup {
+            width: 18px;
+            height: 31px;
+            background-position: -120px -82px;
+        }
+
+        .sprite-up0 {
+            width: 18px;
+            height: 21px;
+            background-position: -51px -123px;
+        }
+
+        .sprite-up1 {
+            width: 18px;
+            height: 25px;
+            background-position: -79px -123px;
+        }
+
+        .sprite-up2 {
+            width: 18px;
+            height: 25px;
+            background-position: -107px -123px;
+        }
+
+        .chest {
+            background-image: url(images/chest.png);
+            background-repeat: no-repeat;
+            display: block;
+            position: absolute;
+            cursor: pointer;
+        }
+
+        .chest-0 {
+            width: 32px;
+            height: 24px;
+            background-position: -5px -5px;
+        }
+
+        .chest-1 {
+            width: 32px;
+            height: 29px;
+            background-position: -5px -39px;
+        }
+
+        .chest-2 {
+            width: 32px;
+            height: 33px;
+            background-position: -47px -5px;
+        }
+
+        .chest-3 {
+            width: 32px;
+            height: 38px;
+            background-position: -47px -48px;
+        }
+    }
+}
