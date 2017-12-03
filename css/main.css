@@ -1,25 +1,25 @@
 /* @font-face kit by Fonts2u (http://www.fonts2u.com) */
 @font-face {
   font-family: "Pokemon Pixel";
-  src: url("fonts/pokemon_pixel_font.eot?") format("eot"), url("fonts/pokemon_pixel_font.woff") format("woff"), url("fonts/pokemon_pixel_font.ttf") format("truetype"), url("fonts/pokemon_pixel_font.svg#Pokemon-Pixel-Font") format("svg");
+  src: url("/fonts/pokemon_pixel_font.eot?") format("eot"), url("/fonts/pokemon_pixel_font.woff") format("woff"), url("/fonts/pokemon_pixel_font.ttf") format("truetype"), url("/fonts/pokemon_pixel_font.svg#Pokemon-Pixel-Font") format("svg");
   font-weight: normal;
   font-style: normal; }
 @font-face {
   font-family: 'FippsRegular';
-  src: url("fonts/fipps-regular-webfont.eot");
-  src: url("fonts/fipps-regular-webfont.eot?#iefix") format("embedded-opentype"), url("fonts/fipps-regular-webfont.woff") format("woff"), url("fonts/fipps-regular-webfont.ttf") format("truetype"), url("fonts/fipps-regular-webfont.svg#FippsRegular") format("svg");
+  src: url("/fonts/fipps-regular-webfont.eot");
+  src: url("/fonts/fipps-regular-webfont.eot?#iefix") format("embedded-opentype"), url("/fonts/fipps-regular-webfont.woff") format("woff"), url("/fonts/fipps-regular-webfont.ttf") format("truetype"), url("/fonts/fipps-regular-webfont.svg#FippsRegular") format("svg");
   font-weight: normal;
   font-style: normal; }
 @font-face {
   font-family: 'emulogic';
-  src: url("fonts/emulogic-webfont.eot");
-  src: url("fonts/emulogic-webfont.eot?#iefix") format("embedded-opentype"), url("fonts/emulogic-webfont.woff") format("woff"), url("fonts/emulogic-webfont.ttf") format("truetype"), url("fonts/emulogic-webfont.svg#emulogicregular") format("svg");
+  src: url("/fonts/emulogic-webfont.eot");
+  src: url("/fonts/emulogic-webfont.eot?#iefix") format("embedded-opentype"), url("/fonts/emulogic-webfont.woff") format("woff"), url("/fonts/emulogic-webfont.ttf") format("truetype"), url("/fonts/emulogic-webfont.svg#emulogicregular") format("svg");
   font-weight: normal;
   font-style: normal; }
 @font-face {
   font-family: 'Futura';
-  src: url("fonts/FuturaStd-HeavyOblique.eot");
-  src: url("fonts/FuturaStd-HeavyOblique.eot?#iefix") format("embedded-opentype"), url("fonts/FuturaStd-HeavyOblique.woff") format("woff"), url("fonts/FuturaStd-HeavyOblique.ttf") format("truetype");
+  src: url("/fonts/FuturaStd-HeavyOblique.eot");
+  src: url("/fonts/FuturaStd-HeavyOblique.eot?#iefix") format("embedded-opentype"), url("/fonts/FuturaStd-HeavyOblique.woff") format("woff"), url("/fonts/FuturaStd-HeavyOblique.ttf") format("truetype");
   font-weight: 900;
   font-style: italic; }
 /* http://meyerweb.com/eric/tools/css/reset/
@@ -43,7 +43,6 @@ time, mark, audio, video {
   padding: 0;
   border: 0;
   font-size: 100%;
-  font: inherit;
   vertical-align: baseline; }
 
 /* HTML5 display-role reset for older browsers */
@@ -81,7 +80,7 @@ ul {
   width: 1000px;
   height: 600px;
   margin: 0 auto;
-  background: url("images/gba.png");
+  background: url("/images/gba.png");
   position: relative;
   /* styles for elements outside of screen */
   /* styles for each screen view */ }
@@ -206,24 +205,23 @@ ul {
     top: 111px;
     width: 17px;
     height: 17px;
-    background-image: -webkit-gradient(radial, center center, 0, center center, 10, from(rgba(108, 199, 72, 0.6)), to(transparent));
-    background-image: -moz-radial-gradient(center center, circle cover, rgba(108, 199, 72, 0.6) 0%, transparent 200%);
+    background-image: -webkit-gradient(radial, center center, 0, center center, 10, from(rgba(108, 199, 72, 0.6)), to(rgba(0, 0, 0, 0)));
+    background-image: -moz-radial-gradient(center center, circle cover, rgba(108, 199, 72, 0.6) 0%, rgba(0, 0, 0, 0) 200%);
     border-radius: 10px;
     display: none; }
   #gameboy #home {
     width: 382px;
     height: 263px;
     padding: 5px 10px; }
-    #gameboy #home h1 {
-      font: 18px 'FippsRegular', 'Pokemon Pixel', monospace;
-      letter-spacing: 0; }
     #gameboy #home #menu {
       width: 120px;
-      height: 170px;
-      border-image: url(images/border.png) 50 repeat;
+      height: 220px;
+      border-image: url("/images/border.png") 50 repeat;
       border-width: 20px;
       border-style: solid;
-      float: left; }
+      float: left;
+      margin-left: 10px;
+      box-sizing: content-box; }
       #gameboy #home #menu ul {
         list-style: none; }
         #gameboy #home #menu ul li {
@@ -236,15 +234,21 @@ ul {
             text-decoration: none;
             color: black; }
         #gameboy #home #menu ul li:hover {
-          background: url(images/arrow.png) no-repeat left 9px; }
+          background: url("/images/arrow.png") no-repeat left 9px; }
     #gameboy #home #avatar {
       float: left;
       width: 218px;
       height: 210px;
-      text-align: center; }
+      text-align: center;
+      padding-top: 15px; }
+      #gameboy #home #avatar h1, #gameboy #home #avatar h2 {
+        font: 18px 'FippsRegular', 'Pokemon Pixel', monospace;
+        letter-spacing: 0; }
+      #gameboy #home #avatar h2 {
+        font-size: 16px; }
       #gameboy #home #avatar img {
-        margin-top: 10px;
-        height: 90%; }
+        margin-top: 15px;
+        height: 60%; }
   #gameboy #about {
     background: white; }
     #gameboy #about img {
@@ -253,7 +257,7 @@ ul {
       position: relative;
       top: 8px; }
     #gameboy #about #text {
-      border-image: url(images/border.png) 50 repeat;
+      border-image: url("/images/border.png") 50 repeat;
       border-width: 20px;
       border-style: solid;
       font-size: 24px;
@@ -261,12 +265,13 @@ ul {
       overflow: auto;
       line-height: 1.3em;
       position: relative;
-      overflow: hidden; }
+      overflow: hidden;
+      box-sizing: content-box; }
       #gameboy #about #text div.section {
         height: 100%; }
     #gameboy #about [id*=arrow] {
       position: absolute;
-      background: url(images/arrow.png) no-repeat center center;
+      background: url("/images/arrow.png") no-repeat center center;
       width: 18px;
       height: 7px;
       display: block;
@@ -286,7 +291,7 @@ ul {
   #gameboy #contact {
     overflow: hidden; }
     #gameboy #contact #map {
-      background: black url(images/map.png) no-repeat 0px center;
+      background: black url("/images/map.png") no-repeat 0px center;
       width: 1297px;
       height: 100%;
       position: relative; }
@@ -311,7 +316,7 @@ ul {
         text-align: center;
         font-size: 24px; }
     #gameboy #contact .mario {
-      background-image: url(images/mario.png);
+      background-image: url("/images/mario.png");
       background-repeat: no-repeat;
       display: block;
       position: absolute; }
@@ -356,19 +361,20 @@ ul {
       height: 16px;
       background-position: -80px -4px; }
   #gameboy #portfolio {
-    background: url("images/portfolio.png"); }
+    background: url("/images/portfolio.png"); }
     #gameboy #portfolio #overlay {
       width: 342px;
       height: 213px;
       position: absolute;
       z-index: 5;
-      border-image: url(images/border2.png) 20 repeat;
+      border-image: url("/images/border2.png") 20 repeat;
       border-width: 20px;
       border-style: solid;
       padding: 10px;
       background: #d2d2d2;
       display: none;
-      overflow: auto; }
+      overflow: auto;
+      box-sizing: content-box; }
       #gameboy #portfolio #overlay #back {
         position: absolute;
         right: 10px;
@@ -381,7 +387,7 @@ ul {
         font-size: 14px; }
     #gameboy #portfolio #sprite {
       position: absolute;
-      background-image: url("images/spritesheet.png");
+      background-image: url("/images/spritesheet.png");
       background-repeat: no-repeat; }
     #gameboy #portfolio .sprite-down0 {
       width: 18px;
@@ -448,7 +454,7 @@ ul {
       height: 25px;
       background-position: -107px -123px; }
     #gameboy #portfolio .chest {
-      background-image: url(images/chest.png);
+      background-image: url("/images/chest.png");
       background-repeat: no-repeat;
       display: block;
       position: absolute;
@@ -469,3 +475,110 @@ ul {
       width: 32px;
       height: 38px;
       background-position: -47px -48px; }
+
+/* @font-face kit by Fonts2u (http://www.fonts2u.com) */
+@font-face {
+  font-family: "Pokemon Pixel";
+  src: url("/fonts/pokemon_pixel_font.eot?") format("eot"), url("/fonts/pokemon_pixel_font.woff") format("woff"), url("/fonts/pokemon_pixel_font.ttf") format("truetype"), url("/fonts/pokemon_pixel_font.svg#Pokemon-Pixel-Font") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+@font-face {
+  font-family: 'FippsRegular';
+  src: url("/fonts/fipps-regular-webfont.eot");
+  src: url("/fonts/fipps-regular-webfont.eot?#iefix") format("embedded-opentype"), url("/fonts/fipps-regular-webfont.woff") format("woff"), url("/fonts/fipps-regular-webfont.ttf") format("truetype"), url("/fonts/fipps-regular-webfont.svg#FippsRegular") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+@font-face {
+  font-family: 'emulogic';
+  src: url("/fonts/emulogic-webfont.eot");
+  src: url("/fonts/emulogic-webfont.eot?#iefix") format("embedded-opentype"), url("/fonts/emulogic-webfont.woff") format("woff"), url("/fonts/emulogic-webfont.ttf") format("truetype"), url("/fonts/emulogic-webfont.svg#emulogicregular") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+@font-face {
+  font-family: 'Futura';
+  src: url("/fonts/FuturaStd-HeavyOblique.eot");
+  src: url("/fonts/FuturaStd-HeavyOblique.eot?#iefix") format("embedded-opentype"), url("/fonts/FuturaStd-HeavyOblique.woff") format("woff"), url("/fonts/FuturaStd-HeavyOblique.ttf") format("truetype");
+  font-weight: 900;
+  font-style: italic; }
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  vertical-align: baseline; }
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+body {
+  line-height: 1; }
+
+ol, ul {
+  list-style: none; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+.note, .notes {
+  font-family: 'Rubik', 'Helvetica Neue', 'Arial', sans-serif;
+  font-size: 16px;
+  line-height: 1.3em; }
+  .note h1, .note h2, .note h3, .note h4, .note h5, .note h6, .notes h1, .notes h2, .notes h3, .notes h4, .notes h5, .notes h6 {
+    font-family: 'Pokemon Pixel', monospace;
+    letter-spacing: 1px;
+    line-height: 0.8em;
+    margin-bottom: 3px; }
+
+.notes h1 {
+  font-family: 'FippsRegular', 'Pokemon Pixel', monospace;
+  font-size: 36px;
+  margin-top: 30px; }
+.notes div.note-list {
+  margin-top: 30px; }
+  .notes div.note-list .row {
+    margin-bottom: 15px; }
+  .notes div.note-list a.note-link {
+    display: block;
+    float: left;
+    color: black; }
+    .notes div.note-list a.note-link:hover {
+      text-decoration: none; }
+    .notes div.note-list a.note-link h2 {
+      font-size: 36px;
+      font-family: 'Pokemon Pixel', monospace; }
+
+.note h1 {
+  font-size: 48px;
+  margin-top: 30px;
+  text-align: center; }
+.note img {
+  display: block;
+  max-width: 100%;
+  max-height: 400px; }

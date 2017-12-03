@@ -6,12 +6,6 @@
 | |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
 \  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
  \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
-
-Hey source reader. If you're curious about how the site's built,
-it uses Backbone to structure the JS along with requirejs for dependencies.
-
-If you're just browsing code, well, there isn't much that's interesting here.
-Try opening the inspector or look at willcrichton.net/js/app.js
 -->
 <html>
   <head>
@@ -20,31 +14,43 @@ Try opening the inspector or look at willcrichton.net/js/app.js
     <meta name="description"
           content="Computer scientist by trade and geek at heart.">
     <title>Will Crichton</title>
+    <link href="https://fonts.googleapis.com/css?family=Rubik" rel="stylesheet">
     <link rel="stylesheet"
           href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/main.css" />
   </head>
   <body>
     <div id="gameboy">
-      <div id="screen"></div>
-      <div id="instructions"></div>
-      <div id="control-pad">
-        <div id="control-up"></div>
-        <div id="control-left"></div>
-        <div id="control-down"></div>
-        <div id="control-right"></div>
-      </div>
-      <div id="control-buttons">
-        <div id="control-a"></div>
-        <div id="control-b"></div>
-      </div>
-      <a id="back-home" href="#">Return home</a>
-      <a id="start" href="#"></a>
-      <!-- <div id="on-light"></div> -->
-      <a id="email" href="mailto:wcrichto@cs.stanford.edu" target="_blank">
-        wcrichto@cs.stanford.edu
-      </a>
-    </div>
-    <script data-main="js/app" src="js/vendor/require.js"></script>
+  <div id="screen"></div>
+  <div id="instructions"></div>
+  <div id="control-pad">
+    <div id="control-up"></div>
+    <div id="control-left"></div>
+    <div id="control-down"></div>
+    <div id="control-right"></div>
+  </div>
+  <div id="control-buttons">
+    <div id="control-a"></div>
+    <div id="control-b"></div>
+  </div>
+  <a id="back-home" href="#">Return home</a>
+  <a id="start" href="#"></a>
+  <!-- <div id="on-light"></div> -->
+  <a id="email" href="mailto:wcrichto@cs.stanford.edu" target="_blank">
+    wcrichto@cs.stanford.edu
+  </a>
+</div>
+<script data-main="js/app" src="js/vendor/require.js"></script>
+
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-16662292-3');
+    </script>
   </body>
 </html>

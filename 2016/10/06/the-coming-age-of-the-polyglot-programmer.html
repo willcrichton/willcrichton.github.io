@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="Computer scientist by trade and geek at heart.">
+    <title>Will Crichton</title>
+    <link href="https://fonts.googleapis.com/css?family=Rubik" rel="stylesheet">
+    <link rel="stylesheet"
+          href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body>
+    <div class="container note">
+  <h1>A Coming Revolution in Metaprogramming</h1>
+  <div class="abstract">A single programming language is no longer enough. I predict that soon, the best programmers will fluently move between languages and the best languages will interoperate well with others. This interoperability will likely stem from strong metaprogramming facilities. I examine how we might build a programmable compiler and look at recent work toward that end.</div>
+
+<center>
+    <img src="http://i.imgur.com/UrY0HZM.jpg" />
+    <i>Figure 1: the programming languages of the world are fragmented. What if we all spoke the same one?</i>
+</center>
+
+<h1 id="introduction">Introduction</h1>
+<p>The chief purpose of a computer, particularly for programmers, is to automate. Computers excel at automating calculation, communication, logistics, learning, and a whole host of rudimentary tasks. Yet, curiously enough, most programmers (myself included) are only ever taught computational automation to the first order, writing code to automate tasks like adding a set of numbers or processing a customer’s order. Second order automation goes by many names: metaprogramming, compilation, translation, macros,  but they all boil down to the same idea: automating the creation of code [1]. The most rudimentary form of metaprogramming is the C preprocessor:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;stdio.h&gt;
+#define DO_TWICE(X) { X; X; }
+
+// prints "Hello world!" twice
+void main() {
+  DO_TWICE(printf("Hello world!\n"));
+  // expands to: { printf("Hello world!\n"); printf("Hello world!\n"); }
+}
+</code></pre>
+</div>
+<center>*Figure 2: copying code with the C preprocessor. This is not a safe way to do macros!*</center>
+
+<p>C preprocessor macros are functions from String → String that take in raw uninterpreted source code and produce more raw source code. This is an unwieldy form of compilation as the macro writer can infer nothing about the structure of his inputs, but it is compilation nonetheless. C macros define new syntax that can change the language in nontrivial ways (see <a href="https://github.com/orangeduck/Cello/blob/master/include/Cello.h#L600">Cello</a> or <a href="http://svn.boost.org/svn/boost/trunk/boost/foreach.hpp">Boost</a>). The C language itself can also be considered metaprogramming if you treat it like a giant macro language for assembly.</p>
+
+<p>Code generation pops up in many other places past just macros and traditional compilers. IDEs like Eclipse often have facilities for automatically generating class definitions and getters/setters for Java. People use frameworks like Ruby on Rails because half of the code you need for setting up a website gets generated with a few keystrokes. Facebook’s React.js can translate HTML-ish markup into Javascript with its JSX format.</p>
+
+<p>In all of these cases, codegen addresses a common problem of the working programmer: ==most programming languages will, at some point, lack the facilities for expressing some logic that the programmer wishes to encode==. In the Java example, you want to be able to append <code class="highlighter-rouge">@with_getter_and_setter</code> to a member field declaration but instead you have to write the functions yourself [2]. For Rails, there is no <code class="highlighter-rouge">Website.new</code> function in Ruby that encapsulates all the functionality you need. With React, HTML is simply more succinct at expressing markup than Javascript.</p>
+
+<p>If a programming language can not sufficiently transcribe the programmer’s intent, then it must be able to interoperate with another language that can. From this observation arises two hypotheses:</p>
+
+<ol>
+  <li>The most productive programmers in the coming years will be those that can work between multiple interoperable languages instead of a single general purpose language.</li>
+  <li>The most productive programming languages will be those which are fully extensible at the language level.</li>
+</ol>
+
+<h1 id="a-diaspora-of-functionality">A Diaspora of Functionality</h1>
+
+<p>Those coming from a web programming background will be no stranger to the plight of the programming polyglot. Ten years ago, creating a website required knowledge of at least three languages: HTML, CSS, and Javascript. Today, front-end dev consists of no less than 30 languages and frameworks that each compile into various subsets and supersets of those three original languages. Although this can be overwhelming at times, this is considerably better than the alternative—just imagine if you had to use Java and Tk instead of HTML. Twenty years ago, most GUI programming was actually done imperatively. The dispersion of this functionality into separate syntaxes (HTML for the markup, CSS for the styling, JS for the scripting) is a natural response to the inability for Java (or similar languages) to concisely express the layout and logic of a webpage.</p>
+
+<p>This kind of diaspora is symptomatic of a larger trend occurring across both industry and academia. In data science, rather than coding math routines by hand in FORTRAN/C/CUDA, statisticians write correlations in Python and then call out to C to do the heavy lifting through libraries like <a href="http://numpy.org">numpy</a>. In software engineering, languages like Groovy are used to reduce the verbosity of project configurations in Java and encode high level business logic. Domain-specific languages (DSLs), or programming languages specialized to a single purpose like <a href="http://ebblang.org/">physical simulation</a> or <a href="https://en.wikipedia.org/wiki/OpenGL_Shading_Language">graphics shading</a>, emerge from the woodwork at an unprecedented rate.</p>
+
+<p>==Languages should specialize in the same way that we modularize applications.== If our application, a website for example, needs to define website structure, styling, and scripting, we would not clump all of this functionality into a single class or method. Why should they get clumped into a single language? Historically, I believe, this has been the case simply because creating a new language is difficult on two counts:</p>
+
+<ol>
+  <li>Compilers are hard. To define a language today, you need to know lexing and parsing/context free grammars as well as tools to generate lexers and parsers. You need to understand abstract syntax trees, type systems (including inference), intermediate representations (e.g. LLVM), assembly languages (x86, WebAssembly, …), optimizations, interpreters, JIT compilers, and so on. Courses on compilers have high variance in quality, so only a small number of developers end up qualified to work on industrial-strength compilers. By contrast, every language has a million tutorials teaching its ins and outs, so writing a library is far easier than writing a language.</li>
+  <li>Interoperability is hard. Unless a new language has such exceptional merit so as to stand on its own, it must be able to work with some existing set of languages. Working well with another language requires either pinning to their runtime/type system (e.g. Scala/Clojure running on the JVM) or defining a foreign function interface for moving between the two (e.g. every language that can call to C). So many new languages wither away because they don’t play well with the existing ecosystem of programming tools.</li>
+</ol>
+
+<p>Today, neither of these problems are close to being solved. However, solutions are on the horizon, and I believe these are what will usher in the era of the metaprogrammer.</p>
+
+<h1 id="the-programmable-compiler">The Programmable Compiler</h1>
+
+<p>Languages today generally lack interoperability because they are developed each in isolation. The people writing GHC for Haskell aren’t thinking, “how can we optimize for Python compatibility?” So glue between languages ends up with ad-hoc bindings that are rarely cross-platform. Specifically, by “develop in isolation,” I really mean that all of these languages either LLVM/x86 or a custom-made bytecode (that in turn is interpreted by code compiled by a language targeting LLVM/x86). Interop between languages needs to happen at a level far higher than abstract assembly to get any meaningful benefit. Ideally, languages would be developed as extensions to a base language that was more high level than assembly, one like Rust or OCaml. In order for languages to be created as such, these base languages need strong facilities for metaprogramming.</p>
+
+<p>I’ve heard it said that the last forty years of programming language development have been rediscovering all the features of Lisp, and that metaprogramming is the last part that has yet to make it into the mainstream. Lisp is famous for its declaration that “code is data,” and so should it be. However, Lisp takes the easy way out to turning code into data by forcing programmers to code in blobs of parentheses, or S-expressions. Of course metaprogramming is easy when the programmer writes in the closest possible thing to abstract syntax. The more interesting question is: how does metaprogramming, this second order automation, work with different syntaxes? Different intermediate representations? Languages with garbage collection and languages with dynamic types?</p>
+
+<p>The answer to this question will come in the form of a programmable compiler. For too long, the compiler has been treated as an almost sacred boundary, its APIs off limits to the programmer except for some set of restricted AST transformations. ==I believe that a fully programmable compiler, one which exposes its concrete syntax, abstract syntax, and code generation facilities to its users, can solve both of the issues limiting language development.== To understand how, let’s take a look at some recent work in this area.</p>
+
+<ol>
+  <li><a href="http://www.cs.cmu.edu/~aldrich/wyvern/">Wyvern</a>: at CMU, Jonathan Aldrich’s group has been working on the Wyvern language, which incorporates a novel language feature called Type-Specific Languages (TSLs) developed by Cyrus Omar. TSLs are a means of extending the syntax of Wyvern by defining parsers as a first-class member of the language and allowing users to create their own mini-languages inside of Wyvern:
+<img src="http://i.imgur.com/7c2oyxx.jpg" style="max-width:500px;display:block;margin:0" /><center>*Figure 3: HTML templating with SQL and CSS mixed in using Wyvern.*</center>This is similar to <a href="https://doc.rust-lang.org/book/compiler-plugins.html">procedural macros</a> in Rust which are essentially functions from TokenStream → AST that define an alternate syntax for the language. TSLs, however, are notable in that they are unambiguous and composable. The general idea is that a TSL returns a value of a known type, and the compiler can do type inference to determine the expected type of a value, so it can resolve ambiguity between languages based on their types. Additionally, the TSLs can be used within each other. When you define a new TSL, you get interoperability with every other TSL defined in Wyvern <em>for free!</em> Imagine if you could freely mix C, OCaml, Javascript and HTML with type-safe interop. This style of composition is the future of front-end, or syntax level, interop.</li>
+  <li><a href="http://terralang.org">Terra</a>: at Stanford, Zach DeVito along with Pat Hanrahan created the Terra language, which is a low-level language that is interoperable with Lua and can also be metaprogrammed in Lua. Their primary goal for Terra is using it to construct domain-specific languages like <a href="http://ebblang.org">Ebb</a> and <a href="http://optlang.org/">Opt</a>. While Wyvern compiles down its languages all into the same base language and type system (SML), Terra uses Lua to define both the compiler and the top-level interface for each new language, but then compiles them down into Terra (as opposed to Lua) for performance.
+<img src="http://i.imgur.com/hd1UkVs.jpg" style="max-width:400px;display:block;margin:0" /><center>*Figure 4: JIT compiling Terra code in Lua.*</center> Here, the fundamental concept is that exposing the compiler’s intermediate representations enables other languages to precisely control their compiled code (as oppose to just compiling to the host language and hoping for the best) while still maintaining a level of interoperability.</li>
+  <li><a href="http://github.com/willcrichton/lia">Lia</a>: in my free time, I started working on a language called Lia which is a Javascript-esque syntax that compiles into pure Rust code using the aforementioned procedural macros—imagine a Javascript runtime where you could easily call any Rust function.
+<img src="http://i.imgur.com/fRJAa3R.jpg" style="max-width:600px;display:block;margin:0" /><center>*Figure 5: Using Rust code in Lia to multiply matrices.*</center>   In my mind, Rust is the ideal compile target for an ecosystem of interoperable languages, as it has the least number of opinions on how to run your program while still ensuring safety. Specifically, it manages memory at compile time and also provides a static type system. In my mind, there are three main tiers of general purpose languages: low level systems languages like Rust, C++, and Terra that provide static types and compile-time or manually managed memory comprise the first tier. In the next tier are languages like OCaml, Haskell, Scala, and Java that provide static types but impose a garbage collector in exchange for usability. The last tier consists of dynamically typed and garbage collected languages, usually called scripting languages, like Javascript, Python, and Ruby. Traditionally, all of these kinds of languages are developed in relative isolation, but there is no real reason for that to be the case. I see a future where Rust, OCaml, and Javascript (or some selection of languages like that) all seamlessly interoperate in the same ecosystem. Lia is a first step towards that ideal by exploring the issues and uses cases for a third tier scripting language embedded inside of a first tier systems language.</li>
+</ol>
+
+<p>There’s considerably more related work in areas like gradual/like typing, metacompilation, and so on than can be discussed in this note. There’s also plenty of related work that I’m simply unaware of—make sure to bring it up in the comments! This note is more for inspiring discussion than providing answers, as I don’t yet know what the fabled programmable compiler will look like or how it will work. My vague idea is to create a second-tier language in a similar fashion to Lia, so a language like OCaml embedded in Rust, and then to use that as a starting point for metaprogramming that can produce TSLs (in Wyvern style) that compile to OCaml or produce DSLs (in Terra style) that compile to Rust. If you have any ideas, please let me know either in the comments or at <a href="mailto:wcrichto@stanford.edu">wcrichto@stanford.edu</a>.</p>
+
+<h1 id="references">References</h1>
+
+<p>[1] My initial idea for this note came about after playing a little too much <a href="http://factorio.com">Factorio</a>.</p>
+
+<p>[2] I’m sure that this has been ameliorated since my short stint in Java, but you get the general idea.</p>
+
+</div>
+
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-16662292-3');
+    </script>
+  </body>
+</html>
