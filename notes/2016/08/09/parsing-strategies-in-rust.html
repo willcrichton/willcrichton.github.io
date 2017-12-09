@@ -14,14 +14,14 @@
     <meta name="description"
           content="Computer scientist by trade and geek at heart.">
     <title>Will Crichton</title>
-    <link href="https://fonts.googleapis.com/css?family=Rubik" rel="stylesheet">
-    <link rel="stylesheet"
-          href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" />
+    <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans" rel="stylesheet">
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
     <link rel="stylesheet" href="/css/main.css" />
   </head>
   <body>
     <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
   <h1>Parsing Strategies in Rust</h1>
   <div class="abstract">I briefly analyze two competing parsing frameworks in Rust: nom, a parser combinator, and LALRPOP, an LR(1) parser generator. I show that LALRPOP can more succinctly and efficiently express grammars for text-based formats.</div>
 
@@ -36,10 +36,10 @@
 
 <p>And cmrx64 also pointed out that binary formats are not context free, with the presumption that parser combinators are better for context-sensitive strategies. However, the list of <a href="https://github.com/Geal/nom/issues/14">parsers using nom</a> also includes a number of text file formats, which don’t have the same strict read-in-byte-at-a-time requirements. So I asked two questions: which is better for text file (or human-readable) formats, and which is better for binary formats?</p>
 
-<h1 id="text-file-formats">Text file formats</h1>
+<h2 id="text-file-formats">Text file formats</h2>
 
 <p>To evaluate the former question, I took the linked <a href="https://github.com/GuillaumeGomez/csv-parser">CSV parser</a> and wrote my own quick CSV parser in LALRPOP. The nom parser was 190 lines of code, too long to show in this note. The LALRPOP was 17 lines of code and ran nearly twice as fast in my simple benchmark. Here’s my grammar:</p>
-<div class="highlighter-rouge"><pre class="highlight"><code>grammar;
+<pre><code class="language-raw">grammar;
 
 pub Csv: Vec&lt;Vec&lt;String&gt;&gt; = { Row+ };
 
@@ -57,11 +57,10 @@ Item: String = {
     r#"[^,"]+"# =&gt; String::from(&lt;&gt;)
 };
 </code></pre>
-</div>
 
 <p>I ran both of these parsers on a 2MB CSV file, and the nom parser ran in 73ms whereas the LALRPOP parser ran in only 41ms. Given that it also took an order of magnitude less code, I would say LALRPOP wins this round. This isn’t to say definitively LALRPOP is always a better tool for parsing text file formats, but rather just a counterpoint to show that it can be more efficient and succinct instead of using parser generators.</p>
 
-<h1 id="binary-formats">Binary formats</h1>
+<h2 id="binary-formats">Binary formats</h2>
 
 <p>The biggest mark against LALRPOP for binary formats is that it by default assumes that your terminals are strings, not numbers. By comparison, nom has a lot of utilities for easily munging bytes (see its <a href="https://github.com/Geal/gif.rs/blob/master/src/parser.rs">gif parser</a>). One could theoretically parse raw bytes in LALRPOP by defining a custom tokenization of the input file into a format where each byte is its own token, but doing that transformation would take up a lot of unnecessary time and space.</p>
 

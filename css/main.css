@@ -22,10 +22,12 @@
   src: url("/fonts/FuturaStd-HeavyOblique.eot?#iefix") format("embedded-opentype"), url("/fonts/FuturaStd-HeavyOblique.woff") format("woff"), url("/fonts/FuturaStd-HeavyOblique.ttf") format("truetype");
   font-weight: 900;
   font-style: italic; }
-/* http://meyerweb.com/eric/tools/css/reset/
-   v2.0 | 20110126
-   License: none (public domain)
-*/
+@media (min-width: 1200px) {
+  .container {
+    max-width: 800px; } }
+@media (min-width: 960px) {
+  .container {
+    max-width: 800px; } }
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -76,6 +78,36 @@ body {
 ul {
   list-style-position: inside; }
 
+#gameboy-mobile {
+  display: none;
+  padding: 15px; }
+  @media (max-width: 600px) {
+    #gameboy-mobile {
+      display: block; } }
+  #gameboy-mobile .header {
+    overflow: auto; }
+  #gameboy-mobile h1 {
+    font: 18px 'FippsRegular', 'Pokemon Pixel', monospace;
+    text-align: center;
+    width: 70%;
+    float: left;
+    margin-left: 20px;
+    margin-top: 12px; }
+  #gameboy-mobile img {
+    height: 100px;
+    display: block;
+    float: right;
+    margin-right: 15px; }
+  #gameboy-mobile .intro {
+    font-size: 24px;
+    margin-top: 10px; }
+    #gameboy-mobile .intro p {
+      margin-bottom: 10px; }
+    #gameboy-mobile .intro .buttons {
+      text-align: center; }
+      #gameboy-mobile .intro .buttons button {
+        margin-right: 5px; }
+
 #gameboy {
   width: 1000px;
   height: 600px;
@@ -86,9 +118,7 @@ ul {
   /* styles for each screen view */ }
   @media (max-width: 600px) {
     #gameboy {
-      width: 100%;
-      height: auto;
-      background: none; } }
+      display: none; } }
   #gameboy #start {
     display: block;
     position: absolute;
@@ -500,10 +530,12 @@ ul {
   src: url("/fonts/FuturaStd-HeavyOblique.eot?#iefix") format("embedded-opentype"), url("/fonts/FuturaStd-HeavyOblique.woff") format("woff"), url("/fonts/FuturaStd-HeavyOblique.ttf") format("truetype");
   font-weight: 900;
   font-style: italic; }
-/* http://meyerweb.com/eric/tools/css/reset/
-   v2.0 | 20110126
-   License: none (public domain)
-*/
+@media (min-width: 1200px) {
+  .container {
+    max-width: 800px; } }
+@media (min-width: 960px) {
+  .container {
+    max-width: 800px; } }
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -547,27 +579,43 @@ table {
   border-spacing: 0; }
 
 .note, .notes {
-  font-family: 'Rubik', 'Helvetica Neue', 'Arial', sans-serif;
-  font-size: 16px;
-  line-height: 1.3em; }
+  font-family: 'Alegreya Sans', 'Helvetica Neue', 'Arial', sans-serif;
+  font-size: 20px;
+  line-height: 1.4em;
+  letter-spacing: 0; }
   .note h1, .note h2, .note h3, .note h4, .note h5, .note h6, .notes h1, .notes h2, .notes h3, .notes h4, .notes h5, .notes h6 {
     font-family: 'Pokemon Pixel', monospace;
     letter-spacing: 1px;
     line-height: 0.8em;
     margin-bottom: 3px; }
+  .note h1.site-title, .notes h1.site-title {
+    font-family: 'FippsRegular', 'Pokemon Pixel', monospace;
+    font-size: 36px;
+    margin-top: 30px;
+    text-align: left;
+    padding-bottom: 30px;
+    border-bottom: 1px dashed black; }
+    .note h1.site-title a, .notes h1.site-title a {
+      color: black; }
+      .note h1.site-title a:hover, .notes h1.site-title a:hover {
+        text-decoration: none; }
+  .note pre, .notes pre {
+    font-size: 16px; }
 
-.notes h1 {
-  font-family: 'FippsRegular', 'Pokemon Pixel', monospace;
-  font-size: 36px;
-  margin-top: 30px; }
 .notes div.note-list {
   margin-top: 30px; }
   .notes div.note-list .row {
-    margin-bottom: 15px; }
+    margin-bottom: 30px; }
+    @media (max-width: 576px) {
+      .notes div.note-list .row {
+        margin-bottom: 0; } }
   .notes div.note-list a.note-link {
     display: block;
     float: left;
     color: black; }
+    @media (max-width: 576px) {
+      .notes div.note-list a.note-link {
+        margin-bottom: 30px; } }
     .notes div.note-list a.note-link:hover {
       text-decoration: none; }
     .notes div.note-list a.note-link h2 {
@@ -575,10 +623,65 @@ table {
       font-family: 'Pokemon Pixel', monospace; }
 
 .note h1 {
+  font-size: 64px;
+  margin-top: 30px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 30px; }
+  @media (max-width: 576px) {
+    .note h1 {
+      font-size: 48px; } }
+.note .abstract {
+  border: 1px dashed black;
+  padding: 20px 20px;
+  margin: 10px 40px 40px; }
+  @media (max-width: 576px) {
+    .note .abstract {
+      margin: 10px; } }
+.note h2 {
   font-size: 48px;
   margin-top: 30px;
-  text-align: center; }
+  margin-bottom: 10px;
+  font-weight: bold; }
 .note img {
-  display: block;
   max-width: 100%;
-  max-height: 400px; }
+  max-height: 400px;
+  display: block;
+  margin: 0 auto; }
+.note p {
+  margin-bottom: 20px; }
+.note .hl {
+  font-style: normal;
+  background-color: rgba(255, 255, 0, 0.2); }
+.note ol, .note ul {
+  padding-left: 20px;
+  margin-bottom: 20px; }
+  .note ol li, .note ol ol, .note ol ul, .note ul li, .note ul ol, .note ul ul {
+    margin-bottom: 10px; }
+.note ol {
+  list-style-type: decimal; }
+  .note ol ol {
+    list-style-type: lower-alpha; }
+.note ul {
+  list-style-type: circle; }
+  .note ul ul {
+    list-style-type: square; }
+.note pre {
+  margin-bottom: 20px;
+  background: #fafafa;
+  padding: 20px; }
+.note code {
+  font-size: 16px; }
+.note blockquote {
+  padding-left: 20px;
+  color: #555;
+  border-left: 2px solid #555; }
+.note div.figure {
+  display: block;
+  margin-bottom: 20px; }
+  .note div.figure img {
+    margin-bottom: 10px; }
+.note div.caption {
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 20px; }
