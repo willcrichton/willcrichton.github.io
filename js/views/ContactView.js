@@ -1,7 +1,7 @@
 define(function(require) {
     'use strict';
 
-    var 
+    var
     $        = require('jQuery'),
     _        = require('Underscore'),
     C        = require('constants'),
@@ -33,13 +33,13 @@ define(function(require) {
         id: 'contact',
 
         instructions: 'Arrow keys to move, jump to hit text boxes',
-        
+
         initialize: function() {
             this.template = _.template(template);
             this.spriteState = new SpriteState();
 
             requestAnimationFrame(_.bind(this.onFrame, this));
-            
+
             this.renderInit();
             this.render();
 
@@ -60,7 +60,7 @@ define(function(require) {
 
         controlUp: function(key) {
             this.spriteState.set('key', '');
-            if (key != C.UP && key != C.ACTION) {
+            if (key != C.UP && key != C.SPACE) {
                 this.spriteState.set('state', 0);
             }
         },
@@ -91,7 +91,7 @@ define(function(require) {
                 if (height + jumpVel < 0) {
                     this.spriteState.set('jumping', false);
                     this.spriteState.set('height', 0);
-                    
+
                     if (this.spriteState.get('state') !== 0) {
                         this.spriteState.set('key', this.spriteState.get('direction'));
                     }
@@ -112,7 +112,7 @@ define(function(require) {
                     this.spriteState.set('direction', C.RIGHT);
                     break;
                 case C.UP:
-                case C.ACTION:
+                case C.SPACE:
                     this.spriteState.set('jumping', true);
                     this.spriteState.set('jumpVel', JUMP_VEL);
                     moved = false;
@@ -133,7 +133,7 @@ define(function(require) {
             this.lastFrame = time;
             requestAnimationFrame(_.bind(this.onFrame, this));
         },
-        
+
         renderInit: function() {
             this.$el.html(this.template());
         },
@@ -165,12 +165,12 @@ define(function(require) {
             this.$('input, textarea').each(_.bind(function(index, el) {
                 var yDist = Math.abs(top - (this.$el.height() - parseInt($(el).css('bottom'), 10)));
                 var xDist = pos - $(el).position().left;
-                
+
                 if (yDist < 1 && xDist > 0 && xDist < $(el).width()) {
                     if (el.type == 'submit' && !this.spriteState.get('mailed')) {
                         var data = new FormData(this.$('form')[0]);
                         $.ajax({
-                            url: 'mail.php',
+                            url: 'https://formspree.io/wcrichto@cs.stanford.edu',
                             data: data,
                             processData: false,
                             contentType: false,
@@ -193,7 +193,7 @@ define(function(require) {
             } else {
                 this.$mario.addClass('mario-' + this.spriteState.get('direction') + this.spriteState.get('state'));
             }
-            
+
             return this;
         }
 

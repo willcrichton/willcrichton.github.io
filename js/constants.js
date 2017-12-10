@@ -8,7 +8,8 @@ define(function(require) {
         LEFT: 'left',
         RIGHT: 'right',
         DOWN: 'down',
-        ACTION: 'action',
+        SPACE: 'space',
+        ENTER: 'enter',
         TAB: 'tab',
         EXIT: 'exit'
     };

@@ -1,7 +1,7 @@
 define(function(require) {
     'use strict';
 
-    var 
+    var
     _        = require('Underscore'),
     Backbone = require('Backbone'),
     C        = require('constants'),
@@ -27,7 +27,8 @@ define(function(require) {
 
         controlDown: function(key) {
             switch(key) {
-            case C.ACTION:
+            case C.SPACE:
+            case C.ENTER:
             case C.DOWN:
                 this.increment();
                 break;

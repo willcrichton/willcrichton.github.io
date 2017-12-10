@@ -186,12 +186,13 @@ define(function(require) {
             case C.DOWN:
                 this.move(0, MOVESPEED * delta);
                 break;
-            case C.ACTION:
+            case C.SPACE:
+            case C.ENTER:
                 this.sprite.set('swording', true);
                 break;
             }
 
-            if (key !== '' && key !== C.ACTION) {
+            if (key !== '' && key !== C.SPACE && key !== C.ENTER) {
                 this.sprite.set('direction', key);
 
                 if (time - this.sprite.get('stateChange') > 100) {

@@ -99,7 +99,7 @@ define(function(require){
             39: C.RIGHT, 68: C.RIGHT,
             37: C.LEFT, 65: C.LEFT,
             40: C.DOWN, 83: C.DOWN,
-            32: C.ACTION, 13: C.ACTION,
+            32: C.SPACE, 13: C.ENTER,
             9: C.TAB, 21: C.EXIT
         };
 
