@@ -685,3 +685,7 @@ table {
   font-style: italic;
   text-align: center;
   margin-bottom: 20px; }
+.note .footnotes {
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+  font-size: 14px; }

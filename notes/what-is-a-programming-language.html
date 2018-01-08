@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="Computer scientist by trade and geek at heart.">
+    <title>Will Crichton</title>
+    <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>What is a programming language?</h1>
+  <div class="abstract">TODO: abstract</div>
+
+<p>Here’s a brief quiz. Consider the following tools, and for each one, ask: is this a programming language?</p>
+
+<ul>
+  <li>Java</li>
+  <li>Eclipse</li>
+  <li>Javascript</li>
+  <li>CSS</li>
+  <li>HTML</li>
+  <li>C</li>
+  <li>C preprocessor</li>
+  <li>JSON</li>
+  <li>Regular expressions</li>
+  <li>LaTeX</li>
+  <li>Microsoft Word</li>
+  <li>SQL</li>
+  <li>Excel</li>
+  <li>TensorFlow</li>
+</ul>
+
+<p>I posed this set of questions to the students taking my programming languages class (<a href="http://cs242.stanford.edu">CS 242</a>) here at Stanford, and found an amusingly wide range of disagreement across the spectrum. For example, everyone agrees Java and C are languages, but less so about SQL and the C preprocessor. Most think JSON is not a programming language, and only the extremists consider Microsoft Word a PL. Why? What causes such a disparity in our collective understanding of what is or is not a programming language?</p>
+
+<h2 id="background">Background</h2>
+
+<p>In developing the curriculum for CS 242, I found myself struggling to provide a clear picture of the fundamentals of programming languages. What are programming languages, and how should we teach them? I searched far and wide through textbooks, curricula, lectures, blog posts, and so on, but still never found (to my mind) a satisfactory overview, so I’d like to take a few blog posts to discuss programming language pedagogy and hear the perspectives of the community. In this note, I will discuss the most basic question of the field: what is a programming language?</p>
+
+<p>Let us first look to the community. How have others tried to define “programming language”? I found that many of these definitions were either overly specific (excluding things that I would reasonably consider a programming language), or overly general (not useful in providing an understanding). A few examples:</p>
+<blockquote>
+  <p>“A vocabulary and set of grammatical rules for instructing a computer to perform specific tasks.”
+<br /> – <a href="http://www.springer.com/us/book/9783642694080">Fundamental of Programming Languages</a> (Ellis Horowitz)</p>
+</blockquote>
+
+<blockquote>
+  <p>“A programming language is a notation for writing programs, which are specifications of a computation or algorithm.”
+<br /> – <a href="https://en.wikipedia.org/wiki/Programming_language">Wikipedia</a></p>
+</blockquote>
+
+<blockquote>
+  <p>“Programming languages are the medium of expression in the art of computer programming.”
+<br /> – <a href="https://www.amazon.com/Concepts-Programming-Languages-John-Mitchell/dp/0521780985">Concepts in Programming Languages</a> (John Mitchell)</p>
+</blockquote>
+
+<blockquote>
+  <p>“A good programming languge is a conceptual universe for thinking about programming.”
+<br /> – Alan Perlis</p>
+</blockquote>
+
+<p>A number of definitions for both “programming language” and “program” (e.g. the Horowitz one above) often strike a far too imperative tone. A programming language can be declarative, specifying what should be computed, but not how, e.g. SQL and Prolog. This raises an interesting question–how declarative can a programming language be before it is not a programming language any longer? Most probably would not consider JSON a programming language, but what if we added arithmetic expressions to JSON? Regular expressions? Conditionals? Could we quantify the smallest delta from not-a-language to is-a-language?</p>
+
+<p>Some definitions, like the Wikipedia one, aren’t useful since they largely punt the problem to understanding what a computation or an algorithm is. Others, like the ones from Mitchell and Perlis<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>, are nice aphorisms but not something that helps me understand what a programming language is.</p>
+
+<h2 id="creating-a-definition">Creating a definition</h2>
+
+<p>For lack of a better definition, it’s time to devise our own. Most reductively, a programming language is a language for defining programmers, requiring us to define both “program” and language”. The latter is much simpler, so we can start there.</p>
+
+<p>A language is a means of communicating ideas. Languages for programming are most often written, but that is by no means a requirement—a <em>visual</em> language can use visual primitives for communication, an idea well understood in the worlds of art and marketing but only recently catching hold in the programming community. To date, most visual programming languages are marketed for children (e.g. <a href="https://scratch.mit.edu/">Scratch</a>), but I would argue that many GUIs for creating documents could be considered visual programming languages. LaTeX is arguably a programming language, so if I create a Word to LaTeX compiler, isn’t Word now a programming language? When you use Eclipse to generate getters and setters for your Java classes, you’re effectively using a point-and-click visual language of Java macros.</p>
+
+<p>Regardless of being textual or visual, a programming language allows you to take the abstract idea of a program, however you define program, and communicate it to a person or a machine via <em>materialization</em>—the transformation of the idea into the concrete medium of the language. Human languages are often materialized acoustically (by talking), whereas programming languages are almost exclusively materialized by typing or clicking. Also, note that while we traditionally think of programming languages as a communication layer between humans and computers, they are equally (if not more importantly) means of communication between humans, a perspective little explored in the PL community (see: <a href="https://www.youtube.com/watch?v=TjkzAls5fsI">Andy Ko’s SPLASH keynote</a> and <a href="https://docs.google.com/document/d/1-GUt5oVPpi7rlObbU1WbA5V1OQBX1iaghryLJ6-ND9o/edit">Usability of Programming Languages SIG meeting at CHI’2016</a>).</p>
+
+<h2 id="what-is-a-program">What is a program?</h2>
+
+<p>Defining the term “program” is much more difficult. Again, most common definitions will use the term “series of instructions”, but this is silly since languages don’t need to specify instructions in a series (think <a href="https://en.wikipedia.org/wiki/Dataflow">dataflow</a>), and often don’t even have a notion of “instructions” if they are sufficiently declarative. A good way to start defining a fuzzy term is to draw from machine learning and classify terms by their features. What trends do we often see across tools we consider to be programming languages?</p>
+
+<ol>
+  <li>
+    <p><em class="hl">Precise.</em> Programming languages attempt to avoid ambiguity, striving for the goal that given a program, there is precisely one meaningful interpretation of its semantics. This precision should exist at both the syntactic level (the grammar is unambiguous, syntax is strictly enforced—don’t miss that semicolon!) and the semantic level (a given parse tree always produces the same program). There are few notions of “almost correct.” This contrasts with human language, where both syntax (“bear” (animal) vs. “bear” (to carry)) and semantics (“He fed her (cat food).” vs. “He fed (her cat) food.”) are frequently ambiguous.</p>
+  </li>
+  <li>
+    <p><em class="hl">Composable.</em> Rather than define a large, fixed list of all the operations a program can perform, programming languages attempt to provide a small set of primitives which can infinitely compose to extend the expressive range of the language. This strikes more closely at the heart of PL research–what is the smallest set of primitives needed to express a particular class of computations (in particular, safely)? What if we got rid of for loops and instead used folds and maps? What if we got rid of breaks/returns and used exceptions?</p>
+  </li>
+</ol>
+
+<p>…And that’s all I have. I feel like there should be more bullet points, but I haven’t been able to think of any additional qualities which really apply to all programming languages.</p>
+
+<p>However, in the spirit of being precise, I must clarify the distinction between programs being <em>abstract</em> or <em>concrete</em>. In my preferred terminology, a programming <em>model</em> is an abstract and (preferably) precise/composable specification of… things<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>. A programming <em>language</em> is a syntax for expressing programs in a given model. Again, a language is simply a means for communicating an idea, not the idea itself. Lastly, the term <em>program</em> is ambiguous; it either refers to an instance of a model (abstractly) or a language (concretely). This distinction is worth identifying since the translation can be lossy—limitations of a language might preclude us from conretely expressing programs that we believe to be part of a language’s programming model.</p>
+
+<p>These definitions are simply my earnest attempt to provide some conceptual clarity into what it means to be a program, a language, or both. I would love to hear your perspective on either improving these definitions or replacing them entirely. Feel free to leave a comment on <a href="">Hacker News</a> or email me at <a href="mailto:wcrichto@cs.stanford.edu">wcrichto@cs.stanford.edu</a>.</p>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>To be fair, this is attempting to clarify a <em>good</em> programming language, not define the term itself, but I thought it worth including. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p>I wish I had something more erudite to say here, but a program can theoretically specify anything, so long as it does so (ideally) precisely and composably. “Things” are actions, ideas, data, and so on. <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+</div>
+
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-16662292-3');
+    </script>
+  </body>
+</html>
