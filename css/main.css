@@ -656,12 +656,12 @@ table {
 .note ol, .note ul {
   padding-left: 20px;
   margin-bottom: 20px; }
-  .note ol li, .note ol ol, .note ol ul, .note ul li, .note ul ol, .note ul ul {
+  .note ol li, .note ul li {
     margin-bottom: 10px; }
 .note ol {
   list-style-type: decimal; }
   .note ol ol {
-    list-style-type: lower-alpha; }
+    list-style-type: decimal; }
 .note ul {
   list-style-type: circle; }
   .note ul ul {
@@ -669,9 +669,15 @@ table {
 .note pre {
   margin-bottom: 20px;
   background: #fafafa;
-  padding: 20px; }
+  padding: 10px;
+  line-height: 1.3em;
+  font-size: 14px; }
+  .note pre code {
+    font-size: 14px; }
 .note code {
   font-size: 16px; }
+.note sup {
+  font-size: 12px; }
 .note blockquote {
   padding-left: 20px;
   color: #555;
@@ -688,4 +694,7 @@ table {
 .note .footnotes {
   border-top: 1px solid #ccc;
   padding-top: 10px;
-  font-size: 14px; }
+  font-size: 14px;
+  line-height: 1.3em; }
+  .note .footnotes p {
+    margin-bottom: 10px; }
