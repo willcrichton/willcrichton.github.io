@@ -23,7 +23,9 @@
     <div class="container note">
   <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
   <h1>What is a programming language?</h1>
-  <div class="abstract">TODO: abstract</div>
+  <div class="abstract">
+    What is or isn't a programming language is a surprisingly subjective question. In this note, I try to nail down the major factors (precision, composition, reuse) that make a language/model programmatic and clarify this definition vs. other related terminology likes libraries and data formats.
+</div>
 
 <p>Consider the following tools, and for each one, ask yourself: is this a programming language?</p>
 
@@ -63,7 +65,7 @@
 
 <h2 id="background">Background</h2>
 
-<p>In developing the curriculum for CS 242, I found myself struggling to provide a clear picture of the fundamentals of programming languages. What are programming languages, and how should we teach them? I searched far and wide through textbooks, curricula, lectures, blog posts, and so on, but still never found (to my mind) a satisfactory overview, so I’d like to take a few blog posts to discuss programming language pedagogy and hear the perspectives of the community. In this note, I will discuss the most basic question of the field: what is a programming language?</p>
+<p>In developing the curriculum for CS 242, I found myself struggling to provide a clear picture of the fundamentals of programming languages. What are programming languages, and how should we teach them? I searched far and wide through textbooks, curricula, lectures, blog posts, and so on, but still never found (to my mind) a satisfactory overview, so I’d like to take a few notes to discuss programming language pedagogy and hear the perspectives of the community. In this note, I will discuss the most basic question of the field: what is a programming language?</p>
 
 <p>Let us first look to the community. How have others tried to define “programming language”? I found that many of these definitions were either overly specific (excluding things that I would reasonably consider a programming language), or overly general (not useful in providing an understanding). A few examples:</p>
 <blockquote>
@@ -124,7 +126,7 @@
 
 <ol>
   <li><em>Libraries.</em> The line between a library and a language is blurry, particularly when discussing domain-specific languages (DSLs), and <em>particularly</em> for embedded DSLs. See <a href="http://composition.al/blog/2017/04/30/what-isnt-a-high-performance-dsl/" target="blank">“What isn’t a high-performance DSL?”</a>. Consider a library for performing arithmetic in Python. If I write the program:
-    <div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span>
+    <div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">z</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span>
 </code></pre>
     </div>
     <p>This is unambiguously a program in the Python programming language, right? Now let’s say I define some helper functions:</p>
@@ -135,7 +137,7 @@
  <span class="k">def</span> <span class="nf">mul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
      <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
 
- <span class="n">add</span><span class="p">(</span><span class="n">mul</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+ <span class="n">z</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="n">mul</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
 </code></pre>
     </div>
     <p>I’m using Python features (functions), so this still feels like a Python program. If I exported the <code class="highlighter-rouge">add</code>  and <code class="highlighter-rouge">mul</code> functions, that would be a silly library. But what if we did this:</p>
@@ -154,12 +156,12 @@
          <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
  <span class="n">program</span> <span class="o">=</span> <span class="n">Add</span><span class="p">(</span><span class="n">Add</span><span class="p">(</span><span class="n">Int</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span> <span class="n">Int</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
- <span class="n">program</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+ <span class="n">z</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </code></pre>
     </div>
     <p>Hmm, that looks a lot like an interpreter to me, which smells like a programing language… and all I did was explicitly <em>stage</em> the representation of the arithmetic program, i.e. allow the creation of the program to occur in a separate step from its execution<sup id="fnref:3"><a href="#fn:3" class="footnote">3</a></sup>. If you’re not convinced, what if I replaced the <code class="highlighter-rouge">run</code> function with a JIT compiler that outputs optimized C code for the input arithmetic expression? What if I added <a href="https://www.tensorflow.org/api_docs/python/tf/placeholder" target="blank">placeholders</a> along with my <a href="https://www.tensorflow.org/api_docs/python/tf/constant" target="blank">constants</a> and then called it NumberFlow?</p>
 
-    <p>What, then, distinguishes a library from a language? In <a href="http://tagide.com/blog/research/constraints/" target="blank">this post</a>, Crista Lopes writes that languages are able to provide <em>constraints</em>, wheras “libraries cannot provide new inabilities.” This is a useful perspective, but I think is overly assertive about the inability of libraries to enforce inabilities. In my mind, libraries usually enforce constraints at <em>runtime</em>, whereas programming languages enforce them at <em>compile time</em>. For example, concurrency libraries can provide the inability to have data races, but enforce this through runtime checks, not static analysis.</p>
+    <p>What, then, distinguishes a library from a language? In <a href="http://tagide.com/blog/research/constraints/" target="blank">this post</a>, Crista Lopes writes that languages are able to provide <em>constraints</em>, whereas “libraries cannot provide new inabilities.” This is a useful perspective, but I think is overly assertive about the inability of libraries to enforce inabilities. In my mind, libraries usually enforce constraints at <em>runtime</em>, whereas programming languages more often enforce them at <em>compile time</em><sup id="fnref:4"><a href="#fn:4" class="footnote">4</a></sup>. For example, concurrency libraries can provide the inability to have data races, but enforce this through runtime checks, not static analysis.</p>
 
     <p>Instead, I think the primary distinction is actually staging. An embedded language has some kind of program representation that is separated from its execution, enabling some form of analysis or compilation. This doesn’t mean everything lazily computed is suddenly a language, but at least suggests that systems like <a href="https://spark.apache.org" target="blank">Spark</a> or even <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html" target="blank">Rust’s iterators</a> could be considered a language unto themselves.</p>
   </li>
@@ -205,6 +207,9 @@
     </li>
     <li id="fn:3">
       <p>The intrepid Python programmers may note that one could also stage the second example by extracting the Python syntax tree, so is it really that different in the abstract? See <a href="https://github.com/cyrus-/typy">typy</a> for an extreme example of this. <a href="#fnref:3" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:4">
+      <p>Dynamically-typed languages, then, are the libraries of programming languages. <a href="#fnref:4" class="reversefootnote">&#8617;</a></p>
     </li>
   </ol>
 </div>
