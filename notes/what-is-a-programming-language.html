@@ -127,7 +127,7 @@
 <p>If the features above provide positive information about what could be a programming language, then we also should provide negative examples—what <em>isn’t</em> a programming language?</p>
 
 <ol>
-  <li><em>Libraries.</em> The line between a library and a language is blurry, particularly when discussing domain-specific languages (DSLs), and <em>particularly</em> for embedded DSLs. See <a href="http://composition.al/blog/2017/04/30/what-isnt-a-high-performance-dsl/" target="blank">“What isn’t a high-performance DSL?”</a>. Consider a library for performing arithmetic in Python. If I write the program:
+  <li><em class="hl">Libraries.</em> The line between a library and a language is blurry, particularly when discussing domain-specific languages (DSLs), and <em>particularly</em> for embedded DSLs. See <a href="http://composition.al/blog/2017/04/30/what-isnt-a-high-performance-dsl/" target="blank">“What isn’t a high-performance DSL?”</a>. Consider a library for performing arithmetic in Python. If I write the program:
     <div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">z</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span>
 </code></pre>
     </div>
@@ -168,12 +168,12 @@
     <p>Instead, I think the primary distinction is actually staging. An embedded language has some kind of program representation that is separated from its execution, enabling some form of analysis or compilation. This doesn’t mean everything lazily computed is suddenly a language, but at least suggests that systems like <a href="https://spark.apache.org" target="blank">Spark</a> or even <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html" target="blank">Rust’s iterators</a> could be considered a language unto themselves.</p>
   </li>
   <li>
-    <p><em>Declarative languages.</em> Programmers have historically drawn a line where a programming language is sufficiently declarative, and called it something else. Notable labels include:</p>
+    <p><em class="hl">Declarative languages.</em> Programmers have historically drawn a line where a programming language is sufficiently declarative, and called it something else. Notable labels include:</p>
 
     <ol>
       <li>Specification languages like <a href="https://en.wikipedia.org/wiki/TLA%2B">TLA+</a> which describe the behavior of systems at a high level</li>
       <li>Data languages/formats like YAML/JSON/Protobuf which do not describe actions but only data</li>
-      <li>Markup languages likes HTML/CSS/Markdown, or data languages that describe visual layouts.</li>
+      <li>Markup languages like HTML/CSS/Markdown, or data languages that describe visual layouts.</li>
     </ol>
 
     <p>Some would argue<sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style/Words_to_watch#Unsupported_attributions" target="blank">who?</a>]</sup> these are not programming languages, as a programming language requires some kind of evaluation, some semantics. There should be a class of programs which are reducible to others, in the way 1 + 1 steps to 2.</p>
