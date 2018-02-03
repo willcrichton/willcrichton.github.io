@@ -677,7 +677,7 @@ table {
 .note code {
   font-size: 16px; }
 .note sup {
-  font-size: 12px; }
+  font-size: 16px; }
 .note blockquote {
   padding-left: 20px;
   color: #555;
@@ -694,7 +694,7 @@ table {
 .note .footnotes {
   border-top: 1px solid #ccc;
   padding-top: 10px;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.3em; }
   .note .footnotes p {
     margin-bottom: 10px; }
