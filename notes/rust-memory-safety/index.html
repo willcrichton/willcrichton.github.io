@@ -52,6 +52,8 @@
 
 <h2 id="c-implementation">C implementation</h2>
 
+<p><strong>Disclaimer: this is a contrived example intended to illustrate how memory errors can occur. Some combination of gcc flags, careful reading, gdb, and Valgrind will catch the bugs. An experienced C programmer would not probably not write this… but they might make some of the same mistakes!</strong></p>
+
 <p><em><a href="https://gist.github.com/willcrichton/4d83754cc3c355e10e6060dfb84cc0f9">Gist link for mobile users.</a></em></p>
 
 <div class="language-c highlighter-rouge"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
@@ -279,7 +281,7 @@
       <p>I’ve seen “memory safety” used to refer to any kind of memory-related bug (e.g. so says <a href="https://en.wikipedia.org/wiki/Memory_safety">Wikipedia</a>), but I think it’s more useful to distinguish between issues of correctness and performance rather than lumping them under the same term. <a href="#fnref:0" class="reversefootnote">&#8617;</a></p>
     </li>
     <li id="fn:1">
-      <p>If you know of the proper term for this (“a program that has no memory leaks”), please let me know. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+      <p>Someone has pointed out to me that the canonical term for this is in the PL community is “safe-for-space,” so use that if you intend to Google related work. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
     </li>
     <li id="fn:2">
       <p>Assuming a program properly checks for failures during memory allocation, I don’t consider a memory leak a correctness issue since it doesn’t necessarily induce a crash. <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
