@@ -44,7 +44,7 @@
   <li><strong>Memory containment</strong> (a term of my own invention<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>) is the property of a program where memory does not leak, i.e. if a piece of memory is allocated, either it is reachable from the root set of the program, or it will be deallocated eventually. Memory containment is a <em>performance</em> issue—a leaky program may eventually run out of memory<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>.</li>
 </ol>
 
-<p>In garbage-collected (GC) languages (e.g. Python and Java), memory safety is guaranteed for all data allocated within the language runtime assuming a correct implementation of the garbage collector. Memory containment is guaranteed for <a href="https://en.wikipedia.org/wiki/Tracing_garbage_collection">tracing garbage collectors</a> (like Java), but not necessarily for <a href="https://en.wikipedia.org/wiki/Reference_counting">reference counting garbage collectors</a> (like Python).</p>
+<p>In garbage-collected (GC) languages (e.g. Python and Java), memory safety is guaranteed for all data allocated within the language runtime, assuming a correct implementation of the garbage collector. Memory containment is guaranteed for <a href="https://en.wikipedia.org/wiki/Tracing_garbage_collection">tracing garbage collectors</a> (like Java), but not necessarily for <a href="https://en.wikipedia.org/wiki/Reference_counting">reference counting garbage collectors</a> (like Python).</p>
 
 <p>In non-GC languages, i.e. low-level systems languages like C, C++ and Rust, these memory properties must either be guaranteed by the compiler via static analysis (C++ RAII, Rust’s borrow checker), or they must be carefully managed by the programmer at runtime (<code class="highlighter-rouge">malloc</code>/<code class="highlighter-rouge">free</code>, <code class="highlighter-rouge">new</code>/<code class="highlighter-rouge">delete</code>). In particular, C is famous for being a language of footguns, as it offers few built-in constructs to protect the programmer against the dangers of manual memory management.</p>
 
@@ -124,7 +124,7 @@
 <p>Let’s review. Here’s the bugs:</p>
 <ol>
   <li>
-    <p><strong><code class="highlighter-rouge">vec_new</code>: <code class="highlighter-rouge">vec</code> is stack-allocated.</strong> This is an example of a <em>dangling pointer</em>. The line <code class="highlighter-rouge">Vec vec</code> allocated the struct on the stack and returns a pointer to that struct, however the stack frame is deallocated when the function returns, so any subsequent use of the pointer is invalid. A proper fix is to either heap allocate (<code class="highlighter-rouge">malloc(sizeof(Vec))</code>) or change the type signature to return the struct itself, not a pointer.</p>
+    <p><strong><code class="highlighter-rouge">vec_new</code>: <code class="highlighter-rouge">vec</code> is stack-allocated.</strong> This is an example of a <em>dangling pointer</em>. The line <code class="highlighter-rouge">Vec vec;</code> allocates the struct on the current stack frame and returns a pointer to that struct, however the stack frame is deallocated when the function returns, so any subsequent use of the pointer is invalid. A proper fix is to either heap allocate (<code class="highlighter-rouge">malloc(sizeof(Vec))</code>) or change the type signature to return the struct itself, not a pointer.</p>
   </li>
   <li>
     <p><strong><code class="highlighter-rouge">vec_new</code>: initial capacity is 0.</strong> When <code class="highlighter-rouge">vec_push</code> is called, the capacity will double, but <code class="highlighter-rouge">2 * 0 = 0</code>, resulting in no additional memory being allocated, so space for at least 1 element needs to be allocated up front.</p>
@@ -184,7 +184,7 @@
 </code></pre>
 </div>
 
-<p>Rust can identify the dangling stack pointer issue without even looking at the function implementation, but instead by analyzing the type signature of the function. Since the function takes no references as input, it’s impossible to return a referece as output, since the output could only be referencing values defined inside the function which would be deallocated if their owners are also inside the function. Fixing the code, we change the type signature to return an <em>owned</em> vector:</p>
+<p>Rust can identify the dangling stack pointer issue without even looking at the function implementation, but instead by analyzing the type signature of the function. Since the function takes no references as input, it’s impossible to return a reference as output, since the output could only be referencing values owned inside the function. Fixing the code, we change the type signature to return an <em>owned</em> vector:</p>
 
 <div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">impl</span> <span class="n">Vec2</span> <span class="p">{</span>
     <span class="k">fn</span> <span class="nf">new</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Vec2</span> <span class="p">{</span>
