@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="Computer scientist by trade and geek at heart.">
+    
+    <title>
+      
+      A distributed for loop from scratch in 70 lines of Python
+      
+      | Will Crichton
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    A distributed for loop from scratch in 70 lines of Python
+    
+  </h1>
+  <div class="abstract">I walk through the concrete steps of how to parallelize a Python function over a cluster using Docker and Kubernetes assuming knowledge of neither. You will create a distributed, fault-tolerant job queue without too much code.</div>
+
+<p><em>This is essentially a rewrite of <a href="https://kubernetes.io/docs/tasks/job/fine-parallel-processing-work-queue/">this tutorial</a> with added context. To run the examples, you will need <a href="https://www.python.org/download/releases/2.7/">Python &gt;=2.7</a>, <a href="https://packaging.python.org/tutorials/installing-packages/">pip</a>, <a href="https://docs.docker.com/install/">Docker</a>, and the <a href="https://cloud.google.com/sdk/downloads">gcloud SDK</a>.</em></p>
+
+<h2 id="1-introduction">1. Introduction</h2>
+
+<p>If you deal with data, you’ve probably written Python code like this:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000000</span><span class="p">):</span>
+    <span class="n">expensive_function</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Where <code class="highlighter-rouge">expensive_function</code> could be downloading a video, processing a text document, computing the i-th value of pi, who knows. These “embarrassingly parallel” for loops, or <a href="https://en.wikipedia.org/wiki/Map_(higher-order_function)">maps</a>, run some function independently over every element of an input list. Naturally, to speed it up, we want to parallelize the computation over multiple cores of our CPU:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
+<span class="k">with</span> <span class="n">ProcessPoolExecutor</span><span class="p">()</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+    <span class="nb">list</span><span class="p">(</span><span class="n">executor</span><span class="o">.</span><span class="nb">map</span><span class="p">(</span><span class="n">expensive_function</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)))</span>
+</code></pre></div></div>
+
+<p>However, sometimes one computer simply isn’t enough. You need more machines either to increase your computing power (e.g. for image processing) or to increase your I/O bandwidth (e.g. for file downloading). Unfortunately, while parallelizing within a single machine is a relatively small change (as above), parallelizing across multiple machines requires a substantively different workflow with much more infrastructure. While there are plenty of existing tools that perform this type of computation like <a href="https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html">Hadoop</a> and <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#basics">Spark</a>, setting them up can be a logistical nightmare in practice<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>. In the rest of this note, I’ll walk you through the basics of how to do this on your own using current cluster management tools.</p>
+
+<h2 id="2-the-task">2. The task</h2>
+
+<p>Let’s begin by setting up the example. Let’s say we want to download a large list of YouTube videos for some kind of video analytics task. Assume we have a file <code class="highlighter-rouge">youtube-ids</code> on our local machine, e.g. drawn from <a href="https://research.google.com/youtube8m/">YouTube-8M</a>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/Code/gcp-job-queue:master*? λ head youtube-ids
+L8ndmOyqD7Q
+xwNVYwbsjKY
+XZkdzukrAYU
+AK3xVvPq5GA
+tlEgKJ9v4OQ
+NYVoupC3Vio
+pWaks6Jm77Y
+Wxa66PN-QJE
+Rsxa1cjwPM0
+s6eS8cmwg_Q
+</code></pre></div></div>
+
+<p>For a baseline, we can write a Python script that will download the files just using our own computer. This and all following code is also available in the accompanying GitHub repository: <a href="https://github.com/willcrichton/gcp-job-queue">gcp-job-queue</a>. Make sure to <code class="highlighter-rouge">pip install -r requirements.txt</code> using the requirements provided in the repository.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># local.py</span>
+<span class="kn">import</span> <span class="nn">subprocess</span> <span class="k">as</span> <span class="n">sp</span>
+
+<span class="k">def</span> <span class="nf">download_video</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">sp</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span>
+        <span class="s">'youtube-dl -f mp4 "https://youtube.com/watch?v={id}" -o {id}.mp4'</span>
+        <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">),</span>
+        <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'youtube-ids'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()]</span>
+
+<span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+    <span class="n">download_video</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Note: at this point, some of you will observe, “wouldn’t this be simpler as a bash script?” For this super-simple example, yes, but this serves as a baseline for more complex processing in which you’ll want Python over bash. Also, yes, youtube-dl has a Python API, but it’s simpler just to use it as a bash command.</p>
+</blockquote>
+
+<p>If we call our script, it will indeed start downloading:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/Code/gcp-job-queue:master*? λ python local.py
+[youtube] L8ndmOyqD7Q: Downloading webpage
+[youtube] L8ndmOyqD7Q: Downloading video info webpage
+[youtube] L8ndmOyqD7Q: Extracting video information
+[download] Destination: L8ndmOyqD7Q.mp4
+[download]   6.9% of 58.14MiB at  4.23MiB/s ETA 00:12
+</code></pre></div></div>
+
+<p>However, since this is a network-bound computation, we’re limited in the number of videos we can download concurrently. Let’s parallelize!</p>
+
+<h2 id="3-essentials-of-work-distribution">3. Essentials of work distribution</h2>
+
+<p>The main question that informs our design of a distributed for loop is <em>work assignment</em>: how does each machine know which part of the input array to process? The theoretically simplest assignment is <em>static</em>, e.g. if we have 5 machines (we’ll call them “workers” from here on) and an array of 100 items, then worker 0 gets 0..19, worker 1 gets 20..39, and so on. However, this strategy has a few problems:</p>
+<ol>
+  <li><em class="hl">Work imbalance</em>: our overall latency is bound by the slowest worker. if items 0..19 take much longer to process than 20..39, then we don’t reach peak efficiency.</li>
+  <li><em class="hl">Worker failure</em>: if a worker dies, then the simplest strategy to fix this is to rerun the worker on the same set of items, which could both re-compute a substantial amount of work, and also increases the overall latency of the computation. We’ll see later why it’s important to be robust to worker failure.</li>
+  <li><em class="hl">Logistics</em>: in practice, it’s actually simpler to adopt a dynamic strategy (described below), since a static assignment requires each worker to know which part of the input array is its own, which can be annoying to implement depending on your cluster management software.</li>
+</ol>
+
+<p>Instead, we want a <em>dynamic</em> work assignment, where workers retrieve work on-demand from a centralized work queue. For example, in standard Python, this would be:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">work_queue</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1000000</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">worker</span><span class="p">():</span>
+  <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">work_queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">work_queue</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="n">expensive_function</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+<span class="n">worker</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>To implement this work queue in a distributed fashion, we need something to create/manage our cluster of machines, and something to manage the work queue. For this blog post, we’re going to use Google Cloud Platform (GCP) services. Specifically, we will use <a href="https://cloud.google.com/kubernetes-engine/">Google Kubernetes Engine</a> + <a href="https://kubernetes.io/">Kubernetes</a> for the cluster and <a href="https://cloud.google.com/pubsub/docs/overview">Google Cloud Pub/Sub</a> for the work queue. As with any technology in this post, you could implement the same idea using another cluster manager (e.g. Mesos), another cloud provider (e.g. Amazon/AWS), another message queue (e.g. Redis), and so on. This is a particular configuration I chose because a) I think it’s easy to setup, and b) it’s what I happen to know.</p>
+
+<p>On a high level, we’ll design our application like this:</p>
+
+<p><img src="/images/assets/gcp-diagram.png" alt="" /></p>
+
+<p>Essentially, you’ll have a host of machines managed by Kubernetes (and you will control Kubernetes from your laptop). These machines will get work from the work queue (Pub/Sub), and you will submit work to the work queue from your laptop, using it as an intermediary of communication. Now let’s dive into each piece individually.</p>
+
+<h2 id="4-creating-the-work-queue">4. Creating the work queue</h2>
+
+<p>While there are programmatic means of doing tasks like creating a cluster or a work queue (usually via <a href="https://cloud.google.com/sdk/">the command line API</a>), we’ll do everything via the UI since it’s more friendly for newcomers. First, visit the dashboard for your GCP project (you will need to create one if you have not already): <a href="https://console.cloud.google.com/home/dashboard">https://console.cloud.google.com/home/dashboard</a></p>
+
+<p><img src="/images/assets/gcp-screen1.png" alt="" /></p>
+
+<blockquote>
+  <p>Note: if this is your first time using GCP, you need to authenticate your laptop to use GCP services by running <code class="highlighter-rouge">gcloud auth login</code> from the command line.</p>
+</blockquote>
+
+<p>Click the menu in the top-left and go to <strong>Big Data &gt; Pub/Sub</strong>. Enable the API (if necessary). Click <strong>Create topic</strong> and give it a name like <code class="highlighter-rouge">queue-example</code>. You’ll have a topic listed now:</p>
+
+<p><img src="/images/assets/gcp-screen2.png" alt="" width="450" /></p>
+
+<p>A topic is like a chat room–it describes a group of queues that you want to publish a message to. Click the topic name and then click <strong>Create subscription</strong>. Give it a name like <code class="highlighter-rouge">queue_example_sub</code>.</p>
+
+<p><img src="/images/assets/gcp-screen3.png" alt="" /></p>
+
+<p>A subscription is an individual message queue. When someone publishes a message to a topic, every subscription has the message enqueued onto its individual queue. Here, we only need one topic for our computation, and we only need one subscription, since every worker should be pulling work from the same queue. Here’s an example that shows how to use the Python API to push/pull messages using the Pub/Sub queue you created:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># pubsub_example.py</span>
+<span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">pubsub</span>
+<span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">monitoring</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">PROJECT</span> <span class="o">=</span> <span class="s">'wc-personal'</span>
+<span class="n">TOPIC</span> <span class="o">=</span> <span class="s">'queue-example'</span>
+<span class="n">SUBSCRIPTION</span> <span class="o">=</span> <span class="s">'queue-example-sub'</span>
+
+
+<span class="c"># This is a dirty hack since Pub/Sub doesn't expose a method for determining</span>
+<span class="c"># if the queue is empty (to my knowledge). We have to use the metrics API which</span>
+<span class="c"># is only updated every minute. Hopefully someone from Google can clarify!</span>
+<span class="k">def</span> <span class="nf">queue_empty</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+        <span class="s">'pubsub.googleapis.com/subscription/num_undelivered_messages'</span><span class="p">,</span>
+        <span class="n">minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">as_dataframe</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s">'pubsub_subscription'</span><span class="p">][</span><span class="n">PROJECT</span><span class="p">][</span><span class="n">SUBSCRIPTION</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
+
+
+<span class="k">def</span> <span class="nf">print_message</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">message</span><span class="o">.</span><span class="n">ack</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">monitoring</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">PROJECT</span><span class="p">)</span>
+
+    <span class="c"># Publishes the message 'Hello World'</span>
+    <span class="n">publisher</span> <span class="o">=</span> <span class="n">pubsub</span><span class="o">.</span><span class="n">PublisherClient</span><span class="p">()</span>
+    <span class="n">topic</span> <span class="o">=</span> <span class="s">'projects/{}/topics/{}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">,</span> <span class="n">TOPIC</span><span class="p">)</span>
+    <span class="n">publisher</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="s">'Hello world!'</span><span class="p">)</span>
+
+    <span class="c"># Opens a connection to the message queue asynchronously</span>
+    <span class="n">subscriber</span> <span class="o">=</span> <span class="n">pubsub</span><span class="o">.</span><span class="n">SubscriberClient</span><span class="p">()</span>
+    <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriber</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">'projects/{}/subscriptions/{}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">PROJECT</span><span class="p">,</span> <span class="n">SUBSCRIPTION</span><span class="p">))</span>
+    <span class="n">subscription</span><span class="o">.</span><span class="nb">open</span><span class="p">(</span><span class="n">print_message</span><span class="p">)</span>
+
+    <span class="c"># Waits until the queue is empty to exit. See queue_empty for more</span>
+    <span class="c"># explanation.</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">queue_empty</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="n">subscription</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="5-creating-the-cluster">5. Creating the cluster</h2>
+
+<p>Now that we have a working message queue, the next ingredient is to setup our cluster. Go to <strong>Compute &gt; Kubernetes Engine</strong> in the GCP dashboard from before. Click <strong>Create cluster</strong>.</p>
+
+<p><img src="/images/assets/gcp-screen4.png" alt="" /></p>
+
+<p>Give your cluster a name (e.g. <code class="highlighter-rouge">example-cluster</code>). Set the size (number of machines) to 1. Leave the rest of the settings as given, and click <strong>Create</strong>. After a few minutes, this will create a cluster containing 1 machine. This machine is just there to serve as the Kubernetes master node, i.e. a place for Kubernetes to help you manage the rest of your cluster.</p>
+
+<p>Once the cluster is created, click on its name and then click <strong>Edit</strong>.</p>
+
+<p><img src="/images/assets/gcp-screen5.png" alt="" /></p>
+
+<p>Scroll to the bottom and click <strong>Add node pool</strong>. Set a few options:</p>
+<ul>
+  <li>Set <strong>Name</strong> to <code class="highlighter-rouge">workers</code>.</li>
+  <li>Set <strong>Preemptible nodes</strong> to <strong>Yes</strong>.</li>
+  <li>Set <strong>Autoscaling</strong> to <strong>On</strong>.</li>
+  <li>set <strong>Minimum size</strong> to 0.</li>
+  <li>Set <strong>Maximum size</strong> to your desired number of workers (we’ll use 3 for this example).</li>
+</ul>
+
+<p>Then click <strong>Save</strong>.</p>
+
+<p>Why all this complexity in having two separate sets of machines? <a href="https://www.youtube.com/watch?v=HMuYfScGpbE">It’s all about the money.</a> Remember that you’re paying for all this. It turns out that if you use “preemptible” nodes, they’re 4-5x as cheap as normal nodes (see: <a href="https://cloud.google.com/compute/pricing#predefined_machine_types">Google Compute Engine Pricing</a>). A preemptible instance is equivalent to an <a href="https://aws.amazon.com/ec2/spot/">AWS spot instance</a>–it’s a machine that you rent with the understanding that Google can kill it at any time. If your application can be robust to random failures (i.e. if it is <em>fault tolerant</em>), then you can save a lot of money!</p>
+
+<p>And, thankfully, with the system design we’ve chosen, we get fault tolerance for free due to a particular aspect of Pub/Sub. Recall that in the earlier example, when a worker receives a message, it has to acknowledge it:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">print_message</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">message</span><span class="o">.</span><span class="n">ack</span><span class="p">()</span>  <span class="c"># &lt;- acknowledgement</span>
+</code></pre></div></div>
+
+<p>The way Pub/Sub works is that if a worker pulls a message but does not acknowledge it, then the message will be re-queued after a fixed (but configurable) length of time. For our expensive computation, we want to wait to acknowledge the input (the message) until after the computation is complete. This ensures that if the worker dies in the middle of a computation, the message will be re-queued, and no input is lost.</p>
+
+<p>To sum up, we now have a cluster with one machine for Kubernetes, the cluster manager, and a variable number of machines for workers. The worker machines are preemptible, meaning they can disappear at any moment, but we don’t worry about failures since our system design can handle failures. Lastly, note that we enabled autoscaling for the worker pool–this means that when a worker dies, Kubernetes will automatically reallocate a new worker for us to replace it. Additionally, when our job is done, Kubernetes will automatically deallocate all the worker machines, minimizing costs.</p>
+
+<h2 id="6-preparing-our-program">6. Preparing our program</h2>
+
+<p>Now all the resources are in place–we have our work queue and our cluster ready to go. Next, we need to change our original script to use the new Pub/Sub work queue. First, we need new script <code class="highlighter-rouge">master.py</code> that we’ll run locally and will submit work into the work queue:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># master.py</span>
+<span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">pubsub</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="n">PROJECT</span> <span class="o">=</span> <span class="s">'wc-personal'</span>
+<span class="n">TOPIC</span> <span class="o">=</span> <span class="s">'queue-example'</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'youtube-ids'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()]</span>
+
+    <span class="n">publisher</span> <span class="o">=</span> <span class="n">pubsub</span><span class="o">.</span><span class="n">PublisherClient</span><span class="p">()</span>
+    <span class="n">topic</span> <span class="o">=</span> <span class="s">'projects/{}/topics/{}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">,</span> <span class="n">TOPIC</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">ids</span><span class="p">):</span>
+        <span class="n">publisher</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>This script goes through every ID in our file <code class="highlighter-rouge">youtube-ids</code> and publishes them to the topic we chose earlier. You can just run this script from your laptop:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python master.py
+</code></pre></div></div>
+
+<p>Once it completes, your queue has been filled to the brim with IDs ready for downloading. Next, we need to create the script we’ll run on each worker:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># worker.py</span>
+<span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">pubsub</span>
+<span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">monitoring</span>
+<span class="kn">import</span> <span class="nn">subprocess</span> <span class="k">as</span> <span class="n">sp</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">PROJECT</span> <span class="o">=</span> <span class="s">'wc-personal'</span>
+<span class="n">TOPIC</span> <span class="o">=</span> <span class="s">'queue-example'</span>
+<span class="n">SUBSCRIPTION</span> <span class="o">=</span> <span class="s">'queue-example-sub'</span>
+<span class="n">BUCKET</span> <span class="o">=</span> <span class="s">'wc-personal-test'</span>
+
+
+<span class="k">def</span> <span class="nf">queue_empty</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+        <span class="s">'pubsub.googleapis.com/subscription/num_undelivered_messages'</span><span class="p">,</span>
+        <span class="n">minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">as_dataframe</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s">'pubsub_subscription'</span><span class="p">][</span><span class="n">PROJECT</span><span class="p">][</span><span class="n">SUBSCRIPTION</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
+
+
+<span class="k">def</span> <span class="nf">download_video</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">sp</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span>
+        <span class="s">'youtube-dl -f mp4 "http://youtube.com/watch?v={id}" -o {id}.mp4 --no-cache-dir'</span>
+        <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">),</span>
+        <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">copy_to_gcs</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">sp</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s">'gsutil mv {}.mp4 gs://{}/tmp/videos/'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">BUCKET</span><span class="p">),</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">handle_message</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">download_video</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="c"># copy_to_gcs(id)</span>
+    <span class="n">message</span><span class="o">.</span><span class="n">ack</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">monitoring</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">PROJECT</span><span class="p">)</span>
+
+    <span class="n">subscriber</span> <span class="o">=</span> <span class="n">pubsub</span><span class="o">.</span><span class="n">SubscriberClient</span><span class="p">()</span>
+    <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriber</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">'projects/{}/subscriptions/{}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">PROJECT</span><span class="p">,</span> <span class="n">SUBSCRIPTION</span><span class="p">))</span>
+    <span class="n">subscription</span><span class="o">.</span><span class="nb">open</span><span class="p">(</span><span class="n">handle_message</span><span class="p">)</span>
+
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">queue_empty</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="n">subscription</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>The major addition to this script is the <code class="highlighter-rouge">copy_to_gcs</code> function. Remember that we’re going to run this script on many different machines, each of which have their own disks. If we downloaded these videos to the machines and then deleted the cluster, our videos would be gone! All that effort for nothing. Instead, we need the workers to download their videos into a single storage system. Here, the simplest approach is to use <a href="https://cloud.google.com/storage/">Google Cloud Storage</a> (GCS), which is Google’s geo-distributed file system. You can download/upload files to it from anywhere, so it’s a perfect location for us to store our videos.</p>
+
+<p>To perform the move, we first need to create a location (or bucket) to store our videos. In the GCP dashboard, go to <strong>Storage &gt; Storage</strong> and click <strong>Create bucket</strong>. Give it a name like <code class="highlighter-rouge">example-bucket</code>, except be more creative since they have to be globally unique.</p>
+
+<p><img src="/images/assets/gcp-screen6.png" alt="" height="500" /></p>
+
+<p>To move videos into our created bucket, we use the <a href="https://cloud.google.com/storage/docs/gsutil">gsutil</a> command line tool. In the script above, it looks like:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gsutil mv &lt;SOME VIDEO.mp4&gt; gs://&lt;YOUR BUCKET&gt;/
+</code></pre></div></div>
+
+<p>This acts just like the normal <code class="highlighter-rouge">mv</code> utility on Unix-based systems, except that it moves the file from the worker’s local file system to Google’s remote file system.</p>
+
+<h2 id="7-packaging-our-program">7. Packaging our program</h2>
+
+<p>Now that our script is ready, the question is: how are we supposed to run our code on all these workers? For this, we care about three things:</p>
+<ol>
+  <li><em class="hl">The environment:</em> our code has dependencies, e.g. youtube-dl, that we need to ensure are installed on all the nodes.</li>
+  <li><em class="hl">The code:</em> the scripts themselves need to be copied to all the nodes so we can run them.</li>
+  <li><em class="hl">The execution:</em> something need to actually ssh into these nodes and hit “go” so the scripts run.</li>
+</ol>
+
+<p>You could imagine that in an older time, you would have to use some combination of semi-scripted <code class="highlighter-rouge">ssh</code> and <code class="highlighter-rouge">scp</code> to accomplish these tasks. However, today there is a much better solution: <a href="https://www.docker.com/what-container#/package_software">containers</a> (specifically Docker). Docker allows us to bundle up our code, its dependencies, and the way to run it into a single file. To do this, we define Dockerfiles, or reproducible build scripts, that we build into images, or templates of our code that we can stamp out. An instance of an image is a container, which is usually a single copy of your program. For this example, each worker will run one container, which in turn runs your script.</p>
+
+<p>To build a Docker image, we create the following Dockerfile:</p>
+
+<div class="language-docker highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Dockerfile</span>
+<span class="k">FROM</span><span class="s"> ubuntu:16.04</span>
+
+<span class="k">RUN </span>apt-get update <span class="o">&amp;&amp;</span> apt-get <span class="nb">install</span> <span class="nt">-y</span> python-pip curl
+<span class="k">RUN </span>pip <span class="nb">install </span>youtube-dl google-cloud-pubsub
+
+<span class="k">RUN </span><span class="nb">echo</span> <span class="s2">"deb http://packages.cloud.google.com/apt cloud-sdk-xenial main"</span> | <span class="se">\
+</span>    <span class="nb">tee</span> <span class="nt">-a</span> /etc/apt/sources.list.d/google-cloud-sdk.list <span class="o">&amp;&amp;</span> <span class="se">\
+</span>    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - <span class="o">&amp;&amp;</span> <span class="se">\
+</span>    apt-get update <span class="o">&amp;&amp;</span> apt-get <span class="nb">install</span> <span class="nt">-y</span> google-cloud-sdk
+
+<span class="k">WORKDIR</span><span class="s"> /app</span>
+<span class="k">COPY</span><span class="s"> worker.py service-key.json ./</span>
+<span class="k">ENV</span><span class="s"> GOOGLE_APPLICATION_CREDENTIALS=/app/service-key.json</span>
+<span class="k">RUN </span>gcloud auth activate-service-account <span class="nt">--key-file</span><span class="o">=</span><span class="nv">$GOOGLE_APPLICATION_CREDENTIALS</span>
+<span class="k">CMD</span><span class="s"> python worker.py</span>
+</code></pre></div></div>
+
+<p>I won’t explain the Dockerfile in too great detail–it uses Ubuntu 16.04 as the base image, installs a few dependencies including the gcloud SDK, and sets the command run when the container is created to <code class="highlighter-rouge">python worker.py</code>. However, there is one critical detail: any of our operations that uses Google services (Pub/Sub, Storage) must be authenticated. You don’t want to manually login from each of your nodes, so instead you need a <a href="https://cloud.google.com/iam/docs/service-accounts">service account</a> as well as a service account key to include in your Dockerfile. To do so, run this from the command line in the same directory as your code files:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gcloud iam service-accounts create example-account
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+    --member serviceAccount:example-account@$(gcloud config get-value project).iam.gserviceaccount.com \
+    --role roles/editor
+gcloud iam service-accounts keys create service-key.json \
+    --iam-account=example-account@$(gcloud config get-value project).iam.gserviceaccount.com
+</code></pre></div></div>
+
+<p>This creates a service account <code class="highlighter-rouge">example-account</code> and generates a key <code class="highlighter-rouge">service-key.json</code>. <strong>WARNING:</strong> keep this key safe. Never commit it to a repository. If it goes up on GitHub, you will have Bitcoin miners spawned on your account within minutes (trust me, I know this from experience).</p>
+
+<p>With the Docker setup ready to go, the last thing to do is build and push the image:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker build -t gcr.io/$(gcloud config get-value project)/worker .
+gcloud docker -- push gcr.io/$(gcloud config get-value project)/worker
+</code></pre></div></div>
+
+<p>This pushes the image to the <a href="https://cloud.google.com/container-registry/">Google Container Registry</a>, a private location (so no one can access your key embedded in the image), but one accessible from your Kubernetes cluster. If you want to debug your container before running it on the cluster, you can always run a copy of it locally:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run -t gcr.io/$(gcloud config get-value project)/worker
+</code></pre></div></div>
+
+<h2 id="8-running-on-the-cluster">8. Running on the cluster</h2>
+
+<p>With our Docker image at the ready, next we need to deploy it to all the workers on our cluster. Rather than doing this manually (e.g. ssh into the node and run Docker ourselves), this is the primary task we will delegate to Kubernetes. To start, we first need to download the <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">kubectl</a> command line tool that lets us talk to Kubernetes. You can do this with:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gcloud components install kubectl
+</code></pre></div></div>
+
+<p>Then we need to authenticate to the previously created cluster, which we can do with:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gcloud container clusters get-credentials example-cluster
+</code></pre></div></div>
+
+<p>To get quick overview of our cluster, we can look at the Kubernetes dashboard. First, in a new tab (or in the background), run:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl proxy
+</code></pre></div></div>
+
+<p>Then in your browser, visit <a href="http://localhost:8001/ui">http://localhost:8001/ui</a>. Click on <strong>Cluster &gt; Nodes</strong> in the sidebar.</p>
+
+<p><img src="/images/assets/gcp-screen7.png" alt="" /></p>
+
+<p>Awesome! We’re plugged in to the cluster. Next, we want to tell Kubernetes to create a copy (container) of our Docker image on every worker (node). For that, Kubernetes needs a YAML description of the <a href="https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/">Job</a> that we want to run (a Job being containers that shouldn’t run forever, unlike a web server):</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># job.yaml</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">batch/v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Job</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">dl-videos</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">parallelism</span><span class="pi">:</span> <span class="s">3</span>
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">dl-videos</span>
+    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">containers</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">worker</span>
+          <span class="na">image</span><span class="pi">:</span> <span class="s">gcr.io/&lt;YOUR PROJECT ID&gt;/worker</span>
+          <span class="na">imagePullPolicy</span><span class="pi">:</span> <span class="s">Always</span>
+          <span class="na">resources</span><span class="pi">:</span>
+            <span class="na">requests</span><span class="pi">:</span>
+              <span class="na">cpu</span><span class="pi">:</span> <span class="s">0.51</span>
+      <span class="na">restartPolicy</span><span class="pi">:</span> <span class="s">OnFailure</span>
+</code></pre></div></div>
+
+<p>This file essentially says that we want to create 3 copies of the <code class="highlighter-rouge">worker</code> container, each should get scheduled onto its own node, and they should until completion. We tell Kubernetes to create this job:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl create -f job.yaml
+</code></pre></div></div>
+
+<p>…And at long last, our script should be running! In the Kubernetes dashboard, go to <strong>Workloads &gt; Pods</strong> to see a list of your containers.</p>
+
+<p><img src="/images/assets/gcp-screen8.png" alt="" /></p>
+
+<blockquote>
+  <p>Note: if your machines only have 1 CPU, I’m not sure how to get Kubernetes to schedule the pods separately onto each machine, since it appears that at least one of them has an additional pod (heapster) that takes enough resources such that a 0.5 CPU request fills up the machine, despite not exceeding the CPU capacity. Using a CPU request less than 0.5 runs the risk of scheduling two onto the same machine. If you know the solution, please let me know.</p>
+</blockquote>
+
+<p>Sometimes the logs (stdout of the container) show up in the Kubernetes dashboard (haven’t gotten a handle on why/why not), in which case you can click on the link for a pod and view them. If not, you can use the command line interface:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/Code/gcp-job-queue:master*? λ kubectl get all
+NAME             DESIRED   SUCCESSFUL   AGE
+jobs/dl-videos   &lt;none&gt;    0            13m
+
+NAME                 READY     STATUS    RESTARTS   AGE
+po/dl-videos-b07kn   0/1       Pending   0          13m
+po/dl-videos-g4pt2   1/1       Running   0          13m
+po/dl-videos-t0xkz   1/1       Running   0          13m
+~/Code/gcp-job-queue:master*? λ kubectl logs po/dl-videos-g4pt2 | tail
+[download]   3.9% of 6.41MiB at  6.74MiB/s ETA 00:00
+[download]   7.8% of 6.41MiB at 10.35MiB/s ETA 00:00
+[download]  15.6% of 6.41MiB at 16.89MiB/s ETA 00:00
+[download]  19.8% of 40.37MiB at 19.48MiB/s ETA 00:01
+[download]  31.2% of 6.41MiB at 17.72MiB/s ETA 00:00
+[download]  60.5% of 99.58MiB at  2.56MiB/s ETA 00:15
+[download]  62.4% of 6.41MiB at 16.90MiB/s ETA 00:00
+[download]  29.7% of 40.37MiB at 19.60MiB/s ETA 00:01
+[download] 100.0% of 6.41MiB at 17.24MiB/s ETA 00:00
+</code></pre></div></div>
+
+<p>Once your queue is empty, the workers will finish, the job will exit successfully. Lastly, to access the videos you downloaded, they’ll be sitting in your bucket:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/Code/gcp-job-queue:master*? λ gsutil ls gs://wc-personal-test/tmp/videos/ | head
+gs://wc-personal-test/tmp/videos/zsdpslSuhgo.mp4
+gs://wc-personal-test/tmp/videos/L8ndmOyqD7Q.mp4
+gs://wc-personal-test/tmp/videos/xwNVYwbsjKY.mp4
+gs://wc-personal-test/tmp/videos/XZkdzukrAYU.mp4
+gs://wc-personal-test/tmp/videos/AK3xVvPq5GA.mp4
+gs://wc-personal-test/tmp/videos/tlEgKJ9v4OQ.mp4
+gs://wc-personal-test/tmp/videos/NYVoupC3Vio.mp4
+gs://wc-personal-test/tmp/videos/pWaks6Jm77Y.mp4
+gs://wc-personal-test/tmp/videos/Wxa66PN-QJE.mp4
+gs://wc-personal-test/tmp/videos/Rsxa1cjwPM0.mp4
+gs://wc-personal-test/tmp/videos/s6eS8cmwg_Q.mp4
+</code></pre></div></div>
+
+<p>And you can copy them to your own machine if you like.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/Code/gcp-job-queue:master*? λ gsutil cp gs://wc-personal-test/tmp/videos/zsdpslSuhgo.mp4 .
+Copying gs://wc-personal-test/tmp/videos/zsdpslSuhgo.mp4...
+\ [1 files][ 19.6 MiB/ 19.6 MiB]
+Operation completed over 1 objects/19.6 MiB.
+</code></pre></div></div>
+
+<p>That’s it! You’ve successfully parallelized a Python for loop over a cluster of machines using Docker, Kubernetes, and Pub/Sub. And once you’ve gone through the setup the first time, it’s much more painless for subsequent tasks. Also, if you run into any trouble during these steps, please let me know so I can update this tutorial.</p>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>I say this, of course, and proceed to write an enormous blog post detailing all the infrastructural challenges of doing it yourself. The irony is not lost on me, I assure you. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-16662292-3');
+    </script>
+  </body>
+</html>

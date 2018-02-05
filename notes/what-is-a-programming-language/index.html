@@ -137,22 +137,20 @@
 
 <ol>
   <li><em class="hl">Libraries.</em> The line between a library and a language is blurry, particularly when discussing domain-specific languages (DSLs), and <em>particularly</em> for embedded DSLs. See <a href="http://composition.al/blog/2017/04/30/what-isnt-a-high-performance-dsl/" target="blank">“What isn’t a high-performance DSL?”</a>. Consider a library for performing arithmetic in Python. If I write the program:
-    <div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">z</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span>
-</code></pre>
-    </div>
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">z</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span>
+</code></pre></div>    </div>
     <p>This is unambiguously a program in the Python programming language, right? Now let’s say I define some helper functions:</p>
 
-    <div class="language-python highlighter-rouge"><pre class="highlight"><code> <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
      <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
 
  <span class="k">def</span> <span class="nf">mul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
      <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
 
  <span class="n">z</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="n">mul</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
     <p>I’m using Python features (functions), so this still feels like a Python program. If I exported the <code class="highlighter-rouge">add</code>  and <code class="highlighter-rouge">mul</code> functions, that would be a silly library. But what if we did this:</p>
-    <div class="language-python highlighter-rouge"><pre class="highlight"><code> <span class="k">class</span> <span class="nc">Int</span><span class="p">:</span>
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">class</span> <span class="nc">Int</span><span class="p">:</span>
      <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
          <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
 
@@ -168,8 +166,7 @@
 
  <span class="n">program</span> <span class="o">=</span> <span class="n">Add</span><span class="p">(</span><span class="n">Add</span><span class="p">(</span><span class="n">Int</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span> <span class="n">Int</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
  <span class="n">z</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
     <p>Hmm, that looks a lot like an interpreter to me, which smells like a programing language… and all I did was explicitly <em>stage</em> the representation of the arithmetic program, i.e. allow the creation of the program to occur in a separate step from its execution<sup id="fnref:3"><a href="#fn:3" class="footnote">3</a></sup>. If you’re not convinced, what if I replaced the <code class="highlighter-rouge">run</code> function with a JIT compiler that outputs optimized C code for the input arithmetic expression? What if I added <a href="https://www.tensorflow.org/api_docs/python/tf/placeholder" target="blank">placeholders</a> along with my <a href="https://www.tensorflow.org/api_docs/python/tf/constant" target="blank">constants</a> and then called it NumberFlow?</p>
 
     <p>What, then, distinguishes a library from a language? In <a href="http://tagide.com/blog/research/constraints/" target="blank">this post</a>, Crista Lopes writes that languages are able to provide <em>constraints</em>, whereas “libraries cannot provide new inabilities.” This is a useful perspective, but I think is overly assertive about the inability of libraries to enforce inabilities. In my mind, libraries usually enforce constraints at <em>runtime</em>, whereas programming languages more often enforce them at <em>compile time</em><sup id="fnref:4"><a href="#fn:4" class="footnote">4</a></sup>. For example, concurrency libraries can provide the inability to have data races, but enforce this through runtime checks, not static analysis.</p>
