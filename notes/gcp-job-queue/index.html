@@ -34,7 +34,7 @@
     A distributed for loop from scratch in 70 lines of Python
     
   </h1>
-  <div class="abstract">I walk through the concrete steps of how to parallelize a Python function over a cluster using Docker and Kubernetes assuming knowledge of neither. You will create a distributed, fault-tolerant job queue without too much code.</div>
+  <div class="abstract">I walk through the concrete steps of how to parallelize a Python function over a cluster using Docker and Kubernetes assuming knowledge of neither. You will create a distributed, fault-tolerant work queue without too much code.</div>
 
 <p><em>This is essentially a rewrite of <a href="https://kubernetes.io/docs/tasks/job/fine-parallel-processing-work-queue/">this tutorial</a> with added context. To run the examples, you will need <a href="https://www.python.org/download/releases/2.7/">Python &gt;=2.7</a>, <a href="https://packaging.python.org/tutorials/installing-packages/">pip</a>, <a href="https://docs.docker.com/install/">Docker</a>, and the <a href="https://cloud.google.com/sdk/downloads">gcloud SDK</a>. All files are in a GitHub repository: <a href="https://github.com/willcrichton/gcp-job-queue">gcp-job-queue</a>.</em></p>
 
@@ -45,14 +45,16 @@
     <span class="n">expensive_function</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 </code></pre></div></div>
 
-<p>Where <code class="highlighter-rouge">expensive_function</code> could be downloading a video, processing a text document, computing the i-th value of pi, who knows. These “embarrassingly parallel” for loops, or <a href="https://en.wikipedia.org/wiki/Map_(higher-order_function)">maps</a>, run some function independently over every element of an input list. Naturally, to speed it up, we want to parallelize the computation over multiple cores of our CPU:</p>
+<p>Where <code class="highlighter-rouge">expensive_function</code> could be downloading a video, processing a text document, computing the i-th digit of pi, who knows. These “embarrassingly parallel” for loops, or <a href="https://en.wikipedia.org/wiki/Map_(higher-order_function)">maps</a>, run some function independently over every element of an input list. Naturally, to speed it up, we want to parallelize the computation over multiple cores of our CPU:</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
 <span class="k">with</span> <span class="n">ProcessPoolExecutor</span><span class="p">()</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
     <span class="nb">list</span><span class="p">(</span><span class="n">executor</span><span class="o">.</span><span class="nb">map</span><span class="p">(</span><span class="n">expensive_function</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)))</span>
 </code></pre></div></div>
 
-<p>However, sometimes one computer simply isn’t enough. You need more machines either to increase your computing power (e.g. for image processing) or to increase your I/O bandwidth (e.g. for file downloading). Unfortunately, while parallelizing within a single machine is a relatively small change (as above), parallelizing across multiple machines requires a substantively different workflow with much more infrastructure. While there are plenty of existing tools that perform this type of computation like <a href="https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html">Hadoop</a> and <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#basics">Spark</a>, setting them up can be a logistical nightmare in practice<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>. In the rest of this note, I’ll walk you through the basics of how to do this on your own using current cluster management tools.</p>
+<p>However, sometimes one computer simply isn’t enough. You need more machines either to increase your computing power (e.g. for image processing) or to increase your I/O bandwidth (e.g. for file downloading). Unfortunately, while parallelizing within a single machine is a relatively small change (as above), parallelizing across multiple machines requires a substantively different workflow with much more infrastructure. While there are plenty of existing tools that perform this type of computation like <a href="https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html">Hadoop</a>, <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#basics">Spark</a>, <a href="https://cloud.google.com/functions/">Cloud Functions</a>, <a href="https://cloud.google.com/dataflow/">Dataflow</a>, and so on, setting them up can be a logistical nightmare in practice<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>. Additionally, they provide you varying levels of control over your environment, often restricting the dependencies you can include.</p>
+
+<p>In the rest of this note, I’ll walk you through the basics of how to do this on your own using current cluster management tools.</p>
 
 <h2 id="2-the-task">2. The task</h2>
 
