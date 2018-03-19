@@ -598,7 +598,8 @@ table {
     .note h1.site-title a, .notes h1.site-title a {
       color: black; }
       .note h1.site-title a, .note h1.site-title a:hover, .notes h1.site-title a, .notes h1.site-title a:hover {
-        text-decoration: none; }
+        text-decoration: none;
+        border-bottom: none; }
   .note pre, .notes pre {
     font-size: 16px; }
 
