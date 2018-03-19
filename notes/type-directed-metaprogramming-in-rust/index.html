@@ -86,7 +86,7 @@
 <p>On a high level, our first goal is just to call the Rust compiler and extract the types of a few fragments of Rust code. The Rust compiler API can be found in their <a href="https://github.com/rust-lang/rust/tree/8aa27ee30972f16320ae4a8887c8f54616fff819/src">GitHub repo</a> with <a href="https://rust-lang-nursery.github.io/rustc-guide/">(sparse) documentation</a>. To start, we need to create a new crate and put it on nightly:</p>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cargo new --bin rustc-type-metaprogramming
 $ cd rustc-type-metaprogramming
-$ rustup override set nightly
+$ rustup override set nightly-2018-03-19
 </code></pre></div></div>
 
 <p>Then we fill out the <code class="highlighter-rouge">src/main.rs</code> file:</p>
@@ -220,11 +220,11 @@ Node: expr(10: 2), type: i32
 
 <h2 id="future-work">Future work</h2>
 
-<p>I’m glad I was able to get this off the ground. Hats off to the Rust developers for the time they’ve invested in documenting the compiler. I think it will pay great dividends for the future, not just for people who want to hack on the compiler but for people like me who want to take it in new directions.</p>
+<p>I’m glad I was able to get this off the ground. Hats off to the Rust developers for the time they’ve invested in documenting the compiler. I think it will pay great dividends for the future, not just for people who want to hack on the compiler, but also for people like me who want to take it in new directions.</p>
 
 <p>That said, after playing around, this approach has a number of logistical challenges today:</p>
 <ol>
-  <li>HIR wasn’t meant to be transformed like an AST. While the AST module has a Folder trait, the HIR module does not, so I had to implement it myself.</li>
+  <li>HIR wasn’t meant to be transformed like the AST. While the AST module has a Folder trait, the HIR module does not, so I had to implement it myself.</li>
   <li>All code generation facilities are targeted towards the AST, not HIR. For example, if I’m folding over a HIR tree, I have to manually define the translation of values between HIR and AST, which is a lot of seemingly unnecessary work. There’s no quotation library for HIR.</li>
   <li>Using the compiler (in my own code) inside the compiler (e.g. in a procedural macro definition) can be dangerous. I ran into a tricky bug where I accidentally defined two string interning contexts and had some wacky results when keywords were getting arbitrarily mutated to other words.</li>
 </ol>
