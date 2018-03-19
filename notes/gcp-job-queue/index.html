@@ -148,7 +148,7 @@ s6eS8cmwg_Q
 
 <p><img src="/images/assets/gcp-screen2.png" alt="" width="450" /></p>
 
-<p>A topic is like a chat room–it describes a group of queues that you want to publish a message to. Click the topic name and then click <strong>Create subscription</strong>. Give it a name like <code class="highlighter-rouge">queue_example_sub</code>.</p>
+<p>A topic is like a chat room–it describes a group of queues that you want to publish a message to. Click the topic name and then click <strong>Create subscription</strong>. Give it a name like <code class="highlighter-rouge">queue-example-sub</code>.</p>
 
 <p><img src="/images/assets/gcp-screen3.png" alt="" /></p>
 
@@ -242,7 +242,7 @@ s6eS8cmwg_Q
 
 <h2 id="6-preparing-our-program">6. Preparing our program</h2>
 
-<p>Now all the resources are in place–we have our work queue and our cluster ready to go. Next, we need to change our original script to use the new Pub/Sub work queue. First, we need new script <code class="highlighter-rouge">master.py</code> that we’ll run locally and will submit work into the work queue:</p>
+<p>Now all the resources are in place–we have our work queue and our cluster ready to go. Next, we need to change our original script to use the new Pub/Sub work queue. First, we need a new script <code class="highlighter-rouge">master.py</code> that we’ll run locally and will submit work into the work queue:</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># master.py</span>
 <span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">pubsub</span>

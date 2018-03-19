@@ -597,7 +597,7 @@ table {
     border-bottom: 1px dashed black; }
     .note h1.site-title a, .notes h1.site-title a {
       color: black; }
-      .note h1.site-title a:hover, .notes h1.site-title a:hover {
+      .note h1.site-title a, .note h1.site-title a:hover, .notes h1.site-title a, .notes h1.site-title a:hover {
         text-decoration: none; }
   .note pre, .notes pre {
     font-size: 16px; }
@@ -673,9 +673,13 @@ table {
   line-height: 1.3em;
   font-size: 14px; }
   .note pre code {
-    font-size: 14px; }
+    font-size: 14px;
+    padding: 0; }
 .note code {
-  font-size: 16px; }
+  font-size: 15px;
+  padding: 3px 5px; }
+.note a code {
+  padding: 0; }
 .note sup {
   font-size: 16px; }
 .note blockquote {
@@ -698,3 +702,10 @@ table {
   line-height: 1.3em; }
   .note .footnotes p {
     margin-bottom: 10px; }
+.note a {
+  color: #2169a5;
+  border-bottom: dotted 1px #2169a5;
+  text-decoration: none; }
+  .note a:hover {
+    color: #378ace;
+    border-bottom: solid 1px #378ace; }
