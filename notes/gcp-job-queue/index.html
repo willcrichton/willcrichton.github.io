@@ -11,14 +11,15 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
     <meta name="description"
-          content="Computer scientist by trade and geek at heart.">
+          content="I walk through the concrete steps of how to parallelize a Python function over a cluster using Docker and Kubernetes assuming knowledge of neither. You will create a distributed, fault-tolerant work queue without too much code.">
+    
     
     <title>
       
-      A distributed for loop from scratch in 70 lines of Python
+      A distributed for loop from scratch in 70 lines of Python | Will Crichton
       
-      | Will Crichton
     </title>
     
     <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans" rel="stylesheet">
@@ -35,8 +36,7 @@
     
   </h1>
   <div class="abstract">I walk through the concrete steps of how to parallelize a Python function over a cluster using Docker and Kubernetes assuming knowledge of neither. You will create a distributed, fault-tolerant work queue without too much code.</div>
-
-<p><em>This is essentially a rewrite of <a href="https://kubernetes.io/docs/tasks/job/fine-parallel-processing-work-queue/">this tutorial</a> with added context. To run the examples, you will need <a href="https://www.python.org/download/releases/2.7/">Python &gt;=2.7</a>, <a href="https://packaging.python.org/tutorials/installing-packages/">pip</a>, <a href="https://docs.docker.com/install/">Docker</a>, and the <a href="https://cloud.google.com/sdk/downloads">gcloud SDK</a>. All files are in a GitHub repository: <a href="https://github.com/willcrichton/gcp-job-queue">gcp-job-queue</a>.</em></p>
+  <p><em>This is essentially a rewrite of <a href="https://kubernetes.io/docs/tasks/job/fine-parallel-processing-work-queue/">this tutorial</a> with added context. To run the examples, you will need <a href="https://www.python.org/download/releases/2.7/">Python &gt;=2.7</a>, <a href="https://packaging.python.org/tutorials/installing-packages/">pip</a>, <a href="https://docs.docker.com/install/">Docker</a>, and the <a href="https://cloud.google.com/sdk/downloads">gcloud SDK</a>. All files are in a GitHub repository: <a href="https://github.com/willcrichton/gcp-job-queue">gcp-job-queue</a>.</em></p>
 
 <h2 id="1-introduction">1. Introduction</h2>
 
