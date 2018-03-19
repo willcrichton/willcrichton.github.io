@@ -36,6 +36,8 @@
   </h1>
   <div class="abstract">I explore how to use Rust compiler internals to metaprogram Rust using information from the typechecker, e.g. to automatically insert garbage-collection into Rust code, and discuss the benefits and drawbacks of this approach.</div>
 
+<p><em>All code in this note is available in the <a href="https://github.com/willcrichton/rustc-type-metaprogramming">rustc-type-metaprograming</a> repository.</em></p>
+
 <h2 id="introduction">Introduction</h2>
 
 <p>Metaprogramming, or code that generates code<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>, is broadly useful in statically typed languages for providing abstractions that are difficult to capture in the base syntax or type system. For example, Rust uses <a href="https://doc.rust-lang.org/book/first-edition/macros.html">macros</a> for simple pattern-matching-based code substitution (a more powerful and hygienic version of the C preprocessor), e.g. to implement variadic arguments like in <a href="https://doc.rust-lang.org/1.11.0/std/macro.println!.html">println!</a> and early returns like in <a href="https://doc.rust-lang.org/1.11.0/std/macro.try!.html">try!</a>.</p>
