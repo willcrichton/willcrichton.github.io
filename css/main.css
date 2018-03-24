@@ -390,9 +390,9 @@ ul {
       width: 17px;
       height: 16px;
       background-position: -80px -4px; }
-  #gameboy #portfolio {
+  #gameboy #research {
     background: url("/images/portfolio.png"); }
-    #gameboy #portfolio #overlay {
+    #gameboy #research #overlay {
       width: 342px;
       height: 213px;
       position: absolute;
@@ -405,103 +405,110 @@ ul {
       display: none;
       overflow: auto;
       box-sizing: content-box; }
-      #gameboy #portfolio #overlay #back {
+      #gameboy #research #overlay #back {
         position: absolute;
-        right: 10px;
-        top: 10px; }
-      #gameboy #portfolio #overlay h2 {
+        right: 2px;
+        top: 2px; }
+      #gameboy #research #overlay h2 {
         font-size: 27px;
-        margin-bottom: 10px; }
-      #gameboy #portfolio #overlay p, #gameboy #portfolio #overlay ul {
-        font-family: 'Droid Sans Mono', 'Courier New', monospace;
-        font-size: 14px; }
-    #gameboy #portfolio #sprite {
+        line-height: 0.8em;
+        margin-bottom: 5px; }
+      #gameboy #research #overlay h3 {
+        font-size: 20px;
+        margin-bottom: 10px;
+        line-height: 0.8em; }
+      #gameboy #research #overlay p, #gameboy #research #overlay ul {
+        font-family: 'Myriad Pro', Arial, sans-serif;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        line-height: 1.25em; }
+    #gameboy #research #sprite {
       position: absolute;
       background-image: url("/images/spritesheet.png");
       background-repeat: no-repeat; }
-    #gameboy #portfolio .sprite-down0 {
+    #gameboy #research .sprite-down0 {
       width: 18px;
       height: 23px;
       background-position: -5px -5px; }
-    #gameboy #portfolio .sprite-down1 {
+    #gameboy #research .sprite-down1 {
       width: 18px;
       height: 24px;
       background-position: -33px -5px; }
-    #gameboy #portfolio .sprite-down2 {
+    #gameboy #research .sprite-down2 {
       width: 18px;
       height: 24px;
       background-position: -61px -5px; }
-    #gameboy #portfolio .sprite-left0 {
+    #gameboy #research .sprite-left0 {
       width: 17px;
       height: 22px;
       background-position: -89px -5px; }
-    #gameboy #portfolio .sprite-left1 {
+    #gameboy #research .sprite-left1 {
       width: 20px;
       height: 22px;
       background-position: -89px -37px; }
-    #gameboy #portfolio .sprite-left2 {
+    #gameboy #research .sprite-left2 {
       width: 19px;
       height: 22px;
       background-position: -5px -69px; }
-    #gameboy #portfolio .sprite-right0 {
+    #gameboy #research .sprite-right0 {
       width: 17px;
       height: 22px;
       background-position: -34px -69px; }
-    #gameboy #portfolio .sprite-right1 {
+    #gameboy #research .sprite-right1 {
       width: 20px;
       height: 22px;
       background-position: -61px -69px; }
-    #gameboy #portfolio .sprite-right2 {
+    #gameboy #research .sprite-right2 {
       width: 19px;
       height: 22px;
       background-position: -91px -69px; }
-    #gameboy #portfolio .sprite-sworddown {
+    #gameboy #research .sprite-sworddown {
       width: 19px;
       height: 35px;
       background-position: -119px -5px; }
-    #gameboy #portfolio .sprite-swordleft {
+    #gameboy #research .sprite-swordleft {
       width: 31px;
       height: 22px;
       background-position: -120px -50px; }
-    #gameboy #portfolio .sprite-swordright {
+    #gameboy #research .sprite-swordright {
       width: 36px;
       height: 20px;
       background-position: -5px -101px; }
-    #gameboy #portfolio .sprite-swordup {
+    #gameboy #research .sprite-swordup {
       width: 18px;
       height: 31px;
       background-position: -120px -82px; }
-    #gameboy #portfolio .sprite-up0 {
+    #gameboy #research .sprite-up0 {
       width: 18px;
       height: 21px;
       background-position: -51px -123px; }
-    #gameboy #portfolio .sprite-up1 {
+    #gameboy #research .sprite-up1 {
       width: 18px;
       height: 25px;
       background-position: -79px -123px; }
-    #gameboy #portfolio .sprite-up2 {
+    #gameboy #research .sprite-up2 {
       width: 18px;
       height: 25px;
       background-position: -107px -123px; }
-    #gameboy #portfolio .chest {
+    #gameboy #research .chest {
       background-image: url("/images/chest.png");
       background-repeat: no-repeat;
       display: block;
       position: absolute;
       cursor: pointer; }
-    #gameboy #portfolio .chest-0 {
+    #gameboy #research .chest-0 {
       width: 32px;
       height: 24px;
       background-position: -5px -5px; }
-    #gameboy #portfolio .chest-1 {
+    #gameboy #research .chest-1 {
       width: 32px;
       height: 29px;
       background-position: -5px -39px; }
-    #gameboy #portfolio .chest-2 {
+    #gameboy #research .chest-2 {
       width: 32px;
       height: 33px;
       background-position: -47px -5px; }
-    #gameboy #portfolio .chest-3 {
+    #gameboy #research .chest-3 {
       width: 32px;
       height: 38px;
       background-position: -47px -48px; }

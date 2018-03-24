@@ -3,12 +3,12 @@ define(function(require) {
 
     var Backbone = require('Backbone'),
         $        = require('jQuery');
-    
+
     return Backbone.Router.extend({
 
         routes: {
             ''          : 'home',
-            'portfolio' : 'portfolio',
+            'research'  : 'research',
             'about'     : 'about',
             'contact'   : 'contact'
         },
@@ -21,7 +21,7 @@ define(function(require) {
             if (this.currentView) {
                 this.currentView.remove();
             }
-            
+
             var view = new View();
             $('#screen').html(view.render().el);
             this.currentView = view;
@@ -33,7 +33,7 @@ define(function(require) {
             this.swapViews(require('views/HomeView'));
         },
 
-        portfolio: function() {
+        research: function() {
             this.swapViews(require('views/PortfolioView'));
         },
 

@@ -25,26 +25,28 @@ define(function(require) {
     var projects = [
         {
             x: 150, y: 60,
-            title: 'Lantern',
+            title: 'Lantern: A Query Language for Visual Concept Retrieval',
+            authors: 'Senior thesis, advised by Kayvon Fatahalian. <a href="/pdf/thesis.pdf">Paper.</a>',
             body: _.template(require('text!templates/portfolio/lantern.tpl'))()
         },
         {
             x: 50, y: 180,
-            title: 'WebGL',
-            body: 'I\'ve been working with WebGl/Three.js for some time now. I taught a course on basic 3D web applications at CMU and was a technical reviewer for the book "Learning Three.js."\
-<br /><br />For the last two years, I\'ve been maintaining a framework for game creation on the web &mdash; Glen. <br /><br /><a target="_blank" href="http://github.com/willcrichton/glen">github.com/wilcrichton/glen</a><br /><br />I\'ve also developed 2D applications using Paper.js, like a <a href="http://willcrichton.net/music/" target="_blank">music visualizer</a>.'
+            title: 'Esper: Query, Analysis, and Visualization of Large Video Collections.',
+            authors: '<b>Will Crichton</b>, Haotian Zhang, Sahaj Garg, Maneesh Agrawala, and Kayvon Fatahalian. <a href="https://github.com/scanner-research/esper/">GitHub.</a>',
+            body: 'Research in progress on analyzing thousands of hours of TV news. Stay tuned!'
         },
         {
             x: 300, y: 220,
-            title: 'Seven Wonders',
-            body: 'As a fun side project, I implemented the popular Seven Wonders board game as a web application using PHP.\
-<a target="_blank" href="http://github.com/willcrichton/sevenwonders"><img src="images/sevenwonders.png" style="margin: 10px auto; display: block"/></a>',
+            title: 'Scanner: Efficient Video Analysis at Scale',
+            authors: 'Alex Poms, <b>Will Crichton</b>, Pat Hanrahan, and Kayvon Fatahalian. SIGGRAPH 2018. <a href="https://github.com/scanner-research/scanner/">GitHub.</a>',
+            body: 'Created Scanner, a platform for productively and efficiently extracting features from videos using heterogeneous hardware and cluster-scale computing. Implemented applications including cinematography analysis, markerless 3D reconstruction, and large-scale video data mining.'
         },
-        {
-            x: 300, y: 70,
-            title: 'Utilikilt',
-            body: '<div style="float:left;width:220px;margin-right:10px;"><p>To learn iOS programming and to help the CMU community, I developed and published a free iPhone app called <a href="https://itunes.apple.com/us/app/utilikilt/id793591989" target="_blank">Utilikilt</a> which automates the retrieval of grades and course schedule into a simple mobile interface.</p></div><img src="http://a2.mzstatic.com/us/r30/Purple6/v4/5b/30/94/5b3094b1-4a4f-d0ff-a372-cb4924155947/screen568x568.jpeg" height="170">'
-        }
+        // {
+        //     x: 300, y: 70,
+        //     title: '',
+        //     authors: '',
+        //     body: ''
+        // }
     ];
 
     var objects = [
@@ -61,7 +63,7 @@ define(function(require) {
 
     return Backbone.View.extend({
 
-        id: 'portfolio',
+        id: 'research',
 
         instructions: 'Arrow keys to move, space to open chests',
 
@@ -71,10 +73,6 @@ define(function(require) {
             this.lastFrame = 0;
 
             this.renderInit();
-
-            $('#screen').click(function(e){
-                console.log(e.offsetX, e.offsetY);
-            });
 
             // create chests from projects list
             _.forEach(projects, function(project) {

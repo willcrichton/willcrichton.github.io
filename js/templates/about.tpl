@@ -4,7 +4,7 @@
     Hi, I'm Will Crichton, a second-year CS PhD student at Stanford. I've done software development for 10 years and I like programming languages and systems.
   </div>
   <div class="section">
-    I code a lot in my spare time, so I have a number of projects you can view in my <a href="#portfolio">portfolio</a> or on my <a href="http://github.com/willcrichton" target="_blank">Github</a>.
+    You can take a look at my <a href="#research">research</a>, or check out the projects I code in my spare time on my <a href="http://github.com/willcrichton" target="_blank">Github</a>.
   </div>
   <div class="section">
     Apart from research, I'm an avid debater, singer, gamer, Mock Trialer, Eagle Scout, and general geek.
