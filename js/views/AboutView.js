@@ -30,6 +30,7 @@ define(function(require) {
             case C.SPACE:
             case C.ENTER:
             case C.DOWN:
+            case C.ACTION:
                 this.increment();
                 break;
             case C.UP:

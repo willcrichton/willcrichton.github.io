@@ -1,4 +1,4 @@
-<img src="images/oak.jpg" />
+<img src="images/avatar_bw.png" style="height:70px" />
 <div id="text">
   <div class="section">
     Hi, I'm Will Crichton, a second-year CS PhD student at Stanford. I've done software development for 10 years and I like programming languages and systems.
