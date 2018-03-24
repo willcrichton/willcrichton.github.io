@@ -11,6 +11,9 @@
   <div id="avatar">
     <h1>Will Crichton</h1>
     <h2>PhD @ Stanford</h2>
-    <img src="/images/avatar_bw.png" />
+    <div class="img-wrapper">
+      <img src="/images/avatar_hidden.png" class="avatar-hidden" />
+      <img src="/images/avatar_bw.png" class="avatar" />
+    </div>
   </div>
 </div>

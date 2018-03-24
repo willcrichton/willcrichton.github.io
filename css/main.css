@@ -276,9 +276,22 @@ ul {
         letter-spacing: 0; }
       #gameboy #home #avatar h2 {
         font-size: 16px; }
-      #gameboy #home #avatar img {
+      #gameboy #home #avatar .img-wrapper {
         margin-top: 15px;
-        height: 60%; }
+        position: relative; }
+        #gameboy #home #avatar .img-wrapper .avatar-hidden {
+          position: absolute;
+          top: -4px;
+          left: 52px;
+          opacity: 0;
+          width: 120px; }
+          #gameboy #home #avatar .img-wrapper .avatar-hidden:hover {
+            opacity: 1; }
+          @media (max-width: 600px) {
+            #gameboy #home #avatar .img-wrapper .avatar-hidden {
+              display: none; } }
+        #gameboy #home #avatar .img-wrapper .avatar {
+          height: 130px; }
   #gameboy #about {
     background: white; }
     #gameboy #about img {
