@@ -36,32 +36,34 @@
     
   </h1>
   <div class="abstract">Abstract: TODO</div>
-  <h2 id="preface-picking-the-right-problem">Preface: picking the right problem</h2>
+  <h2 id="picking-the-right-problem">Picking the right problem</h2>
 
-<p>What are the big problems in programming languages in 2018? The ones which, if we solve them, will have the greatest impact on the next generation of programmers? This question, to me, is the allure of programming language research, that the tools and theories we develop don’t affect just a single domain, but potentially <em>everybody</em> who programs. But therein lies another problem: how on earth are we supposed to know the needs of every single programmer? It’s easy enough to work on a language for X new type theory or Y new language feature that I personally think is interesting, but what about everyone else?</p>
+<p>What are the big problems in programming languages in 2018? The ones which, if we solve them, will have the greatest impact on the next generation of programmers? <sup id="fnref:0"><a href="#fn:0" class="footnote">1</a></sup> This question, to me, is the allure of programming language research, that the tools and theories we develop don’t affect just a single domain, but potentially <em>everybody</em> who programs. But therein lies another problem: how on earth are we supposed to know the needs of every single programmer? It’s easy enough to work on a language for X new type theory or Y new language feature that I personally think is interesting, but what about everyone else?</p>
 
-<p>This is one of the great failings of programming languages as a modern research field. A lot of the research is driven largely by the intuitions of the researchers, which are in turn shaped by their specific experiences with programming tools, languages, environments, and so on. This approach has obviously taken us quite far to our current standing—smart people tend to have good intuitions—but I have to speculate that the apparent stagnation in widespread adoption of modern PL research is due in part to a lack of focus on the end user. A sentiment I’ve seen repeated is that there have been <a href="https://youtu.be/-I_jE0l7sYQ?t=10m49s">no new big ideas since Prolog</a>.</p>
+<p>This is one of the great failings of programming languages as a modern research field. A lot of the research is driven by the intuitions of the researchers, which are in turn shaped by their specific experiences with programming tools, languages, environments, and so on. An intuitionist approach has clearly taken us quite far to our current standing—smart people tend to have good intuitions—but I have to speculate that the apparent stagnation in widespread adoption of modern PL research is due in part to a lack of focus on the end user. A sentiment I’ve seen repeated is that there have been <a href="https://youtu.be/-I_jE0l7sYQ?t=10m49s">no new big ideas since Prolog</a>.</p>
 
-<p>I believe, then, that viewing programming languages through a lens of human-computer interaction (HCI) is the most critical meta-problem in the field today. More than ever, we need surveys, interviews, user studies, sociologists, psychologists, and so on to provide data-driven hypotheses about the hard parts of programming. Not just for learners, but for everyone, from the grizzled low-level systems developers to the rising tide of web developers. We’ve seen this in the <a href="https://docs.google.com/document/d/1-GUt5oVPpi7rlObbU1WbA5V1OQBX1iaghryLJ6-ND9o/edit">Usability of Programming Languages Special Interest Group</a> at CHI (HCI conference), in papers like an <a href="http://lmeyerov.github.io/projects/socioplt/papers/oopsla2013.pdf">Empirical Analysis of Programming Language Adoption</a>, and in emerging <a href="https://medium.com/bits-and-behavior/designing-learnable-teachable-and-productive-programming-languages-dagstuhl-trip-report-81e41bde84bd">working groups for language usability</a>.</p>
+<p>I believe, then, that viewing programming languages (PL) through a lens of human-computer interaction (HCI) is the most critical meta-problem in the field today. More than ever, we need surveys, interviews, user studies, sociologists, psychologists, and so on to provide data-driven hypotheses about the hard parts of programming. Not just for learners, but for everyone, from the grizzled low-level systems developers to the rising tide of web developers. We’re starting to see this in the <a href="https://docs.google.com/document/d/1-GUt5oVPpi7rlObbU1WbA5V1OQBX1iaghryLJ6-ND9o/edit">Usability of Programming Languages Special Interest Group</a> at CHI (HCI conference), in papers like an <a href="http://lmeyerov.github.io/projects/socioplt/papers/oopsla2013.pdf">Empirical Analysis of Programming Language Adoption</a>, and in emerging <a href="https://medium.com/bits-and-behavior/designing-learnable-teachable-and-productive-programming-languages-dagstuhl-trip-report-81e41bde84bd">working groups for language usability</a>.</p>
 
 <p>However, in the meantime, we can still make progress on core PL problems that we believe to be impactful. The manifesto presented in the remainder of this note stems mostly from my personal experience—I’ve been programming for just over a decade now in games (Lua, C), websites (PHP, JS), high-performance/distributed systems (C++, Go, Rust), compilers (Standard ML, OCaml), and data science (Python, R). In the course of these experiences, I’ve worked on small scripts, personal projects, open-source software, products at tiny (2 people), small (15), medium (500), and big (2000+) companies, and nowadays on academic research. I studied programming language theory at Carnegie Mellon, and these days I teach the <a href="http://cs242.stanford.edu/">programming language course</a> at Stanford.</p>
 
-<p>All of which is to say, although we need more data, I have done my best to form an educated opinion on problems in programming languages that matter across many domains and actually occur in the real world. Yet still there is much I do not know, and I encourage you, as always, to read on with a critical eye.</p>
+<p>All of which is to say, although we need more data, I have done my best to form an educated opinion on problems in programming languages that matter across many domains and actually occur in the real world. Yet still there is much I do not know, and as always, I encourage you to read on with a critical eye.</p>
 
 <h2 id="thinking-gradually">Thinking gradually</h2>
 
-<p>I hold this fundamental belief: <strong>programming languages should be designed to match the human programming process.</strong><sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup> We should seek to understand how people think about programs and determine what programming processes come intuitively to the human mind. There are all sorts of interesting questions here, like:</p>
+<p>I hold this fundamental belief: <strong>programming languages should be designed to match the human programming process.</strong><sup id="fnref:1"><a href="#fn:1" class="footnote">2</a></sup> We should seek to understand how people think about programs and determine what programming processes come intuitively to the human mind. There are all sorts of fascinating questions here, like:</p>
 <ul>
-  <li>Is imperative programming more intuitive to most people because it matches the way our brains are configured, or because it’s simply the most common form of programming?</li>
+  <li>Is imperative programming more intuitive than functional programming to people? If so, is it because it matches the way our brains are configured, or because it’s simply the most common form of programming?</li>
   <li>How far should we go to match people’s natural processes versus trying to change the way people think about programming?</li>
-  <li>How impactful is documentation in understanding a program? Types? Control flow?</li>
+  <li>How impactful are comments in understanding a program? Variable names? Types? Control flow?</li>
 </ul>
 
 <p>A basic observation about the human programming process is that it is incremental. No one writes the entirety of their program in a single go, clicks compile + publish, and never looks at the code again. Programming is a long slog of trial and error, where the length of the trial and the severity of the error depend heavily on the domain and the tooling. This is why inspectable output and fast compile times matter, e.g. changing an HTML document and refreshing the page shows you instantly what happened. Bret Victor’s <a href="http://worrydream.com/#!/LearnableProgramming">Learnable Programming</a> discusses this idea in detail.</p>
 
-<p>I call this perspective <strong>“gradual programming”</strong> <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup> <sup id="fnref:3"><a href="#fn:3" class="footnote">3</a></sup>. While programming, the programmer is tracking the co-evolution of two things: 1) the syntactic representation of the program, as expressed to the computer via a programming language, and 2) a conceptual representation of the program, inside her mind. In the beginning of the process, the programmer starts with no syntax (an empty file) and usually a fuzzy idea of how the final program should work. From this point, she takes small steps in building components of the program until the final version is complete.</p>
+<p>I call this process <strong>“gradual programming”</strong> <sup id="fnref:2"><a href="#fn:2" class="footnote">3</a></sup> <sup id="fnref:3"><a href="#fn:3" class="footnote">4</a></sup>. While paradigms like imperative or functional programming characterize certain underlying aspects of our mental model of program, gradual programming describes a process by which a mental model is formed. In that sense, gradual programming is just… programming, but I think a new name is helpful in having a clear discussion.</p>
 
-<p>If you do programming, you have most certainly gone through this process before and can likely relate, but usually most of the thought process occurs implicitly (i.e. inside your head) and is never reified into a communicable form. To be concrete about this incremental process, let’s walk through an example in detail. Let’s say I want to write a program to append a line of text to a file. In my head, I have a model of the program that looks like this:</p>
+<p>Gradual programming is the programmer tracking the co-evolution of two things: 1) the syntactic representation of the program, as expressed to the computer via a programming language, and 2) a conceptual representation of the program, inside the mind. In the beginning of the process, the programmer starts with no syntax (an empty file) and usually a fuzzy idea of how the final program should work. From this point, she takes small steps in building components of the program until the final version is complete.</p>
+
+<p>If you do programming, you have most certainly gone through this process before and can likely relate, but usually most of the thought process occurs implicitly (i.e. inside your head) and is never reified into a communicable form. To be concrete about this gradual process, let’s walk through an example in detail. Let’s say I want to write a program to append a line of text to a file. In my head, I have a model of the program that looks like this:</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>input file = some other input
 input line = some input
@@ -96,7 +98,7 @@ $ echo "test.txt\ntest" | python append.py
 ('test.txt', 'test')
 </code></pre></div></div>
 
-<p>Next, I need to figure out how to append the line to the file. In my initial mental model, this was all encapsulated with “write input line to the end of input file,” but now I need to turn that fuzzy idea into more concrete steps that I can easily encode in Python. Specifically, I need to first open the file in append mode, write the string, and then close the file. After thinking about these details, my new mental model is:</p>
+<p>Next, I need to figure out how to append the line to the file. In my initial mental model, this was all encapsulated with “write input line to the end of input file,” but now I need to turn that fuzzy idea into more concrete steps that I can easily encode in Python. Specifically, if I understand how a file system works, then I know I need to first open the file in append mode, write the string, and then close the file. After thinking about these details, my new mental model is:</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>input file = some other input
 input line = some input
@@ -110,8 +112,9 @@ close file
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat append.py
 input_file = raw_input()
 input_line = raw_input()
-with open(input_file, 'a') as file:
-    file.write(input_line)
+file = open(input_file, 'a')
+file.write(input_line)
+file.close()
 
 $ echo "test\ntest.txt" | python append.py
 
@@ -121,17 +124,17 @@ test
 
 <p>Success! Again, the purpose of this is to demonstrate the co-evolution of the syntactic and conceptual model of a program over time. Based on my experience programming as well as teaching others to program, I believe it exemplifies a common process underlying the way many people program.</p>
 
-<h2 id="axes-of-incrementality">Axes of incrementality</h2>
+<h2 id="axes-of-evolution">Axes of evolution</h2>
 
-<p>At this point, while it should be clear that programming is incremental, it is not yet clear how we should be creating tools to match that process. One way to do this is to break down the programming process along multiple axes. Essentially, we ask: what kinds of information do people incrementally learn and/or write down about their program? Then we can consider how programming languages can help optimize each axis individually.</p>
+<p>The example above demonstrates the incremental nature of the programming process, but it’s not clear yet how we should be creating tools to match that process. To simplify the problem, we want to break down the evolution of a program along many smaller axes of evolution. Essentially, we ask: what kinds of information do people incrementally learn and/or write down about their program? Then we can consider how programming languages can help optimize each axis individually.</p>
 
 <p><strong>1. Concrete / abstract</strong><br />
 In building programs, it’s commonplace to start with an example of what you’re trying to make, and then generalize (or “abstract”) that example to cover a wider range of use cases. Abstraction is the backbone of programming languages, usually provided through functions and interfaces. For example, we can abstract our script above into a function:</p>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">append_line</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">input_line</span><span class="p">):</span>
-   <span class="o">...</span>
+   <span class="c"># our code above</span>
 
 <span class="n">append_line</span><span class="p">(</span><span class="s">'test.txt'</span><span class="p">,</span> <span class="s">'test'</span><span class="p">)</span>
-<span class="n">append_line</span><span class="p">(</span><span class="s">'test.txt'</span><span class="p">,</span> <span class="s">'test_again'</span><span class="p">)</span>
+<span class="n">append_line</span><span class="p">(</span><span class="s">'test.txt'</span><span class="p">,</span> <span class="s">'test again'</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p>However, the fuzzier your program model is initially, the harder it is to immediately jump to an abstract solution, so this transition from concrete to abstract occurs frequently (again, see “Create by Abstracting” in <a href="http://worrydream.com/#!/LearnableProgramming">Learnable Programming</a>).</p>
@@ -139,8 +142,9 @@ In building programs, it’s commonplace to start with an example of what you’
 <p><strong>2. Anonymous / named</strong><br />
 In the beginning of the programming process during iteration/experimentation, we as programmers naturally want to optimize for the speed of writing code, not <a href="https://talks.golang.org/2014/names.slide">reading code</a>. One form of write-optimized code is short-named and anonymous values. For example, a shortened first pass at our script above might look like:</p>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">()</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s">'a'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">raw_input</span><span class="p">())</span>
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s">'a'</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">raw_input</span><span class="p">())</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </code></pre></div></div>
 
 <p>Here, the variable names are less informative: <code class="highlighter-rouge">s</code> instead of <code class="highlighter-rouge">input_file</code>, <code class="highlighter-rouge">f</code> instead of <code class="highlighter-rouge">file</code>, and no name provided to the <code class="highlighter-rouge">input_line</code>. However, it takes less time to write, and if the script will never be read again, then why not? If we intend to use the script in a bigger codebase, then we might decide to incrementally change the names to be more informative as before for the sake of our code reviewers. This is a good example of incremental change that’s easy and commonplace in today’s programming languages.</p>
@@ -169,8 +173,9 @@ The rise of dynamically typed languages in the last two decades (Python, Javascr
 <a href="https://github.com/soutaro/steep">Ruby</a>, <a href="http://hacklang.org/">Hack</a>, and others. For example, our program above could look like:</p>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">input_file</span><span class="p">:</span> <span class="n">String</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">()</span>
 <span class="n">input_line</span><span class="p">:</span> <span class="n">String</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">()</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="s">'a'</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="nb">file</span><span class="p">:</span> <span class="n">File</span><span class="p">):</span>
-    <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">input_line</span><span class="p">)</span>
+<span class="nb">file</span><span class="p">:</span> <span class="n">File</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="s">'a'</span><span class="p">)</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">input_line</span><span class="p">)</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </code></pre></div></div>
 
 <p><strong>5. Dynamically deallocated / statically deallocated</strong><br />
@@ -179,8 +184,9 @@ You can view memory management, or lifetimes, through a similar lens as types. I
 <p>However, as before, having fine-grained control over value lifetimes is still useful both for correctness and performance. Ownership and borrowing like in Rust can help structure a system to <a href="https://blog.rust-lang.org/2015/04/10/Fearless-Concurrency.html">avoid data races</a> in concurrent programming, as well as avoid the use of a costly garbage collector at runtime. Continuing our typed example, it could look like:</p>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">input_file</span><span class="p">:</span> <span class="n">String</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">()</span>
 <span class="n">input_line</span><span class="p">:</span> <span class="n">String</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">()</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_file</span><span class="p">,</span> <span class="s">'a'</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">mut</span> <span class="nb">file</span><span class="p">:</span> <span class="n">File</span><span class="p">):</span>
-    <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_line</span><span class="p">)</span>
+<span class="nb">file</span><span class="p">:</span> <span class="n">mut</span> <span class="n">File</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_file</span><span class="p">,</span> <span class="s">'a'</span><span class="p">)</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_line</span><span class="p">)</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </code></pre></div></div>
 
 <p>Unlike gradual typing, to my knowledge, there is no work yet on gradual memory management (except <a href="https://drive.google.com/file/d/0B_4wx_3dTGICWG1Ddk81Rnh0YzA/view">this whitepaper</a>).</p>
@@ -192,9 +198,9 @@ When beginning to write a program, the programmer wants to have every feature in
 
 <h2 id="a-vision-for-gradual-programming">A vision for gradual programming</h2>
 
-<p>The axes identified are not novel in the sense that, e.g. static vs. dynamic typing is a well-worn trade-off. However, what I am demonstrating is that these are not one-time decisions that never change over the course of a program. Instead, all of these axes likely a) change over the evolution of an individual program, and b) change in a fine-grained manner, e.g. typed and untyped code should be mixed in the same system. This is anathema to the all-or-nothing approach that most languages take today: everything should be typed, or nothing should be typed. Everything is garbage collected, or nothing is garbage collected. That requires programmers to face absurd tradeoffs, like changing entire language ecosystems just to get the benefits of static typing.</p>
+<p>The axes identified are not novel in the sense that, for example, static vs. dynamic typing is a well-worn trade-off. However, what I am demonstrating is that these are not one-time decisions that never change over the course of a program. Instead, all of these axes likely a) change over the evolution of an individual program, and b) change in a fine-grained manner, e.g. typed and untyped code should be mixed in the same system. This is anathema to the all-or-nothing approach that most languages take today: everything should be typed, or nothing should be typed. Everything is garbage collected, or nothing is garbage collected. That requires programmers to face absurd tradeoffs, like changing entire language ecosystems just to get the benefits of static typing.</p>
 
-<p>In that light, gradual programming entails the following research process:</p>
+<p>In that light, advancing gradual programming entails the following research process:</p>
 <ol>
   <li>Identify parts of the programming process that change incrementally over time, but currently require undue overhead or switching languages to adapt.</li>
   <li>Develop language mechanisms that enable programmers to gradually move along a particular axis within a homogeneous programming environment.</li>
@@ -209,6 +215,9 @@ When beginning to write a program, the programmer wants to have every feature in
 
 <div class="footnotes">
   <ol>
+    <li id="fn:0">
+      <p>See Graydon Hoare’s <a href="https://graydon2.dreamwidth.org/253769.html">“What’s next?”</a> and Stephen Diehl’s <a href="http://dev.stephendiehl.com/nearfuture.pdf">“Near Future of Programming Languages”</a> for further discussion on this topic. <a href="#fnref:0" class="reversefootnote">&#8617;</a></p>
+    </li>
     <li id="fn:1">
       <p>The “human” part of this may seem obvious, but there is a tradeoff in designing a language intended for consumption by computers vs. by people. Languages written by humans have the problem of being in both camps, although there are languages (e.g. LLVM) which are, for the most part, exclusively for machines. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
     </li>
