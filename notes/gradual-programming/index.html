@@ -137,7 +137,7 @@ In building programs, it’s commonplace to start with an example of what you’
 <span class="n">append_line</span><span class="p">(</span><span class="s">'test.txt'</span><span class="p">,</span> <span class="s">'test again'</span><span class="p">)</span>
 </code></pre></div></div>
 
-<p>However, the fuzzier your program model is initially, the harder it is to immediately jump to an abstract solution, so this transition from concrete to abstract occurs frequently (again, see “Create by Abstracting” in <a href="http://worrydream.com/#!/LearnableProgramming">Learnable Programming</a>).</p>
+<p>However, the fuzzier your program model is initially, the harder it is to immediately jump to an abstract solution, so this evolution from concrete to abstract occurs frequently in today’s programming languages (again, see “Create by Abstracting” in <a href="http://worrydream.com/#!/LearnableProgramming">Learnable Programming</a>).</p>
 
 <p><strong>2. Anonymous / named</strong><br />
 In the beginning of the programming process during iteration/experimentation, we as programmers naturally want to optimize for the speed of writing code, not <a href="https://talks.golang.org/2014/names.slide">reading code</a>. One form of write-optimized code is short-named and anonymous values. For example, a shortened first pass at our script above might look like:</p>
@@ -147,7 +147,7 @@ In the beginning of the programming process during iteration/experimentation, we
 <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </code></pre></div></div>
 
-<p>Here, the variable names are less informative: <code class="highlighter-rouge">s</code> instead of <code class="highlighter-rouge">input_file</code>, <code class="highlighter-rouge">f</code> instead of <code class="highlighter-rouge">file</code>, and no name provided to the <code class="highlighter-rouge">input_line</code>. However, it takes less time to write, and if the script will never be read again, then why not? If we intend to use the script in a bigger codebase, then we might decide to incrementally change the names to be more informative as before for the sake of our code reviewers. This is a good example of incremental change that’s easy and commonplace in today’s programming languages.</p>
+<p>Here, the variable names are less informative: <code class="highlighter-rouge">s</code> instead of <code class="highlighter-rouge">input_file</code>, <code class="highlighter-rouge">f</code> instead of <code class="highlighter-rouge">file</code>, and no name provided to the <code class="highlighter-rouge">input_line</code>. However, it takes less time to write, and if the script will never be read again, then why not? If we intend to use the script in a bigger codebase, then we might decide to incrementally change the names to be more informative for the sake of our code reviewers. This is another good example of incremental change that’s easy and commonplace in today’s programming languages.</p>
 
 <p><strong>3. Imperative / declarative</strong><br />
 For a multitude of reasons, straight-line, sequential imperative code comes more naturally to programmers than functional/declarative code in their conceptual program model. For example, a simple list transformation will likely use for loops:</p>
