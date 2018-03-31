@@ -126,7 +126,7 @@ test
 
 <h2 id="axes-of-evolution">Axes of evolution</h2>
 
-<p>The example above demonstrates the incremental nature of the programming process, but it’s not clear yet how we should be creating tools to match that process. To simplify the problem, we want to break down the evolution of a program along many smaller axes of evolution. Essentially, we ask: what kinds of information do people incrementally learn and/or write down about their program? Then we can consider how programming languages can help optimize each axis individually.</p>
+<p>The example above demonstrates the gradual nature of the programming process, but it’s not clear yet how we should be creating tools to match that process. To simplify the problem, we want to break down the evolution of a program along many smaller axes of evolution. Essentially, we ask: what kinds of information do people gradually learn and/or write down about their program? Then we can consider how programming languages can help optimize each axis individually.</p>
 
 <p><strong>1. Concrete / abstract</strong><br />
 In building programs, it’s commonplace to start with an example of what you’re trying to make, and then generalize (or “abstract”) that example to cover a wider range of use cases. Abstraction is the backbone of programming languages, usually provided through functions and interfaces. For example, we can abstract our script above into a function:</p>
@@ -147,7 +147,7 @@ In the beginning of the programming process during iteration/experimentation, we
 <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </code></pre></div></div>
 
-<p>Here, the variable names are less informative: <code class="highlighter-rouge">s</code> instead of <code class="highlighter-rouge">input_file</code>, <code class="highlighter-rouge">f</code> instead of <code class="highlighter-rouge">file</code>, and no name provided to the <code class="highlighter-rouge">input_line</code>. However, it takes less time to write, and if the script will never be read again, then why not? If we intend to use the script in a bigger codebase, then we might decide to incrementally change the names to be more informative for the sake of our code reviewers. This is another good example of incremental change that’s easy and commonplace in today’s programming languages.</p>
+<p>Here, the variable names are less informative: <code class="highlighter-rouge">s</code> instead of <code class="highlighter-rouge">input_file</code>, <code class="highlighter-rouge">f</code> instead of <code class="highlighter-rouge">file</code>, and no name provided to the <code class="highlighter-rouge">input_line</code>. However, it takes less time to write, and if the script will never be read again, then why not? If we intend to use the script in a bigger codebase, then we might decide to incrementally change the names to be more informative for the sake of our code reviewers. This is another good example of gradual change that’s easy and commonplace in today’s programming languages.</p>
 
 <p><strong>3. Imperative / declarative</strong><br />
 For a multitude of reasons, straight-line, sequential imperative code comes more naturally to programmers than functional/declarative code in their conceptual program model. For example, a simple list transformation will likely use for loops:</p>
@@ -179,7 +179,7 @@ The rise of dynamically typed languages in the last two decades (Python, Javascr
 </code></pre></div></div>
 
 <p><strong>5. Dynamically deallocated / statically deallocated</strong><br />
-You can view memory management, or lifetimes, through a similar lens as types. In 2018, all programming languages should be <a href="http://willcrichton.net/notes/rust-memory-safety/">memory safe</a>, with the only question being whether memory deallocation is determined at compile time (i.e. like Rust, with a borrow checker) or at run time (i.e. garbage collection, like every popular language except C/C++). Garbage collection is unquestionably a productivity boost for programmers, so it’s natural that our initial program model shouldn’t have to consider exactly how long each value should live before deallocation.</p>
+You can view memory management, or lifetimes, through a similar lens as types. In 2018, all programming languages should be <a href="http://willcrichton.net/notes/rust-memory-safety/">memory safe</a>, with the only question being whether memory deallocation is determined at compile time (i.e. like Rust, with a borrow checker) or at run time (i.e. like every other language, with a garbage collector). Garbage collection is unquestionably a productivity boost for programmers, so it’s natural that our initial program model shouldn’t have to consider exactly how long each value should live before deallocation.</p>
 
 <p>However, as before, having fine-grained control over value lifetimes is still useful both for correctness and performance. Ownership and borrowing like in Rust can help structure a system to <a href="https://blog.rust-lang.org/2015/04/10/Fearless-Concurrency.html">avoid data races</a> in concurrent programming, as well as avoid the use of a costly garbage collector at runtime. Continuing our typed example, it could look like:</p>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">input_file</span><span class="p">:</span> <span class="n">String</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">()</span>
@@ -194,7 +194,7 @@ You can view memory management, or lifetimes, through a similar lens as types. I
 <p><strong>6. General-purpose / domain-specific</strong><br />
 When beginning to write a program, the programmer wants to have every feature in her language of choice available for consideration in the implementation to maximize the speed of prototyping and the productivity of the creative process. This is not usually on the minds of most as they develop software, except perhaps from a code style perspective (“what subset of Python should I be using?”).</p>
 
-<p>However, the emerging wave of high-performance domain-specific languages like <a href="https://www.tensorflow.org/">TensorFlow</a>, <a href="http://halide-lang.org/">Halide</a>, <a href="http://ebblang.org/">Ebb</a>, and <a href="https://www.weld.rs/">Weld</a>, have identified that if the programmer only uses a small subset of general-purpose programs, e.g. differentiable pure functions, then an optimizer can produce substantially more efficient code. From a gradual perspective, this suggests a possible future workflow where as the programmer incrementally shrinks the subset of the language she uses in a particular part of her program, the compiler is able to provide increasingly optimized backends.</p>
+<p>However, the emerging wave of high-performance domain-specific languages like <a href="https://www.tensorflow.org/">TensorFlow</a>, <a href="http://halide-lang.org/">Halide</a>, <a href="http://ebblang.org/">Ebb</a>, and <a href="https://www.weld.rs/">Weld</a>, have identified that if the programmer only uses a small subset of general-purpose programs, e.g. differentiable pure functions, then an optimizer can produce substantially more efficient code. From a gradual perspective, this suggests a possible future workflow where as the programmer gradually shrinks the subset of the language she uses in a particular part of her program, the compiler is able to provide increasingly optimized backends.</p>
 
 <h2 id="a-vision-for-gradual-programming">A vision for gradual programming</h2>
 
@@ -202,7 +202,7 @@ When beginning to write a program, the programmer wants to have every feature in
 
 <p>In that light, advancing gradual programming entails the following research process:</p>
 <ol>
-  <li>Identify parts of the programming process that change incrementally over time, but currently require undue overhead or switching languages to adapt.</li>
+  <li>Identify parts of the programming process that change gradually over time, but currently require undue overhead or switching languages to adapt.</li>
   <li>Develop language mechanisms that enable programmers to gradually move along a particular axis within a homogeneous programming environment.</li>
   <li>Empirically validate against real programmers whether the proposed mechanisms match the hypothesized programming process in practice.</li>
 </ol>
