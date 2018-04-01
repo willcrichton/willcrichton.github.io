@@ -82,7 +82,7 @@ print(input_file)
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ echo "test.txt" | python append.py
 Traceback (most recent call last):
   File "append.py", line 1, in &lt;module&gt;
-    input_line = input()
+    input_file = input()
   File "&lt;string&gt;", line 1, in &lt;module&gt;
 NameError: name 'test' is not defined
 </code></pre></div></div>
@@ -116,7 +116,7 @@ file = open(input_file, 'a')
 file.write(input_line)
 file.close()
 
-$ echo "test\ntest.txt" | python append.py
+$ echo "test.txt\ntest" | python append.py
 
 $ cat test.txt
 test
