@@ -132,7 +132,7 @@
     <p><strong><code class="highlighter-rouge">vec_new</code>: initial capacity is 0.</strong> When <code class="highlighter-rouge">vec_push</code> is called, the capacity will double, but <code class="highlighter-rouge">2 * 0 = 0</code>, resulting in no additional memory being allocated, so space for at least 1 element needs to be allocated up front.</p>
   </li>
   <li>
-    <p><strong><code class="highlighter-rouge">vec_push</code>: incorrect call to <code class="highlighter-rouge">malloc</code>.</strong> The argument to malloc is the size of memory in bytes to allocate, however <code class="highlighter-rouge">new_capacity</code> is simple the number of integers. We need to <code class="highlighter-rouge">malloc(sizeof(int) * new_capacity)</code>.</p>
+    <p><strong><code class="highlighter-rouge">vec_push</code>: incorrect call to <code class="highlighter-rouge">malloc</code>.</strong> The argument to malloc is the size of memory in bytes to allocate, however <code class="highlighter-rouge">new_capacity</code> is simply the number of integers. We need to <code class="highlighter-rouge">malloc(sizeof(int) * new_capacity)</code>.</p>
   </li>
   <li>
     <p><strong><code class="highlighter-rouge">vec_push</code>: missing free on resize.</strong> When the resize occurs, we reassign <code class="highlighter-rouge">vec-&gt;data</code> without freeing the old data pointer, resulting in a memory leak.</p>
