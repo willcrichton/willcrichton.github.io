@@ -648,10 +648,15 @@ table {
   margin-top: 30px;
   text-align: center;
   font-weight: bold;
-  margin-bottom: 30px; }
+  margin-bottom: 10px; }
   @media (max-width: 576px) {
     .note h1 {
       font-size: 48px; } }
+.note .date {
+  font-family: 'Pokemon Pixel', monospace;
+  text-align: center;
+  font-size: 30px;
+  margin-bottom: 30px; }
 .note .abstract {
   border: 1px dashed black;
   padding: 20px 20px;
