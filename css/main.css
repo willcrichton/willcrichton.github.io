@@ -623,8 +623,10 @@ table {
   .note pre, .notes pre {
     font-size: 16px; }
 
+.notes .highlights {
+  margin-top: 20px; }
 .notes div.note-list {
-  margin-top: 30px; }
+  margin-top: 20px; }
   .notes div.note-list .row {
     margin-bottom: 30px; }
     @media (max-width: 576px) {
