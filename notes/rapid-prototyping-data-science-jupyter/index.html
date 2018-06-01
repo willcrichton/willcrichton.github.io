@@ -51,7 +51,7 @@
 
 <p>In the course of visual inspection, we inevitably noticed some mistakes by the neural nets, so the next step for the UI was to make it interactive: allows users to fix mistakes or create gold standard data by manually drawing/correcting visual metadata.</p>
 
-<video src="/images/assets/prototyping2.mp4" autoplay="" loop="" muted=""></video>
+<p><video src="/images/assets/prototyping2.mp4" autoplay="" loop="" muted=""></video></p>
 
 <h2 id="multi-stage-interactive-workflows">Multi-stage interactive workflows</h2>
 
@@ -67,7 +67,7 @@
 
 <p>While we initially wanted to implement this process in our web UI, the trouble is that because it’s a multi-stage interactive pipeline, we would need to persist the pipeline state across both the server and the client, synchronizing between Python and Javascript and visualizing the current stage in the pipeline for the user. We realized that what we really wanted was just a normal Jupyter notebook, except with interactive inputs in between the pipeline stages for the manual labeling. This idea lead us to an approach like this:</p>
 
-<video src="/images/assets/prototyping3.mp4" autoplay="" loop="" muted=""></video>
+<p><video src="/images/assets/prototyping3.mp4" autoplay="" loop="" muted=""></video></p>
 
 <p>Essentially, we took our existing web UI and compressed it into a <a href="https://github.com/jupyter-widgets/ipywidgets/">Jupyter widget</a>. We added a thin layer to allow values to pass back and forth between the Python runtime and the Javascript widget, and that was it! Our new API looks roughly like:</p>
 

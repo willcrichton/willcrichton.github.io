@@ -674,7 +674,7 @@ table {
   font-weight: bold; }
 .note img, .note video {
   max-width: 100%;
-  max-height: 400px;
+  max-height: 500px;
   display: block;
   margin: 0 auto; }
 .note p {
