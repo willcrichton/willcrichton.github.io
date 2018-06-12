@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="I briefly demonstrate how to use procedural macros to automatically perform type coercion in Rust, mimicking the behavior of dynamic languages.">
+    
+    
+    <title>
+      
+      Automatic Type Coercions in Rust | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Automatic Type Coercions in Rust
+    
+  </h1>
+  <div class="date">June 12, 2018</div>
+  <div class="abstract">I briefly demonstrate how to use procedural macros to automatically perform type coercion in Rust, mimicking the behavior of dynamic languages.</div>
+  <p>As an eminently lazy Rust programmer, I often take one too many shortcuts. For example, the other day I was writing a function that takes as input a string.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">foo</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">String</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">...</span> <span class="p">{}</span>
+</code></pre></div></div>
+
+<p>Except I frequently invoked this function with a variety of things that turned into strings, including <code class="highlighter-rouge">&amp;str</code>, <code class="highlighter-rouge">i32</code>, and other types, so much that I was frequently invoking the <code class="highlighter-rouge">ToString</code> trait. So I thought, why not move this into the API?</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="n">foo</span><span class="o">&lt;</span><span class="n">S</span><span class="p">:</span> <span class="n">Into</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">S</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">...</span> <span class="p">{</span>
+  <span class="k">let</span> <span class="n">s</span><span class="p">:</span> <span class="nb">String</span> <span class="o">=</span> <span class="n">s</span><span class="nf">.into</span><span class="p">();</span>
+  <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then I started thinking, how far can we take this pattern? Because the <code class="highlighter-rouge">.into()</code> function relies on Rust’s trait resolution to figure out what type to coerce into, it feels kind of like a dynamically typed language. For example, here’s a function that concatenates two strings:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="n">concat</span><span class="o">&lt;</span><span class="n">T1</span><span class="p">:</span> <span class="n">Into</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">T2</span><span class="p">:</span> <span class="n">Into</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">t1</span><span class="p">:</span> <span class="n">T1</span><span class="p">,</span> <span class="n">t2</span><span class="p">:</span> <span class="n">T2</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">String</span> <span class="p">{</span>
+  <span class="k">let</span> <span class="n">t1</span><span class="p">:</span> <span class="nb">String</span> <span class="o">=</span> <span class="n">t1</span><span class="nf">.into</span><span class="p">();</span>
+  <span class="k">let</span> <span class="n">t2</span><span class="p">:</span> <span class="nb">String</span> <span class="o">=</span> <span class="n">t2</span><span class="nf">.into</span><span class="p">();</span>
+  <span class="n">t1</span> <span class="o">+</span> <span class="o">&amp;</span><span class="n">t2</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nd">println!</span><span class="p">(</span><span class="s">"{}, {}"</span><span class="p">,</span>
+    <span class="nf">concat</span><span class="p">(</span><span class="s">"A"</span><span class="p">,</span> <span class="s">"B"</span><span class="p">),</span>
+    <span class="nf">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">"Hello"</span><span class="nf">.to_string</span><span class="p">()));</span>
+  <span class="c">// prints "AB, 1Hello"</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>At this point, it’s clear that on the implementation side, this API style requires a fair amount of boilerplate. We can abstract that away through a procedural macro!</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span><span class="p">[</span><span class="n">auto_into</span><span class="p">]</span>
+<span class="k">fn</span> <span class="nf">concat</span><span class="p">(</span><span class="n">t1</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="n">t2</span><span class="p">:</span> <span class="nb">String</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">String</span> <span class="p">{</span>
+  <span class="n">t1</span> <span class="o">+</span> <span class="o">&amp;</span><span class="n">t2</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><a href="https://gist.github.com/willcrichton/d49783efee8366d6de110e1960279544">See here</a> for the barebones macro implementation (nightly required). This is cool because, in a sense, it makes your API strictly more general than before. Any calls that were valid before are still valid after <code class="highlighter-rouge">#[auto_into]</code>, except now you can pass any values which could be coerced into the desired input types.</p>
+
+<p>That said, is this a good idea? Probably not in the general case, since implicit type coercions are a scary source of bugs, particularly for a language like Rust that errs on the side of explicitness. But it’s a neat pattern enabled by the trait system that could be used for more practical designs, e.g. a student in my Programming Languages course used a similar idea to implement a fluent API for <a href="http://cs242.stanford.edu/assets/projects/2017/diamondm-mvilim.pdf">dependency injection</a> in Rust.</p>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-16662292-3');
+    </script>
+  </body>
+</html>
