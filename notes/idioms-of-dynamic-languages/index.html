@@ -193,7 +193,7 @@
 <span class="n">printList</span><span class="o">(</span><span class="n">l</span><span class="o">);</span>
 </code></pre></div>    </div>
     <p><strong>Pros:</strong> low syntactic overhead, flexible (no fixed set of types at implementation time). <br />
-<strong>Cons:</strong> any object must be an instance of a class which derives from the required base class, which gets awkward/unwiedly for ad-hoc combinations of different methods. Interface must be explicitly specified in a class definition/interface.</p>
+<strong>Cons:</strong> any object must be an instance of a class which derives from the required base class, which gets awkward/unwieldy for ad-hoc combinations of different methods. Interface must be explicitly specified in a class definition/interface.</p>
   </li>
   <li><strong>Trait polymorphism:</strong> this is basically the prime use case for traits, e.g. in Rust:
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Rust</span>
@@ -420,7 +420,7 @@
   |
 </code></pre></div></div>
 
-<p>Most type checkers would not, for example, decide <code class="highlighter-rouge">T = Any</code> and then insert runtime type checks any time a value from <code class="highlighter-rouge">v</code> was used. This is again an example of requireing a programmer to make decisions about the types of variables before it is necessary due to restrictions of the type system. Partial programs are not easily amenable to static analysis.</p>
+<p>Most type checkers would not, for example, decide <code class="highlighter-rouge">T = Any</code> and then insert runtime type checks any time a value from <code class="highlighter-rouge">v</code> was used. This is again an example of requiring a programmer to make decisions about the types of variables before it is necessary due to restrictions of the type system. Partial programs are not easily amenable to static analysis.</p>
 
 <h2 id="discussion">Discussion</h2>
 
@@ -439,7 +439,7 @@
 
 <p>However, I think we need a more nuanced understanding of both how programmers think about programming as well as how dynamic languages mesh with that process. This can lead us to a more sensible discussion about the tradeoffs between static and dynamic languages, and it can help us design better metrics for evaluating the human impact of language features and tooling.</p>
 
-<p>But, of course, this is all just from my personal experience. Do you find dynamic languages more productive, and if so, why? Please send me mail at <a href="mailto:wcrichto@cs.stanford.edu">wcrichto@cs.stanford.edu</a> or leave a comment on <a href="">Hacker News</a>.</p>
+<p>But, of course, this is all just from my personal experience. Do you find dynamic languages more productive, and if so, why? Please send me mail at <a href="mailto:wcrichto@cs.stanford.edu">wcrichto@cs.stanford.edu</a> or leave a comment on <a href="https://news.ycombinator.com/item?id=17439635">Hacker News</a>.</p>
 
 <div class="footnotes">
   <ol>
