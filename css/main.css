@@ -599,13 +599,14 @@ table {
   border-spacing: 0; }
 
 .note, .notes {
-  font-family: 'Alegreya Sans', 'Helvetica Neue', 'Arial', sans-serif;
-  font-size: 20px;
+  font-family: 'Source Sans Pro', 'Helvetica Neue', 'Arial', sans-serif;
+  font-size: 22px;
   line-height: 1.4em;
-  letter-spacing: 0; }
-  .note h1, .note h2, .note h3, .note h4, .note h5, .note h6, .notes h1, .notes h2, .notes h3, .notes h4, .notes h5, .notes h6 {
+  letter-spacing: 0px; }
+  .note h1, .notes h1 {
     font-family: 'Pokemon Pixel', monospace;
-    letter-spacing: 1px;
+    letter-spacing: 1px; }
+  .note h2, .note h3, .note h4, .note h5, .note h6, .notes h2, .notes h3, .notes h4, .notes h5, .notes h6 {
     line-height: 0.8em;
     margin-bottom: 3px; }
   .note h1.site-title, .notes h1.site-title {
@@ -668,7 +669,7 @@ table {
     .note .abstract {
       margin: 10px; } }
 .note h2 {
-  font-size: 48px;
+  font-size: 36px;
   margin-top: 30px;
   margin-bottom: 10px;
   font-weight: bold; }
@@ -700,17 +701,17 @@ table {
   background: #fafafa;
   padding: 10px;
   line-height: 1.3em;
-  font-size: 14px; }
+  font-size: 16px; }
   .note pre code {
-    font-size: 14px;
+    font-size: 16px;
     padding: 0; }
 .note code {
-  font-size: 15px;
+  font-size: 16px;
   padding: 3px 5px; }
 .note a code {
   padding: 0; }
 .note sup {
-  font-size: 16px; }
+  font-size: 18px; }
 .note blockquote {
   padding-left: 20px;
   color: #555;
