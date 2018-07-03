@@ -123,8 +123,10 @@
       <p>Note: this idea is related to the idea of “existential types” in programming language theory.</p>
     </blockquote>
   </li>
-  <li><strong><a href="https://doc.rust-lang.org/book/second-edition/ch06-01-defining-an-enum.html">Explicit sum types</a>:</strong> In a language with support for sum types (tagged unions, enums with values, etc.) like Rust, or Haskell, one can wrap values in an enum:
-    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Rust</span>
+  <li><strong>Sum types</strong>: Sum types (or unions, enums, variants, etc.) allow the definition of types that could be one of many things. Sum types take many forms, with three primary tradeoffs:
+    <ol>
+      <li><strong>Named vs. anonymous</strong>: sum types in OCaml, Haskell, and Rust all have named branches. For example:
+        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Rust</span>
 <span class="k">enum</span> <span class="n">MyValue</span> <span class="p">{</span>
   <span class="nf">Int</span><span class="p">(</span><span class="nb">i32</span><span class="p">),</span>
   <span class="nf">String</span><span class="p">(</span><span class="nb">String</span><span class="p">)</span>
@@ -138,23 +140,39 @@
   <span class="nn">MyValue</span><span class="p">::</span><span class="nf">Int</span><span class="p">(</span><span class="k">ref</span> <span class="n">n</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span>
   <span class="nn">MyValue</span><span class="p">::</span><span class="nf">String</span><span class="p">(</span><span class="k">ref</span> <span class="n">s</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
 <span class="p">};</span>
-</code></pre></div>    </div>
-    <p><strong>Pros</strong>: flexible, can store values of any type so long as they’re in the enum.<br />
-<strong>Cons</strong>: requires determining ahead of time the exact set of types that will be in the container, writing it down, along with verbose value creation and matching.</p>
-  </li>
-  <li><strong>Implicit sum types:</strong> Languages like <a href="(https://stackoverflow.com/questions/1428743/ocaml-list-that-could-contain-two-types)">OCaml</a> and <a href="https://ceylon-lang.org/documentation/tour/types/">Ceylon</a> have support for automatically inferring the subset of types that could describe a particular value:
-    <div class="language-ceylon highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Ceylon
+</code></pre></div>        </div>
+        <p>Here, <code class="highlighter-rouge">MyValue</code> is the sum type name, and <code class="highlighter-rouge">Int</code>/<code class="highlighter-rouge">String</code> are the branch names. By contrast, languages like <a href="https://ceylon-lang.org/documentation/tour/types/">Ceylon</a> have support for anonymous sum types:</p>
+        <div class="language-ceylon highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Ceylon
 </span><span class="nd">HashMap</span><span class="o">&lt;</span><span class="nd">Integer</span><span class="o">,</span> <span class="nd">Integer</span><span class="o">|</span><span class="nd">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span>
     <span class="nd">HashMap</span> <span class="o">{</span> <span class="mi">100</span><span class="err">-</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">,</span> <span class="mi">200</span><span class="err">-</span><span class="o">&gt;</span><span class="s">"Hello world"</span> <span class="o">}</span>
-</code></pre></div>    </div>
-    <p><strong>Pros</strong>: removes the verbosity of the explicit sum type approach while maintaining same flexibility.<br />
-<strong>Cons</strong>: not type-safe, still requires explicit checks or exceptions on cast failures, doesn’t allow dynamic addition of non-statically-determinable types at runtime.</p>
+</code></pre></div>        </div>
+        <p>Most languages that have fully-featured sum types tend to only have named sums, one benefit being that it allows branches with the same inner type to have different names, e.g. <code class="highlighter-rouge">Foo(i32), Bar(i32)</code>.</p>
+      </li>
+      <li><strong>Declared vs. inferred</strong>: some languages with sum types like Rust require an explicit declaration of the enum ahead of time, as in the previous example. Other languages, like Ceylon as well as OCaml’s <a href="https://stackoverflow.com/questions/1428743/ocaml-list-that-could-contain-two-types">polymorphic variants</a> allow the sum types to be inferred by the compiler.
+        <div class="language-ocaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">(* OCaml *)</span>
+<span class="k">let</span> <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="nt">`Int</span> <span class="mi">0</span><span class="o">,</span> <span class="nt">`String</span> <span class="s2">"Hello world"</span><span class="p">]</span> <span class="p">;;</span>
+<span class="c">(* l inferred to have type [ `Int of int | `String of string ] *)</span>
+</code></pre></div>        </div>
+      </li>
+      <li><strong>Matched vs. casted</strong>: some languages like OCaml allow potentially incorrect casts from a sum type to one of its branches:
+        <div class="language-ocaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">(* OCaml *)</span>
+<span class="k">type</span> <span class="n">foo</span> <span class="o">=</span> <span class="nc">X</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">|</span> <span class="nc">Y</span> <span class="k">of</span> <span class="kt">string</span> <span class="p">;;</span>
+<span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="nc">X</span> <span class="mi">10</span> <span class="p">;;</span>
+<span class="k">let</span> <span class="nc">X</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="p">;;</span> <span class="c">(* This raises an exception if incorrect *)</span>
+<span class="n">print_int</span> <span class="n">y</span> <span class="p">;;</span>
+</code></pre></div>        </div>
+        <p>By contrast, Rust (and I believe Haskell?) require exhaustive matching:</p>
+        <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Rust</span>
+<span class="k">let</span> <span class="nn">MyValue</span><span class="p">::</span><span class="nf">String</span><span class="p">(</span><span class="k">ref</span> <span class="n">s</span><span class="p">)</span> <span class="o">=</span> <span class="n">map</span><span class="p">[</span><span class="o">&amp;</span><span class="mi">200</span><span class="p">];</span> <span class="c">// Invalid!</span>
+</code></pre></div>        </div>
+      </li>
+    </ol>
+
+    <p>There’s a surprisingly large design space here, and the pros/cons relative to dynamic languages vary based on the particular choices a language makes. Casted, inferred, and anonymous sums arguably come quite close to equivalent dynamic code, although such a type system appears uncommon in practice.</p>
   </li>
 </ol>
 
-<p>To summarize, static languages offer a wide array of options to implement dynamic heterogeneous data structures with varying degrees of verbosity, up-front cost, flexibility, and runtime safety. It seems like the implicit sum types approach plus exception-based typecasting probably gets closest in terms of flexibility and conciseness as a dynamic language.</p>
-
-<p>In any case, implementing these data structures in a static language gives rise to two kinds of conceptual impedance mismatch:</p>
+<p>Among these many cases, implementing a heterogeneous data structures in a static language generally gives rise to two kinds of conceptual impedance mismatch:</p>
 <ol>
   <li>The programmer either cannot easily encode the desired heterogeneity in a particular static language, e.g. OCaml does not provide a simple solution for an <code class="highlighter-rouge">Any</code> type.</li>
   <li>The programmer must decide too early (i.e. while initially describing the data structure) what kind of data types are allowed, e.g. in the enum case, or what functionality of the data types is allowed, e.g. in the traits case.</li>
