@@ -123,7 +123,7 @@
       <p>Note: this idea is related to the idea of “existential types” in programming language theory.</p>
     </blockquote>
   </li>
-  <li><strong><a href="https://doc.rust-lang.org/book/second-edition/ch06-01-defining-an-enum.html">Explicit sum types</a>:</strong> In a language with support for sum types (tagged unions, enums with values, etc.) like Rust, Haskell, or OCaml, one can wrap values in an enum:
+  <li><strong><a href="https://doc.rust-lang.org/book/second-edition/ch06-01-defining-an-enum.html">Explicit sum types</a>:</strong> In a language with support for sum types (tagged unions, enums with values, etc.) like Rust, or Haskell, one can wrap values in an enum:
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Rust</span>
 <span class="k">enum</span> <span class="n">MyValue</span> <span class="p">{</span>
   <span class="nf">Int</span><span class="p">(</span><span class="nb">i32</span><span class="p">),</span>
@@ -141,11 +141,8 @@
 </code></pre></div>    </div>
     <p><strong>Pros</strong>: flexible, can store values of any type so long as they’re in the enum.<br />
 <strong>Cons</strong>: requires determining ahead of time the exact set of types that will be in the container, writing it down, along with verbose value creation and matching.</p>
-    <blockquote>
-      <p>Note: languages with <a href="https://stackoverflow.com/questions/1428743/ocaml-list-that-could-contain-two-types">polymorphic variants</a> like OCaml reduce the verbosity by allowing named enums to be implicitly defined, e.g. removing the need to write down <code class="highlighter-rouge">enum MyValue</code> in the above example.</p>
-    </blockquote>
   </li>
-  <li><strong><a href="https://ceylon-lang.org/documentation/tour/types/">Implicit sum types</a>:</strong> Languages like Ceylon have support for automatically inferring the subset of types that could describe a particular value:
+  <li><strong>Implicit sum types:</strong> Languages like <a href="(https://stackoverflow.com/questions/1428743/ocaml-list-that-could-contain-two-types)">OCaml</a> and <a href="https://ceylon-lang.org/documentation/tour/types/">Ceylon</a> have support for automatically inferring the subset of types that could describe a particular value:
     <div class="language-ceylon highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Ceylon
 </span><span class="nd">HashMap</span><span class="o">&lt;</span><span class="nd">Integer</span><span class="o">,</span> <span class="nd">Integer</span><span class="o">|</span><span class="nd">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span>
     <span class="nd">HashMap</span> <span class="o">{</span> <span class="mi">100</span><span class="err">-</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">,</span> <span class="mi">200</span><span class="err">-</span><span class="o">&gt;</span><span class="s">"Hello world"</span> <span class="o">}</span>
@@ -413,8 +410,8 @@
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>error[E0282]: type annotations needed
  --&gt; test.rs:2:19
   |
-2 |   let v: Vec&lt;_&gt; = vec![];
-  |       -           ^^^^^^ cannot infer type for `T`
+2 |   let v: Vec&lt;_&gt; = Vec::new();
+  |       -           ^^^^^^^^^^ cannot infer type for `T`
   |       |
   |       consider giving `v` a type
   |
