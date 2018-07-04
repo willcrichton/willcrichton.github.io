@@ -154,14 +154,14 @@
 <span class="c">(* l inferred to have type [ `Int of int | `String of string ] *)</span>
 </code></pre></div>        </div>
       </li>
-      <li><strong>Matched vs. casted</strong>: some languages like OCaml allow potentially incorrect casts from a sum type to one of its branches:
+      <li><strong>Matched vs. casted</strong>: some languages like OCaml and Haskell allow potentially incorrect casts from a sum type to one of its branches:
         <div class="language-ocaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">(* OCaml *)</span>
 <span class="k">type</span> <span class="n">foo</span> <span class="o">=</span> <span class="nc">X</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">|</span> <span class="nc">Y</span> <span class="k">of</span> <span class="kt">string</span> <span class="p">;;</span>
 <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="nc">X</span> <span class="mi">10</span> <span class="p">;;</span>
 <span class="k">let</span> <span class="nc">X</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="p">;;</span> <span class="c">(* This raises an exception if incorrect *)</span>
 <span class="n">print_int</span> <span class="n">y</span> <span class="p">;;</span>
 </code></pre></div>        </div>
-        <p>By contrast, Rust (and I believe Haskell?) require exhaustive matching:</p>
+        <p>By contrast, Rust require exhaustive matching:</p>
         <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Rust</span>
 <span class="k">let</span> <span class="nn">MyValue</span><span class="p">::</span><span class="nf">String</span><span class="p">(</span><span class="k">ref</span> <span class="n">s</span><span class="p">)</span> <span class="o">=</span> <span class="n">map</span><span class="p">[</span><span class="o">&amp;</span><span class="mi">200</span><span class="p">];</span> <span class="c">// Invalid!</span>
 </code></pre></div>        </div>
