@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="At JupyterCon, I learned three things: reactive notebooks are the future, Jupyter is the new Bash, and data science is a gateway drug.">
+    
+    
+    <title>
+      
+      The Future of Notebooks: Lessons from JupyterCon | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    The Future of Notebooks: Lessons from JupyterCon
+    
+  </h1>
+  <div class="date">August 24, 2018</div>
+  <div class="abstract">At JupyterCon, I learned three things: reactive notebooks are the future, Jupyter is the new Bash, and data science is a gateway drug.</div>
+  <p>Over the last two days at <a href="https://conferences.oreilly.com/jupyter/jup-ny">JupyterCon</a>, I saw a lot of exciting ideas about the future of Jupyter notebooks. I’ve already written about my own ideas—<a href="http://willcrichton.net/notes/programming-in-the-debugger/">Jupyter for debugging</a>, <a href="http://willcrichton.net/notes/rapid-prototyping-data-science-jupyter/">Jupyter for prototyping interactions</a>—but in this note, I want to highlight the major trends I saw in the JupyterCon presentations.</p>
+
+<h2 id="1-reactive-notebooks">1. Reactive notebooks</h2>
+
+<p>In the talk <a href="https://docs.google.com/presentation/d/1n2RlMdmv1p25Xy5thJUhkKGvjtV-dkAIsUXP-AL4ffI/edit#slide=id.g37ce315c78_0_27">“I don’t like notebooks”</a>, Joel Grus’ number one (or at least first) complaint about Jupyter is that “notebooks have tons and tons of hidden state that’s easy to screw up and difficult to reason about.” Although Jupyter displays cells in a linear order, they can be executed, edited, and re-executed in any order.</p>
+
+<p><img src="/images/assets/jupytercon1.png" alt="" /></p>
+
+<p>Two subsequent talks, <a href="https://conferences.oreilly.com/jupyter/jup-ny/public/schedule/detail/68448">“Supporting reproducibility in Jupyter through dataflow notebooks”</a> and <a href="https://conferences.oreilly.com/jupyter/jup-ny/public/schedule/detail/68344">“Explorations in reproducible analysis with Nodebook”</a>, explored new systems that turn Jupyter into a reactive programming environment, i.e. the runtime tracks dependencies between cells, and knows to re-run a cell when its dependencies change.</p>
+
+<p>The two systems, <a href="https://github.com/dataflownb/dfkernel/">dfkernel</a> and <a href="https://github.com/stitchfix/nodebook">Nodebook</a>, have different mechanisms for tracking updates. Both only track variables in the global scope. Dfkernel conservatively invalidates all global variables used in a particular cell. Nodebook computes the hash of the serialization of every global variable on every cell execution, and compares the hashes to the previous hashes to determine invalidation. Nodebook additionally enforces the constraint that cells can have data dependencies on prior cells.</p>
+
+<p>While neither seems like a fully optimal solution, it does seem like reactive notebooks are growing in popularity. <a href="https://beta.observablehq.com/">Observable’s</a> Javascript notebooks also adopt this idea.</p>
+
+<h2 id="2-jupyter-is-the-new-bash">2. Jupyter is the new Bash</h2>
+
+<p>While Jupyter notebooks have traditionally been a humans-only entrypoint into a program, researchers and companies alike are increasingly using notebooks for automation. In <a href="https://conferences.oreilly.com/jupyter/jup-ny/public/schedule/detail/68348">“Scheduled notebooks: A means for manageable and traceable code execution”</a>, a Netflix engineer described how they have replaced Bash scripts with Jupyter notebooks for ETL pipelines and cron jobs.</p>
+
+<p><img src="/images/assets/jupytercon2.png" alt="" /></p>
+
+<p>The basic idea is that you write a parameterized Jupyter notebook, essentially a function with parameters that get pasted into a new block at the top of the notebook. A system called <a href="https://github.com/nteract/papermill">Papermill</a> then takes a notebook and its parameters, metaprograms a bespoke notebook with the parameters pasted in, and then executes the notebook with zero user interaction required. For Netflix, the benefit of this approach is to simplify the development and debugging of these scripts. If a particular job breaks, it’s trivial to pop open the offending notebook in the normal Jupyter context, and it has all the data built in that it needs to execute until hitting the error.</p>
+
+<p>A more experimental approach to this is <a href="https://conferences.oreilly.com/jupyter/jup-ny/public/schedule/detail/68339">Script of Scripts</a>, a Jupyter kernel that allows users to bridge between multiple programming languages (e.g. Python, Bash, and R) in a single Jupyter notebook.</p>
+
+<p><img src="/images/assets/jupytercon3.png" alt="" /></p>
+
+<p>The SoS system integrates into traditional cluster schedulers like slurm, enabling their group at University of Texas to write Jupyter notebooks instead of Bash scripts to create bioinformatics pipelines.</p>
+
+<h2 id="3-data-science-as-a-gateway-drug-in-education">3. Data science as a gateway drug in education</h2>
+
+<p>On the education side of things, Jupyter is quickly gaining adoption in universities around America, particularly for data science courses. Conversely, data science is increasingly becoming students’ first exposure to programming and computer science, not just a supplement to a CS curriculum. Most notable is UC Berkeley’s <a href="http://data8.org/">Data 8</a> program, which is projected to reach 50% of the university’s undergraduates within the next few years.</p>
+
+<p>The neat part about Data 8 is that it starts with a core class, but branches into many sister classes that incorporate data science principles to investigate domains like medicine, geography, and sports. Their pedagogy is to develop a series of independent modules on topics like hypothesis testing, text processing, etc. such that courses can incorporate modules as necessary for their domain.</p>
+
+<p>I think this is a reasonable reaction to the utterly contrived assignments in many first-year programming courses—it’s way more motivating to gain insight in domains I actually care about as opposed to writing a routine to sort a list or search a tree.</p>
+
+<p>Other cool things I saw but haven’t covered: <a href="https://github.com/jupyterlab/jupyterlab">JupyterLab</a> (web-based window manager and IDE), <a href="https://github.com/jupyterhub/jupyterhub">JupyterHub</a> (multi-user server for Jupyter), <a href="https://mybinder.org/">Binder</a> (hosted notebooks), <a href="https://www.nbinteract.com/">nbinteract</a> (convert interactive notebooks into web pages), <a href="https://quiltdata.com/">Quilt</a> (data versioning), and <a href="http://quantstack.net/xeus.html">Xeus</a> (C++ kernel in Jupyter).</p>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-16662292-3');
+    </script>
+  </body>
+</html>
