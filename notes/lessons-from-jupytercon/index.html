@@ -35,7 +35,13 @@
     The Future of Notebooks: Lessons from JupyterCon
     
   </h1>
-  <div class="date">August 24, 2018</div>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    August 24, 2018
+  </div>
   <div class="abstract">At JupyterCon, I learned three things: reactive notebooks are the future, Jupyter is the new Bash, and data science is a gateway drug.</div>
   <p>Over the last two days at <a href="https://conferences.oreilly.com/jupyter/jup-ny">JupyterCon</a>, I saw a lot of exciting ideas about the future of Jupyter notebooks. I’ve already written about my own ideas—<a href="http://willcrichton.net/notes/programming-in-the-debugger/">Jupyter for debugging</a>, <a href="http://willcrichton.net/notes/rapid-prototyping-data-science-jupyter/">Jupyter for prototyping interactions</a>—but in this note, I want to highlight the major trends I saw in the JupyterCon presentations.</p>
 
@@ -47,7 +53,7 @@
 
 <p>Two subsequent talks, <a href="https://conferences.oreilly.com/jupyter/jup-ny/public/schedule/detail/68448">“Supporting reproducibility in Jupyter through dataflow notebooks”</a> and <a href="https://conferences.oreilly.com/jupyter/jup-ny/public/schedule/detail/68344">“Explorations in reproducible analysis with Nodebook”</a>, explored new systems that turn Jupyter into a reactive programming environment, i.e. the runtime tracks dependencies between cells, and knows to re-run a cell when its dependencies change.</p>
 
-<p>The two systems, <a href="https://github.com/dataflownb/dfkernel/">dfkernel</a> and <a href="https://github.com/stitchfix/nodebook">Nodebook</a>, have different mechanisms for tracking updates. Both only track variables in the global scope. Dfkernel conservatively invalidates all global variables used in a particular cell. Nodebook computes the hash of the serialization of every global variable on every cell execution, and compares the hashes to the previous hashes to determine invalidation. Nodebook additionally enforces the constraint that cells can have data dependencies on prior cells.</p>
+<p>The two systems, <a href="https://github.com/dataflownb/dfkernel/">dfkernel</a> and <a href="https://github.com/stitchfix/nodebook">Nodebook</a>, have different mechanisms for tracking updates. Both only track variables in the global scope. Dfkernel conservatively invalidates all global variables used in a particular cell. Nodebook computes the hash of the serialization of every global variable on every cell execution, and compares the hashes to the previous hashes to determine invalidation. Nodebook additionally enforces the constraint that cells can only have data dependencies on prior cells.</p>
 
 <p>While neither seems like a fully optimal solution, it does seem like reactive notebooks are growing in popularity. <a href="https://beta.observablehq.com/">Observable’s</a> Javascript notebooks also adopt this idea.</p>
 
@@ -57,7 +63,7 @@
 
 <p><img src="/images/assets/jupytercon2.png" alt="" /></p>
 
-<p>The basic idea is that you write a parameterized Jupyter notebook, essentially a function with parameters that get pasted into a new block at the top of the notebook. A system called <a href="https://github.com/nteract/papermill">Papermill</a> then takes a notebook and its parameters, metaprograms a bespoke notebook with the parameters pasted in, and then executes the notebook with zero user interaction required. For Netflix, the benefit of this approach is to simplify the development and debugging of these scripts. If a particular job breaks, it’s trivial to pop open the offending notebook in the normal Jupyter context, and it has all the data built in that it needs to execute until hitting the error.</p>
+<p>The basic idea is that you write a parameterized Jupyter notebook, essentially a notebook with parameters that get pasted into a new block at the top of the notebook. A system called <a href="https://github.com/nteract/papermill">Papermill</a> metaprograms a bespoke notebook with provided parameters pasted in, and then executes the notebook with zero user interaction required. For Netflix, the benefit of this approach is to simplify the development and debugging of these scripts. If a particular job breaks, it’s trivial to pop open the offending notebook in the normal Jupyter environment, and it has all the data built in that it needs to execute until hitting the error.</p>
 
 <p>A more experimental approach to this is <a href="https://conferences.oreilly.com/jupyter/jup-ny/public/schedule/detail/68339">Script of Scripts</a>, a Jupyter kernel that allows users to bridge between multiple programming languages (e.g. Python, Bash, and R) in a single Jupyter notebook.</p>
 
