@@ -1,5 +1,5 @@
 <div id="map">
-  <form onsubmit="return false;">
+  <form action='https://formspree.io/wcrichto@cs.stanford.edu' method="POST" target="_blank">
     <input type="text" name="name" placeholder="Name" />
     <input type="text" name="email" placeholder="Email" />
     <textarea name="message" rows="7" cols="30" placeholder="Enter your message here..."></textarea>

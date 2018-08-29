@@ -168,14 +168,7 @@ define(function(require) {
 
                 if (yDist < 1 && xDist > 0 && xDist < $(el).width()) {
                     if (el.type == 'submit' && !this.spriteState.get('mailed')) {
-                        var data = new FormData(this.$('form')[0]);
-                        $.ajax({
-                            url: 'https://formspree.io/wcrichto@cs.stanford.edu',
-                            data: data,
-                            processData: false,
-                            contentType: false,
-                            type: 'POST'
-                        });
+                        this.$('form').submit();
 
                         this.$('input, textarea').fadeOut(100, _.bind(function() {
                             this.$('#message').fadeIn(100);
