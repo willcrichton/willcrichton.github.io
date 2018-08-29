@@ -603,6 +603,9 @@ table {
   font-size: 22px;
   line-height: 1.4em;
   letter-spacing: 0px; }
+  @media (max-width: 576px) {
+    .note, .notes {
+      font-size: 18px; } }
   .note h1, .notes h1 {
     font-family: 'Pokemon Pixel', monospace;
     letter-spacing: 1px; }
@@ -645,6 +648,10 @@ table {
     .notes div.note-list a.note-link h2 {
       font-size: 36px;
       font-family: 'Pokemon Pixel', monospace; }
+    .notes div.note-list a.note-link h3 {
+      margin: 8px 0;
+      font-family: 'Pokemon Pixel', monospace;
+      font-size: 28px; }
 
 .note h1 {
   font-size: 64px;
@@ -661,6 +668,9 @@ table {
   text-align: center;
   font-size: 30px;
   margin-bottom: 30px; }
+  @media (max-width: 576px) {
+    .note .date {
+      margin-bottom: 10px; } }
 .note .abstract {
   border: 1px dashed black;
   padding: 20px 20px;
@@ -673,6 +683,10 @@ table {
   margin-top: 30px;
   margin-bottom: 10px;
   font-weight: bold; }
+  @media (max-width: 576px) {
+    .note h2 {
+      line-height: 1em;
+      font-size: 26px; } }
 .note img, .note video {
   max-width: 100%;
   max-height: 500px;
