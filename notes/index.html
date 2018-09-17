@@ -22,6 +22,98 @@
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/css/tango.css" />
     <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\brc}[1]{\{{#1}\}}
+
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\rec}[3]{\msf{rec}(#1; ~ x.y.#2)(#3)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+
+      % Typed lambda calculus - types
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wblockr}[2]{\msf{block}~{#1}~{#2}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[3]{\msf{label}_{#1}~\{#2\}~{#3}}
+      \newcommand{\wframe}[1]{\msf{frame}~{#1}}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[2]{\msf{breaking}_{#1}~{#2}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}~{#1};~\msf{mem}~{#2};~\msf{locals}~{#3};~\msf{stack}~{#4};~\msf{instrs}~{#5}\}}
+      \newcommand{\wfunc}[3]{\{\msf{params}~{#1};~\msf{locals}~{#2};~\msf{body}~{#3}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}~{#1}\}}
+
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      \newcommand{\semii}[3]{{#1};~{#2};~{#3}}
+      \newcommand{\semiii}[4]{{#1};~{#2};~{#3};~{#4}}
+      \newcommand{\semiiii}[5]{{#1};~{#2};~{#3};~{#4};~{#5}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
   </head>
   <body>
     <div class="container notes">
@@ -40,12 +132,25 @@
     <div class="row">
       
       <div class="col-md-6 col-sm-12">
+        <a class="note-link" href="/notes/specificity-programming-languages/">
+          <h2>"Do What I Mean": Name Resolution in Programming Languages</h2>
+          <h3>September 16, 2018</h3>
+          <div class="abstract">Resolving names is a hard problem that permeates many aspects of programming like variable scoping, structured control flow, and method resolution. I show how a few core ideas underlie seemingly disparate parts of programming language design.</div>
+        </a>
+      </div>
+      
+      <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/systems-programming/">
           <h2>What is Systems Programming, Really?</h2>
           <h3>September 9, 2018</h3>
           <div class="abstract">I have a gripe with the phrase "systems programming." To me, it always seemed to unnecessarily combine two ideas: low-level programming (dealing with implementation details of the machine) and systems design (creating and managing a complex set of interoperating components). Why is that the case? How long has this been true? And what could we gain from redefining the idea of systems?</div>
         </a>
       </div>
+      
+    </div>
+    
+    
+    <div class="row">
       
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/lessons-from-jupytercon/">
@@ -55,11 +160,6 @@
         </a>
       </div>
       
-    </div>
-    
-    
-    <div class="row">
-      
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/idioms-of-dynamic-languages/">
           <h2>Idioms of Dynamic Languages</h2>
@@ -67,6 +167,11 @@
           <div class="abstract">Programmers think dynamic languages like Python are easier to use than static ones, but why? I look at uniquely dynamic programming idioms and their static alternatives, identifying a few broad trends that impact language usability.</div>
         </a>
       </div>
+      
+    </div>
+    
+    
+    <div class="row">
       
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/automatic-type-coercions-macros-rust/">
@@ -76,11 +181,6 @@
         </a>
       </div>
       
-    </div>
-    
-    
-    <div class="row">
-      
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/rapid-prototyping-data-science-jupyter/">
           <h2>Rapid Prototyping of Interactive Data Science Workflows in Jupyter</h2>
@@ -88,6 +188,11 @@
           <div class="abstract">Motivated by my experience in research on large-scale video analysis, I look at how Jupyter's web integration provides new opportunities for easily creating bespoke interactive data processing pipelines with a human in the loop.</div>
         </a>
       </div>
+      
+    </div>
+    
+    
+    <div class="row">
       
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/remixing-as-learning-in-creative-media/">
@@ -97,11 +202,6 @@
         </a>
       </div>
       
-    </div>
-    
-    
-    <div class="row">
-      
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/programming-in-the-debugger/">
           <h2>Programming in the Debugger</h2>
@@ -109,6 +209,11 @@
           <div class="abstract">Jupyter presents a unique programming style where the programmer can change her code while it's running, reducing the cost of mistakes and improving the interactivity of the programming process. I discuss the benefits and limitations of this approach along with the related work.</div>
         </a>
       </div>
+      
+    </div>
+    
+    
+    <div class="row">
       
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/gradual-programming/">
@@ -118,11 +223,6 @@
         </a>
       </div>
       
-    </div>
-    
-    
-    <div class="row">
-      
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/type-directed-metaprogramming-in-rust/">
           <h2>Type-directed metaprogramming in Rust</h2>
@@ -130,6 +230,11 @@
           <div class="abstract">I explore how to use Rust compiler internals to metaprogram Rust using information from the typechecker, e.g. to automatically insert garbage-collection into Rust code, and discuss the benefits and drawbacks of this approach.</div>
         </a>
       </div>
+      
+    </div>
+    
+    
+    <div class="row">
       
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/gcp-job-queue/">
@@ -139,11 +244,6 @@
         </a>
       </div>
       
-    </div>
-    
-    
-    <div class="row">
-      
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/rust-memory-safety/">
           <h2>Memory Safety in Rust</h2>
@@ -151,6 +251,11 @@
           <div class="abstract">To demonstrate the value of Rust's memory safety rules, I contrast the implementation of a simple vector library in C and Rust, highlighting where and how Rust's static analysis can prevent tricky memory errors.</div>
         </a>
       </div>
+      
+    </div>
+    
+    
+    <div class="row">
       
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/what-is-a-pl-survey/">
@@ -160,11 +265,6 @@
         </a>
       </div>
       
-    </div>
-    
-    
-    <div class="row">
-      
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/what-is-a-programming-language/">
           <h2>What is a programming language?</h2>
@@ -172,6 +272,11 @@
           <div class="abstract">What is or isn't a programming language is a surprisingly subjective question. In this note, I try to nail down the major factors (precision, composition, reuse) that make a language/model programmatic and clarify this definition vs. other related terminology likes libraries and data formats.</div>
         </a>
       </div>
+      
+    </div>
+    
+    
+    <div class="row">
       
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/digest-july-2017/">
@@ -181,11 +286,6 @@
         </a>
       </div>
       
-    </div>
-    
-    
-    <div class="row">
-      
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/digest-march-2017/">
           <h2>Digest - March 2017</h2>
@@ -193,6 +293,11 @@
           <div class="abstract">This is the start of a series about highlighting cool events, people, games, etc. that happened recently or I encountered recently and don't need their own blog post. I'll try to keep this up at least every two months!</div>
         </a>
       </div>
+      
+    </div>
+    
+    
+    <div class="row">
       
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/learning-through-goals-in-computer-science/">
@@ -202,11 +307,6 @@
         </a>
       </div>
       
-    </div>
-    
-    
-    <div class="row">
-      
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/parsing-strategies-in-rust/">
           <h2>Parsing Strategies in Rust</h2>
@@ -214,6 +314,11 @@
           <div class="abstract">I briefly analyze two competing parsing frameworks in Rust: nom, a parser combinator, and LALRPOP, an LR(1) parser generator. I show that LALRPOP can more succinctly and efficiently express grammars for text-based formats.</div>
         </a>
       </div>
+      
+    </div>
+    
+    
+    <div class="row">
       
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/programming-languages-as-boy-scouts/">
@@ -223,11 +328,6 @@
         </a>
       </div>
       
-    </div>
-    
-    
-    <div class="row">
-      
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/extensible-compilation/">
           <h2>Extensible Compilation: Goals and Related Work</h2>
@@ -235,6 +335,11 @@
           <div class="abstract">We need programming languages that can evolve with us as our requirements and coding styles change. I look at prior work in components of such an extensible compiler: combining static and dynamic types, breaking the GC/systems divide, and lowering the barrier to DSLs. I consider how we can combine these features into a single language, and argue for a few design decisions to underpin this new language.</div>
         </a>
       </div>
+      
+    </div>
+    
+    
+    <div class="row">
       
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/rust-the-new-llvm/">
@@ -244,11 +349,6 @@
         </a>
       </div>
       
-    </div>
-    
-    
-    <div class="row">
-      
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/the-coming-age-of-the-polyglot-programmer/">
           <h2>A Coming Revolution in Metaprogramming</h2>
@@ -257,6 +357,11 @@
         </a>
       </div>
       
+    </div>
+    
+    
+    <div class="row">
+      
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/making-the-most-out-of-cmu/">
           <h2>Making the Most Out of CMU</h2>
@@ -264,11 +369,6 @@
           <div class="abstract">Carnegie Mellon is a big investment, so you should make the most out of it. If you don't pay attention, its opportunities can slip right past you. I recommend doing research, taking fewer classes, ignoring your diploma, and trying to TA a class. I also include a few quick tips for better life in Pittsburgh!</div>
         </a>
       </div>
-      
-    </div>
-    
-    
-    <div class="row">
       
       <div class="col-md-6 col-sm-12">
         <a class="note-link" href="/notes/minimum-effort-investing/">
@@ -286,10 +386,28 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'UA-16662292-3');
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
     </script>
   </body>
 </html>

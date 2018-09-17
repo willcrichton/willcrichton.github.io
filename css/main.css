@@ -715,7 +715,8 @@ table {
   background: #fafafa;
   padding: 10px;
   line-height: 1.3em;
-  font-size: 16px; }
+  font-size: 16px;
+  border: 2px solid #eee; }
   .note pre code {
     font-size: 16px;
     padding: 0; }
