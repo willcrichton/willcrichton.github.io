@@ -465,7 +465,7 @@ help: the following trait is implemented but not in scope, perhaps add a `use` f
    |
 </code></pre></div></div>
 
-<p>Method resolution for traits has two steps: first the trait has to be imported (the <code class="highlighter-rouge">use</code> keyword) into the current scope, and then the type system has to resolve the name to the trait. In the above example, this will work:</p>
+<p>Method resolution for traits has two steps: first the trait has to be imported (the <code class="highlighter-rouge">use</code> keyword) into the current scope, and then the type system has to resolve the method name to the implementation of a corresponding trait. In the above example, this will work:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">point</span><span class="p">::{</span><span class="n">Point</span><span class="p">,</span> <span class="nb">Add</span><span class="p">};</span>
 
@@ -515,11 +515,11 @@ help: the following trait is implemented but not in scope, perhaps add a `use` f
 
 <p>In order to resolve <code class="highlighter-rouge">add</code>, the compiler has to prove that <code class="highlighter-rouge">i32: Add</code> (i.e. there exists something that implements <code class="highlighter-rouge">Add</code> for <code class="highlighter-rouge">i32</code>). To solve a name resolution problem this complex, Rust internally has an <a href="http://smallcultfollowing.com/babysteps/blog/2017/01/26/lowering-rust-traits-to-logic/">entire logic programming language</a> dedicated to it.</p>
 
-<p>An important constraint on this problem is that two traits are not allowed even possibly implement the same method for the same data type. <a href="http://smallcultfollowing.com/babysteps/blog/2015/01/14/little-orphan-impls/">Little Orphan Impls</a> covers the gory details here, but the key idea is that Rust wants to ensure that importing a crate or a type doesn’t suddenly cause your program to change because you’re accidentally using a different trait implementation than before.</p>
+<p>An important constraint on this problem is that two traits are not allowed to possibly implement the same method for the same data type. <a href="http://smallcultfollowing.com/babysteps/blog/2015/01/14/little-orphan-impls/">Little Orphan Impls</a> covers the gory details here, but the key idea is that Rust wants to ensure that importing a crate or a type doesn’t suddenly cause your program to change because you’re accidentally using a different trait implementation than before.</p>
 
 <p>However, this isn’t ideal because it can be useful to have more “general” implementations of a method for every type, and more “specific” implementations of a method for a few types, e.g. a general vs. customized <code class="highlighter-rouge">to_string</code> method. Hence, a major project in the Rust pipeline is <em>trait specialization</em>, as detailed in <a href="http://aturon.github.io/2018/04/05/sound-specialization/">Sound and ergonomic specialization for Rust</a>. The challenge is to determine what makes a method “specific” vs. “general,” which is still being debated in the community.</p>
 
-<p>Overall, Rust’s approach to method resolution is trying to implement a maximally flexible means of associating functionality to data, and approaching a “do what I mean” algorithm for resolving methods. The trade off is the enormous complexity in the trait resolution algorithm, and the extent to which that complexity is passed on to the user instead of hidden in the compiler.</p>
+<p>Overall, Rust’s approach to method resolution is trying to implement a maximally flexible means of associating functionality to data, and approaching a “do what I mean” algorithm for resolving methods. The trade off is the complexity in the trait resolution algorithm, and the extent to which that complexity is passed on to the user instead of hidden in the compiler.</p>
 
 <h2 id="5-specificity">5. Specificity</h2>
 
