@@ -162,11 +162,11 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>However, it turned out that writing schedules is hard, so my colleague Ravi set out to write an auto-scheduler, culminating in <a href="https://dl.acm.org/citation.cfm?id=2925952">Automatically Scheduling Halide Image Processing Pipelines</a> (SIGGRAPH 2017). To evaluate whether his automatic scheduling algorithm was any good, he ran a study to compare it against the hand-crafted schedules of expert Halide users. Importantly, he measured not just the max speed of their best schedule, but how long it took them to get there. As you can see in the figure, he showed that the two expert programmers took hours to get close to the performance that he could get instantly.</p>
+<p>It turned out that writing schedules is hard, so my colleague Ravi set out to write an auto-scheduler, culminating in <a href="https://dl.acm.org/citation.cfm?id=2925952">Automatically Scheduling Halide Image Processing Pipelines</a> (SIGGRAPH 2017). To evaluate whether his automatic scheduling algorithm was any good, he ran a study to compare it against the hand-crafted schedules of expert Halide users. Importantly, he measured not just the max speed of their best schedule, but how long it took them to get there. As you can see in the figure, he showed that the two expert programmers took hours to get close to the performance that he could get instantly.</p>
 
 <p><img src="/images/assets/pl-benchmarks.png" alt="" /></p>
 
-<p>The moral of the story is that I think this kind of combined benchmark/user-study could tell us a lot more about the utility of high-performance programming languages than just highly-optimized benchmarks. On one hand, I suspect that it probably takes a decent amount of effort to make a program written in a low-level language much faster than a high-level one with an optimized runtime. On the other hand, when performance <em>really</em> matters, it will probably take less time to maximize the performance of a low-level program with strict control of the hardware than a high-level program at the mercy of a JIT.</p>
+<p>The moral of the story is that I think this kind of combined benchmark/user-study could tell us a lot more about the utility of programming languages than just highly-optimized benchmarks. On one hand, I suspect that it probably takes a decent amount of effort to make a program written in a low-level language <em>that</em> much faster than a high-level one with an optimized runtime. On the other hand, when performance <em>really</em> matters, it will probably take less time to maximize the performance of a low-level program with strict control of the hardware than a high-level program at the mercy of a JIT.</p>
 
 </div>
 
