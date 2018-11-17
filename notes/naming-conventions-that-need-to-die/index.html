@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="Names are an important tool of thought. They provide a loose, lightweight way to manage and structure knowledge. However, bad names inhibit learning and impede progress. We should root out and destroy the processes that leads to bad names.">
+    
+    
+    <title>
+      
+      Naming Conventions That Need to Die | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\brc}[1]{\{{#1}\}}
+
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\rec}[3]{\msf{rec}(#1; ~ x.y.#2)(#3)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+
+      % Typed lambda calculus - types
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wblockr}[2]{\msf{block}~{#1}~{#2}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[3]{\msf{label}_{#1}~\{#2\}~{#3}}
+      \newcommand{\wframe}[1]{\msf{frame}~{#1}}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[2]{\msf{breaking}_{#1}~{#2}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}~{#1};~\msf{mem}~{#2};~\msf{locals}~{#3};~\msf{stack}~{#4};~\msf{instrs}~{#5}\}}
+      \newcommand{\wfunc}[3]{\{\msf{params}~{#1};~\msf{locals}~{#2};~\msf{body}~{#3}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}~{#1}\}}
+
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      \newcommand{\semii}[3]{{#1};~{#2};~{#3}}
+      \newcommand{\semiii}[4]{{#1};~{#2};~{#3};~{#4}}
+      \newcommand{\semiiii}[5]{{#1};~{#2};~{#3};~{#4};~{#5}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Naming Conventions That Need to Die
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    November 17, 2018
+  </div>
+  <div class="abstract">Names are an important tool of thought. They provide a loose, lightweight way to manage and structure knowledge. However, bad names inhibit learning and impede progress. We should root out and destroy the processes that leads to bad names.</div>
+  <h2 id="1-inventors">1. Inventors.</h2>
+
+<p>This one is first, because it is the most widespread disease afflicting the naming process in science and math.</p>
+
+<ul>
+  <li><strong><a href="https://en.wikipedia.org/wiki/Category:Inequalities">Inequalities</a></strong>: Cauchy-Schwartz inequality, Grothendieck inequality, Lubell–Yamamoto–Meshalkin inequality, etc.</li>
+  <li><strong><a href="https://en.wikipedia.org/wiki/Category:Fundamental_constants">Constants</a></strong>: planck constant, Avogadro constant, Boltzmann constant, etc.</li>
+  <li><strong><a href="https://en.wikipedia.org/wiki/List_of_theorems">Theorems</a></strong>: just scroll through the linked page.</li>
+  <li><strong><a href="https://en.wikipedia.org/wiki/List_of_probability_distributions">Distributions</a></strong>: Bernoulli distribution, Poisson distribution, Gaussian distribution, etc.</li>
+  <li>Misc: Jacobian matrices, Lagrange multipliers, Markov chains (and Markov chain Monte Carlo), etc.</li>
+</ul>
+
+<p>Look, I’m all for recognizing the people who make contributions to math and science. But <strong>don’t let them name their discoveries after themselves.</strong> That is personal greed at the expense of every person thereafter who needs to use the created/discovered concept. We already have Nobel Prizes, Turing Awards, etc. to commemorate these achivements.</p>
+
+<p>A good name should communicate the essence of an underlying idea, usually through a few carefully-picked nouns and adjectives. For example, breadth-first search and depth-first search are wonderfully informative. If we called them “<a href="https://en.wikipedia.org/wiki/Konrad_Zuse">Zuse’s</a> method” and the “<a href="https://en.wikipedia.org/wiki/Tr%C3%A9maux_tree">Tremaux</a> approch”, that communicates literally nothing about the methods unless I’m already a science historian who knows the respective fields of each inventor.</p>
+
+<p>Recently, I’ve been re-learning a lot of probability basics, and I’m constantly reminded how many missed opportunities we have to communicate intuitions through names. A positive example is the Gaussian distribution—names like “normal distribution” convey its natural utility (in describing many natural phenomena), and “bell curve” convey its shape. By contrast, “Dirichlet distribution” is uninformative, but with no alternatives. How about “sum-to-1 distribution?” Or for the beta distribution, how about “unit-bounded distribution?” Or Bernoulli distribution as “coin-flip distribution?”</p>
+
+<p>More broadly, knowledge should be constructed compositionally. If we only have to remember a few core pieces, and then can understand concepts by combining them in different ways, that’s a pretty efficient process for our brains. By contrast, inventor-based names labels concepts with (effectively) a random, unique identifier that we just have to remember, adding to a long list of completely unrelated identifiers. That knowledge is unstructurable, as the names “Maxwell”, “Bernoulli”, “Jacobian” have no common basis, no shared terms, no reasonable decomposition.</p>
+
+<p>So please, don’t name stuff after yourself.</p>
+
+<h2 id="2-numbers">2. Numbers.</h2>
+
+<p>Few names make my blood boil as much as “Type 1 error” and “Type 2 error.” Rarely in the history of human progress have such awful names been adopted so widely than in hypothesis testing. Imagine, if you will, a programmer submitting this code for review:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="n">MemoryError</span> <span class="p">{</span>
+  <span class="n">Type1</span><span class="p">,</span>
+  <span class="n">Type2</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">malloc_safe</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;*</span><span class="k">mut</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">MemoryError</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="nf">system_out_of_memory</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nf">Err</span><span class="p">(</span><span class="nn">Error</span><span class="p">::</span><span class="n">Type1</span><span class="p">)</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="nf">Err</span><span class="p">(</span><span class="nn">Error</span><span class="p">::</span><span class="n">Type2</span><span class="p">)</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nf">Ok</span><span class="p">(</span><span class="nf">malloc</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This person would get laughed out of the building. Why would you call these <code class="highlighter-rouge">Type1</code> and <code class="highlighter-rouge">Type2</code> when they clearly could be <code class="highlighter-rouge">OutOfMemory</code> and <code class="highlighter-rouge">ZeroSizeAlloc</code>? Yet somehow, when <a href="https://en.wikipedia.org/wiki/Type_I_and_type_II_errors#Etymology">eminent statisticians do this</a>, that becomes precedent for a century. Imagine how many statistics students have tried to memory what “type 1” and “type 2” mean, spending completely wasted time mapping useless terms to their actual meaning.</p>
+
+<p><strong>Just use false positive and false negative.</strong> This is a perfect example of how a compositional basis for terminology (i.e. (false | true) (positive | negative)) lower the barrier to reconstructing the term’s meaning. Even still, I usually have to pause and think when someone says “false negative” to both understand what kind of error, and how to contextualize it in their use case. But if they said “type 1 error”, I would be completely lost.</p>
+
+<p>Dishonorable mention here to <a href="https://en.wikipedia.org/wiki/Quadrant_(plane_geometry)">graph quadrants</a>. Is “top right” that hard? Hilarious mention to <a href="https://en.wikipedia.org/wiki/Separation_axiom">separations axioms</a> (thanks <a href="https://twitter.com/twitchard/status/1063911697667231746">@twitchard</a>) whose indexing includes <script type="math/tex">T_{2\frac{1}{2}}</script>.</p>
+
+<h2 id="3-random-words">3. Random words.</h2>
+
+<p>Can you imagine putting so little thought into naming something that your name is indistinguishable from the output of a random name generator? Would you do that to your company? Your child?</p>
+
+<p>Yet, we do it to software all the time. I invite you to browse the list of <a href="https://projects.apache.org/projects.html">Apache Projects</a>. Pig, Flink, Spark, Hive, Arrow, Kafka. If humans cannot pass a <a href="https://pixelastic.github.io/pokemonorbigdata/">Pokemon-equivalent Turing test</a>, your system is poorly named.</p>
+
+<p>Here, I think the big danger is exclusion. If you’re having a conversation with someone about big data technologies for your company, and your CTO wants to listen in, phrases like “yeah we just have to hook up our Airflow into GCP Dataflow with a Kafka broker so our logs can get Flumed” will completely exclude anyone not in the know from the conversation. By contrast, if you use phrases like “message queue”, “cache”, “data processor,” someone can get the gist of the conversation without knowing the specific technologies.</p>
+
+<p>To my understanding, this also happens in government (and in particular military) a lot with acronyms. An acronym is effectively the same as a random word, so you have to be in-the-know to hold a conversation with others in the department.</p>
+
+<h2 id="4-historical-accidents">4. Historical accidents.</h2>
+
+<p>Accidents happen. We pick a bad name in the heat of the moment, and then are forced to live with that mistake for reasons of backwards compatibility. However, we should clearly identify such mistakes, and discourage their usage where possible in the future. Regardless of what you think about the <a href="https://github.com/antirez/redis/issues/5335">redis debate</a>, new systems today probably shouldn’t use the term “master-slave” when plenty of other options exist out there.</p>
+
+<p>Yet, one phenomenon I have never understood is the propensity of Lisp users to use <a href="https://en.wikipedia.org/wiki/CAR_and_CDR">car and cdr</a>. Head and tail. Left and right. There are many sensible, well-known ways to access elements of a pair or a list. The only reason Lisp originally adopted “car” and “cdr” is due to the design of 1950s (!) hardware:</p>
+
+<blockquote>
+  <p>The 704 and its successors have a 36-bit word length and a 15-bit address space. These computers had two instruction formats, one of which, the Type A, had a short, 3-bit, operation code prefix and two 15-bit fields separated by a 3-bit tag. The first 15-bit field was the operand address and the second held a decrement or count. The tag specified one of three index registers. Indexing was a subtractive process on the 704, hence the value to be loaded into an index register was called a “decrement”. The 704 hardware had special instructions for accessing the address and decrement fields in a word. As a result it was efficient to use those two fields to store within a single word the two pointers needed for a list. Thus, “CAR” is “Contents of the Address part of the Register”. The term “register” in this context refers to “memory location”.</p>
+</blockquote>
+
+<p>Today? Racket’s <a href="https://docs.racket-lang.org/htdp-langs/beginner.html">Beginning Student</a> language still proudly uses <code class="highlighter-rouge">car</code> and <code class="highlighter-rouge">cdr</code>… for beginning students. (Including the many wonderful derivations: <a href="https://docs.racket-lang.org/htdp-langs/beginner.html#%28def._htdp-beginner._%28%28lib._lang%2Fhtdp-beginner..rkt%29._caaar%29%29"><code class="highlighter-rouge">caaar</code></a>, <a href="https://docs.racket-lang.org/htdp-langs/beginner.html#%28def._htdp-beginner._%28%28lib._lang%2Fhtdp-beginner..rkt%29._cadddr%29%29"><code class="highlighter-rouge">cadddr</code></a>, <a href="https://docs.racket-lang.org/htdp-langs/beginner.html#%28def._htdp-beginner._%28%28lib._lang%2Fhtdp-beginner..rkt%29._cdddr%29%29"><code class="highlighter-rouge">cdddr</code></a>, and so forth.) This is recommended usage of the language. If I had to guess, I think usage of these words persists because it forms and in-group of Lisp programmers “in the know” who use this archaic terminology. That’s why they can still make jokes like <a href="http://cs.gettysburg.edu/~tneller/cs341/carcdr/IMG_4849.JPG">my other car is a cdr</a>.</p>
+
+<p>This is, of course, bad. It’s a barrier to entry for novices, it harms readability for people porting over knowledge from other languages, and it generally encourages a culture of bad names. Let’s learn from our mistakes and make names more accessible, memorable, and understandable to everyone.</p>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>
