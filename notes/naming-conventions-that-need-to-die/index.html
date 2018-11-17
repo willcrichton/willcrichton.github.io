@@ -168,9 +168,9 @@
 
 <span class="k">fn</span> <span class="nf">malloc_safe</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;*</span><span class="k">mut</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">MemoryError</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="k">if</span> <span class="nf">system_out_of_memory</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nf">Err</span><span class="p">(</span><span class="nn">Error</span><span class="p">::</span><span class="n">Type1</span><span class="p">)</span>
+    <span class="nf">Err</span><span class="p">(</span><span class="nn">MemoryError</span><span class="p">::</span><span class="n">Type1</span><span class="p">)</span>
   <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
-    <span class="nf">Err</span><span class="p">(</span><span class="nn">Error</span><span class="p">::</span><span class="n">Type2</span><span class="p">)</span>
+    <span class="nf">Err</span><span class="p">(</span><span class="nn">MemoryError</span><span class="p">::</span><span class="n">Type2</span><span class="p">)</span>
   <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
     <span class="nf">Ok</span><span class="p">(</span><span class="nf">malloc</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
   <span class="p">}</span>
