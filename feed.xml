@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.2">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2018-11-17T22:58:45+00:00</updated><id>/</id><title type="html">Will Crichton</title><entry><title type="html">Naming Conventions That Need to Die</title><link href="/notes/naming-conventions-that-need-to-die/" rel="alternate" type="text/html" title="Naming Conventions That Need to Die" /><published>2018-11-17T00:00:00+00:00</published><updated>2018-11-17T00:00:00+00:00</updated><id>/notes/naming-conventions-that-need-to-die</id><content type="html" xml:base="/notes/naming-conventions-that-need-to-die/">&lt;h2 id=&quot;1-inventors&quot;&gt;1. Inventors.&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.2">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2018-11-17T23:00:48+00:00</updated><id>/</id><title type="html">Will Crichton</title><entry><title type="html">Naming Conventions That Need to Die</title><link href="/notes/naming-conventions-that-need-to-die/" rel="alternate" type="text/html" title="Naming Conventions That Need to Die" /><published>2018-11-17T00:00:00+00:00</published><updated>2018-11-17T00:00:00+00:00</updated><id>/notes/naming-conventions-that-need-to-die</id><content type="html" xml:base="/notes/naming-conventions-that-need-to-die/">&lt;h2 id=&quot;1-inventors&quot;&gt;1. Inventors.&lt;/h2&gt;
 
 &lt;p&gt;This one is first, because it is the most widespread disease afflicting the naming process in science and math.&lt;/p&gt;
 
@@ -44,7 +44,7 @@
 
 &lt;p&gt;&lt;strong&gt;Just use false positive and false negative.&lt;/strong&gt; This is a perfect example of how a compositional basis for terminology (i.e. (false | true) (positive | negative)) lower the barrier to reconstructing the term’s meaning. Even still, I usually have to pause and think when someone says “false negative” to both understand what kind of error, and how to contextualize it in their use case. But if they said “type 1 error”, I would be completely lost.&lt;/p&gt;
 
-&lt;p&gt;Dishonorable mention here to &lt;a href=&quot;https://en.wikipedia.org/wiki/Quadrant_(plane_geometry)&quot;&gt;graph quadrants&lt;/a&gt;. Is “top right” that hard? Hilarious mention to &lt;a href=&quot;https://en.wikipedia.org/wiki/Separation_axiom&quot;&gt;separations axioms&lt;/a&gt; (thanks &lt;a href=&quot;https://twitter.com/twitchard/status/1063911697667231746&quot;&gt;@twitchard&lt;/a&gt;) whose indexing includes &lt;script type=&quot;math/tex&quot;&gt;T_{2\frac{1}{2}}&lt;/script&gt;.&lt;/p&gt;
+&lt;p&gt;Dishonorable mention here to &lt;a href=&quot;https://en.wikipedia.org/wiki/Quadrant_(plane_geometry)&quot;&gt;graph quadrants&lt;/a&gt;. Is “top right” that hard? Hilarious mention to &lt;a href=&quot;https://en.wikipedia.org/wiki/Separation_axiom&quot;&gt;separation axioms&lt;/a&gt; (thanks &lt;a href=&quot;https://twitter.com/twitchard/status/1063911697667231746&quot;&gt;@twitchard&lt;/a&gt;) whose indexing includes &lt;script type=&quot;math/tex&quot;&gt;T_{2\frac{1}{2}}&lt;/script&gt;.&lt;/p&gt;
 
 &lt;h2 id=&quot;3-random-words&quot;&gt;3. Random words.&lt;/h2&gt;
 
@@ -54,7 +54,7 @@
 
 &lt;p&gt;Here, I think the big danger is exclusion. If you’re having a conversation with someone about big data technologies for your company, and your CTO wants to listen in, phrases like “yeah we just have to hook up our Airflow into GCP Dataflow with a Kafka broker so our logs can get Flumed” will completely exclude anyone not in the know from the conversation. By contrast, if you use phrases like “message queue”, “cache”, “data processor,” someone can get the gist of the conversation without knowing the specific technologies.&lt;/p&gt;
 
-&lt;p&gt;To my understanding, this also happens in government (and in particular military) a lot with acronyms. An acronym is effectively the same as a random word, so you have to be in-the-know to hold a conversation with others in the department.&lt;/p&gt;
+&lt;p&gt;To my understanding, this also happens in government (and in particular the military) a lot with acronyms. An acronym is effectively the same as a random word, so you have to be in-the-know to hold a conversation with others in the department.&lt;/p&gt;
 
 &lt;h2 id=&quot;4-historical-accidents&quot;&gt;4. Historical accidents.&lt;/h2&gt;
 
