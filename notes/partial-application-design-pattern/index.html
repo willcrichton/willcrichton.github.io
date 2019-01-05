@@ -213,7 +213,7 @@
 
 <p>For the <code class="highlighter-rouge">select</code> function, the database connection is going to change the <em>least</em> frequently. We usually connect to a database and run many queries. Then the table is next least frequent to change, as we may select multiple columns from a table (as in this example). So we can provide our parameters in order, and now the user can iteratively whittle down their helper functions until they need the minimal number of arguments to get the job done. How concise!</p>
 
-<p>Two interesting nuances here. First, if we use named arguments (e.g. <code class="highlighter-rouge">table</code> and <code class="highlighter-rouge">column</code> above), we aren’t restricted to currying in the left-to-right ordering. For example, we could curry on the column and leave the table unspecified:</p>
+<p>Two interesting nuances here. First, if we use named arguments (e.g. <code class="highlighter-rouge">table</code> and <code class="highlighter-rouge">column</code> above), we aren’t restricted to currying in the left-to-right ordering. For example, we could curry on the column and leave the table unspecified without changing the original function definition:</p>
 
 <div class="language-ocaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">select_firstname</span> <span class="o">:</span> <span class="n">table</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">row</span> <span class="kt">list</span> <span class="o">=</span>
   <span class="nn">Db</span><span class="p">.</span><span class="n">select</span> <span class="n">c</span> <span class="o">~</span><span class="n">column</span><span class="o">:</span><span class="s2">"firstname"</span> <span class="k">in</span>
@@ -285,7 +285,7 @@
 <span class="nn">List</span><span class="p">.</span><span class="n">filter</span> <span class="o">:</span> <span class="p">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span>
 </code></pre></div></div>
 
-<p>Note that the transforming functions come first, and the target list comes last (right before the output). With our API ordered like this, we can then rewrite the inside-out example:</p>
+<p>Note that the transforming functions come first, and the target list (<code class="highlighter-rouge">'a list</code>) comes last (right before the output). With our API ordered like this, we can then rewrite the inside-out example:</p>
 
 <div class="language-ocaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">l</span><span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">;</span> <span class="mi">2</span><span class="p">;</span> <span class="mi">3</span><span class="p">;</span> <span class="mi">4</span><span class="p">;</span> <span class="mi">5</span><span class="p">]</span> <span class="k">in</span>
 
