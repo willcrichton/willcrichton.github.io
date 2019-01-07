@@ -114,11 +114,9 @@ class Image extends React.Component {
         }
 
         window.location = `/wedding/#${this.props.href}`;
-      }} ></a-image>;
+      }}></a-image>;
   }
 }
-
-
 
 let Sky = (props) => {
   return <a-sky src={skies[props.skyName].path} radius={rad+25} rotation={skies[props.skyName].rotation} {...props}></a-sky>;
@@ -195,7 +193,7 @@ let Schedule = () => {
 
       <a-entity  {...polarToCart(150, 95, rad+15)} geometry="primitive: plane; width: 50; height: 20" material="shader:flat; opacity: .5; color: #FFF6F6" />
       <Text {...polarToCart(150, 95,rad+10)} noGeom={true} value={
-          `All gifts welcome!`
+          `Details TBA`
       } width="100" align="center" color="black" />
       <Text {...polarToCart(150, 85,rad+15)} value="Gifts" width="130" align="center" color="black" />
 
