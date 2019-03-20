@@ -234,8 +234,8 @@
 <span class="n">db</span> <span class="o">=</span> <span class="n">Database</span><span class="p">()</span>
 <span class="n">firstnames</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'users'</span><span class="p">,</span> <span class="s">'firstname'</span><span class="p">)</span>
 
-<span class="c"># Explicit currying by creating new functions</span>
-<span class="n">selectuser</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">column</span><span class="p">:</span> <span class="n">db</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'users'</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
+<span class="c1"># Explicit currying by creating new functions
+</span><span class="n">selectuser</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">column</span><span class="p">:</span> <span class="n">db</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'users'</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
 <span class="n">lastnames</span> <span class="o">=</span> <span class="n">selectuser</span><span class="p">(</span><span class="s">"lastname"</span><span class="p">)</span>
 </code></pre></div></div>
 

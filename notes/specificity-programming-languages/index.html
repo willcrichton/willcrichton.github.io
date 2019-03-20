@@ -339,8 +339,8 @@ def main() {
   <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
 
 <span class="n">a</span> <span class="o">=</span> <span class="n">A</span><span class="p">()</span>
-<span class="n">a</span><span class="o">.</span><span class="n">save</span><span class="p">()</span> <span class="c"># Resolves to A.save(a)</span>
-</code></pre></div></div>
+<span class="n">a</span><span class="o">.</span><span class="n">save</span><span class="p">()</span> <span class="c1"># Resolves to A.save(a)
+</span></code></pre></div></div>
 
 <p>Here, because <code class="highlighter-rouge">a</code> is of type <code class="highlighter-rouge">A</code>, when we try to call functions on <code class="highlighter-rouge">a</code>, the runtime can determine that the <code class="highlighter-rouge">a.save</code> function should refer to <code class="highlighter-rouge">A.save</code>. Object-oriented languages also support inheritance, which complicates name resolution:</p>
 
@@ -352,9 +352,9 @@ def main() {
   <span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
 
 <span class="n">b</span> <span class="o">=</span> <span class="n">B</span><span class="p">()</span>
-<span class="n">b</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span> <span class="c"># resolves to B.to_string(b)</span>
-<span class="n">b</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>      <span class="c"># resolves to A.save(b)</span>
-</code></pre></div></div>
+<span class="n">b</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span> <span class="c1"># resolves to B.to_string(b)
+</span><span class="n">b</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>      <span class="c1"># resolves to A.save(b)
+</span></code></pre></div></div>
 
 <p>Conceptually, single-inheritance represents a stack of methods. When asking for a particular method, resolving the method involves walking the stack of methods for the closest declaration<sup id="fnref:3"><a href="#fn:3" class="footnote">4</a></sup> (this should sound familiar). Here, <code class="highlighter-rouge">to_string</code> resolves to the closest declaration in <code class="highlighter-rouge">B</code>, while <code class="highlighter-rouge">save</code> resolves to the closest declaration in <code class="highlighter-rouge">A</code>.</p>
 

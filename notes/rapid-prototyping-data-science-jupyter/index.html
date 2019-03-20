@@ -169,14 +169,14 @@
 
 <p>Essentially, we took our existing web UI and compressed it into a <a href="https://github.com/jupyter-widgets/ipywidgets/">Jupyter widget</a>. We added a thin layer to allow values to pass back and forth between the Python runtime and the Javascript widget, and that was it! Our new API looks roughly like:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">face_list</span> <span class="o">=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>                 <span class="c"># Get a list of faces to display</span>
-<span class="n">widget</span> <span class="o">=</span> <span class="n">esper_widget</span><span class="p">(</span><span class="n">face_list</span><span class="p">)</span>  <span class="c"># Create a Python widget to display faces</span>
-<span class="n">widget</span>                            <span class="c"># Ask Jupyter to display the widget</span>
-
-<span class="c">### code cell boundary ###</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">selected</span><span class="p">)</span>            <span class="c"># Print the faces selected in the</span>
-</code></pre></div></div>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">face_list</span> <span class="o">=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>                 <span class="c1"># Get a list of faces to display
+</span><span class="n">widget</span> <span class="o">=</span> <span class="n">esper_widget</span><span class="p">(</span><span class="n">face_list</span><span class="p">)</span>  <span class="c1"># Create a Python widget to display faces
+</span><span class="n">widget</span>                            <span class="c1"># Ask Jupyter to display the widget
+</span>
+<span class="c1">### code cell boundary ###
+</span>
+<span class="k">print</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">selected</span><span class="p">)</span>            <span class="c1"># Print the faces selected in the
+</span></code></pre></div></div>
 
 <p>With this API, we’ve been able to start rapidly prototyping the sort of workflows described above. The cool thing is that we’re not just prototyping purely data processing Python pipelines, but we can also capture human-in-the-loop pipelines which involve manual input.</p>
 

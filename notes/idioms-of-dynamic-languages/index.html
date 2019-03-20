@@ -147,12 +147,12 @@
 
 <p>In dynamic languages, it’s common to have data structures like dictionaries that mix and match values of different types. This is particularly common when dealing with data types like JSON, or any data where it’s hard to predict ahead of time what the data format will be.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Python</span>
-<span class="n">my_dict</span> <span class="o">=</span> <span class="p">{}</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Python
+</span><span class="n">my_dict</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">my_dict</span><span class="p">[</span><span class="mi">100</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">my_dict</span><span class="p">[</span><span class="mi">200</span><span class="p">]</span> <span class="o">=</span> <span class="s">'Hello world!'</span>
-<span class="c"># No problem!</span>
-</code></pre></div></div>
+<span class="c1"># No problem!
+</span></code></pre></div></div>
 
 <p>We can use two axes to describe the kinds of behavior occuring here and how it relates to static languages. The first is static vs. dynamic, or whether the size/shape of the data structure changes at runtime. For example, if we have:</p>
 
@@ -282,10 +282,10 @@
 
 <p>When writing polymorphic functions, i.e. functions that could apply to many different types, it’s common to specify a function over types that provide a specific set of functionality. For example:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Python</span>
-<span class="k">def</span> <span class="nf">print_list</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Python
+</span><span class="k">def</span> <span class="nf">print_list</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
     <span class="n">formatted_elements</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">]</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">'[{}]'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">','</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">formatted_elements</span><span class="p">)))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'[{}]'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="s">','</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">formatted_elements</span><span class="p">)))</span>
 </code></pre></div></div>
 
 <p>This function is implicitly defined over all lists (or technically iterables) that contain elements which can be converted to a string, using <code class="highlighter-rouge">str</code>. (This idea is also called “duck typing”, although I never found the term very informative.)</p>
@@ -372,13 +372,13 @@
 
 <p>In the Python ecosystem, for example, reflection is used to <a href="https://docs.python.org/3/library/pickle.html">serialize arbitrary objects</a>, <a href="https://docs.djangoproject.com/en/2.0/topics/db/models/">generate SQL tables from class definitions</a>, and <a href="https://docs.python.org/3/library/dataclasses.html">create comparison and equality checks</a>. Importantly, all of these tasks are accomplished by simple, intra-linguistic mechanisms, i.e. all you need is a Python interpreter to use these libraries. No additional parsers, AST libraries, etc. need to be downloaded or run external to the language runtime. For example, to print out all the methods of a class:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Python</span>
-<span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Python
+</span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
 
 <span class="k">print</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">Foo</span><span class="p">(),</span> <span class="n">predicate</span><span class="o">=</span><span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">))</span>
-<span class="c"># [('bar', &lt;bound method Foo.bar of &lt;__main__.Foo object at 0x10320f0b8&gt;&gt;)]</span>
-</code></pre></div></div>
+<span class="c1"># [('bar', &lt;bound method Foo.bar of &lt;__main__.Foo object at 0x10320f0b8&gt;&gt;)]
+</span></code></pre></div></div>
 
 <p>In static languages with limited or zero reflection, these tasks are instead performed by metaprogramming mechanisms. In Java for example, tools like IDEs are frequently used to code generate class definitions, getter/setter methods, and more. Other static languages use programmable macro systems to define a code generation pre-compilation step, e.g. the C preprocessor for C/C++, <code class="highlighter-rouge">macro_rules</code>/procedural macros for Rust, PPX for OCaml, and Template Haskell for Haskell. For example, to create a default method for turning an object into a string for debugging in Rust:</p>
 
@@ -407,8 +407,8 @@
 
 <p>Exceptions are still worth talking about because not all static languages have them, and it’s important to understand how critical they are to the dynamic programming style. Generally speaking, much of the productivity gain of dynamic languages could boil down to “not forcing the programmer to think about an issue until it arises,” or in the Python community, “it’s better to ask forgiveness than permission.” For example, in the following snippet:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Python</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'test.txt'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Python
+</span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'test.txt'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="k">print</span><span class="p">(</span><span class="mi">10</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
 </code></pre></div></div>
@@ -461,11 +461,11 @@
 
 <p>During the process of developing a program, it’s often in an incomplete or inconsistent state. A programmer naturally develops a program one piece at a time, leaving the other pieces as stubs or comments. For example, if I wrote a program to divide each element of a list by a number, that might start like:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Python</span>
-<span class="k">def</span> <span class="nf">divide_list</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Python
+</span><span class="k">def</span> <span class="nf">divide_list</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="c"># do something?</span>
-        <span class="k">pass</span>
+        <span class="c1"># do something?
+</span>        <span class="k">pass</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="o">/</span> <span class="n">n</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">]</span>
 

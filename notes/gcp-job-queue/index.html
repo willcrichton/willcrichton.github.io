@@ -174,13 +174,13 @@ s6eS8cmwg_Q
 
 <p>For a baseline, we can write a Python script that will download the files just using our own computer. This and all following code is also available in the accompanying GitHub repository: <a href="https://github.com/willcrichton/gcp-job-queue">gcp-job-queue</a>. Make sure to <code class="highlighter-rouge">pip install -r requirements.txt</code> using the requirements provided in the repository.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># local.py</span>
-<span class="kn">import</span> <span class="nn">subprocess</span> <span class="k">as</span> <span class="n">sp</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># local.py
+</span><span class="kn">import</span> <span class="nn">subprocess</span> <span class="k">as</span> <span class="n">sp</span>
 
 <span class="k">def</span> <span class="nf">download_video</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
     <span class="n">sp</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span>
         <span class="s">'youtube-dl -f mp4 "https://youtube.com/watch?v={id}" -o {id}.mp4'</span>
-        <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">),</span>
+        <span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">),</span>
         <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'youtube-ids'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -253,8 +253,8 @@ s6eS8cmwg_Q
 
 <p>A subscription is an individual message queue. When someone publishes a message to a topic, every subscription has the message enqueued onto its individual queue. Here, we only need one topic for our computation, and we only need one subscription, since every worker should be pulling work from the same queue. Here’s an example that shows how to use the Python API to push/pull messages using the Pub/Sub queue you created:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># pubsub_example.py</span>
-<span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">pubsub</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># pubsub_example.py
+</span><span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">pubsub</span>
 <span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">monitoring</span>
 <span class="kn">import</span> <span class="nn">time</span>
 
@@ -263,10 +263,10 @@ s6eS8cmwg_Q
 <span class="n">SUBSCRIPTION</span> <span class="o">=</span> <span class="s">'queue-example-sub'</span>
 
 
-<span class="c"># This is a dirty hack since Pub/Sub doesn't expose a method for determining</span>
-<span class="c"># if the queue is empty (to my knowledge). We have to use the metrics API which</span>
-<span class="c"># is only updated every minute. Hopefully someone from Google can clarify!</span>
-<span class="k">def</span> <span class="nf">queue_empty</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+<span class="c1"># This is a dirty hack since Pub/Sub doesn't expose a method for determining
+# if the queue is empty (to my knowledge). We have to use the metrics API which
+# is only updated every minute. Hopefully someone from Google can clarify!
+</span><span class="k">def</span> <span class="nf">queue_empty</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
         <span class="s">'pubsub.googleapis.com/subscription/num_undelivered_messages'</span><span class="p">,</span>
         <span class="n">minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">as_dataframe</span><span class="p">()</span>
@@ -281,20 +281,20 @@ s6eS8cmwg_Q
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">monitoring</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">PROJECT</span><span class="p">)</span>
 
-    <span class="c"># Publishes the message 'Hello World'</span>
-    <span class="n">publisher</span> <span class="o">=</span> <span class="n">pubsub</span><span class="o">.</span><span class="n">PublisherClient</span><span class="p">()</span>
-    <span class="n">topic</span> <span class="o">=</span> <span class="s">'projects/{}/topics/{}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">,</span> <span class="n">TOPIC</span><span class="p">)</span>
+    <span class="c1"># Publishes the message 'Hello World'
+</span>    <span class="n">publisher</span> <span class="o">=</span> <span class="n">pubsub</span><span class="o">.</span><span class="n">PublisherClient</span><span class="p">()</span>
+    <span class="n">topic</span> <span class="o">=</span> <span class="s">'projects/{}/topics/{}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">,</span> <span class="n">TOPIC</span><span class="p">)</span>
     <span class="n">publisher</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="s">'Hello world!'</span><span class="p">)</span>
 
-    <span class="c"># Opens a connection to the message queue asynchronously</span>
-    <span class="n">subscriber</span> <span class="o">=</span> <span class="n">pubsub</span><span class="o">.</span><span class="n">SubscriberClient</span><span class="p">()</span>
-    <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriber</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">'projects/{}/subscriptions/{}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="c1"># Opens a connection to the message queue asynchronously
+</span>    <span class="n">subscriber</span> <span class="o">=</span> <span class="n">pubsub</span><span class="o">.</span><span class="n">SubscriberClient</span><span class="p">()</span>
+    <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriber</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">'projects/{}/subscriptions/{}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span>
         <span class="n">PROJECT</span><span class="p">,</span> <span class="n">SUBSCRIPTION</span><span class="p">))</span>
     <span class="n">subscription</span><span class="o">.</span><span class="nb">open</span><span class="p">(</span><span class="n">print_message</span><span class="p">)</span>
 
-    <span class="c"># Waits until the queue is empty to exit. See queue_empty for more</span>
-    <span class="c"># explanation.</span>
-    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+    <span class="c1"># Waits until the queue is empty to exit. See queue_empty for more
+</span>    <span class="c1"># explanation.
+</span>    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
     <span class="k">while</span> <span class="ow">not</span> <span class="n">queue_empty</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
         <span class="k">pass</span>
     <span class="n">subscription</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -332,8 +332,8 @@ s6eS8cmwg_Q
 <p>And, thankfully, with the system design we’ve chosen, we get fault tolerance for free due to a particular aspect of Pub/Sub. Recall that in the earlier example, when a worker receives a message, it has to acknowledge it:</p>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">print_message</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
     <span class="k">print</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-    <span class="n">message</span><span class="o">.</span><span class="n">ack</span><span class="p">()</span>  <span class="c"># &lt;- acknowledgement</span>
-</code></pre></div></div>
+    <span class="n">message</span><span class="o">.</span><span class="n">ack</span><span class="p">()</span>  <span class="c1"># &lt;- acknowledgement
+</span></code></pre></div></div>
 
 <p>The way Pub/Sub works is that if a worker pulls a message but does not acknowledge it, then the message will be re-queued after a fixed (but configurable) length of time. For our expensive computation, we want to wait to acknowledge the input (the message) until after the computation is complete. This ensures that if the worker dies in the middle of a computation, the message will be re-queued, and no input is lost.</p>
 
@@ -343,8 +343,8 @@ s6eS8cmwg_Q
 
 <p>Now all the resources are in place–we have our work queue and our cluster ready to go. Next, we need to change our original script to use the new Pub/Sub work queue. First, we need a new script <code class="highlighter-rouge">master.py</code> that we’ll run locally and will submit work into the work queue:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># master.py</span>
-<span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">pubsub</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># master.py
+</span><span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">pubsub</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="n">PROJECT</span> <span class="o">=</span> <span class="s">'wc-personal'</span>
@@ -356,7 +356,7 @@ s6eS8cmwg_Q
         <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()]</span>
 
     <span class="n">publisher</span> <span class="o">=</span> <span class="n">pubsub</span><span class="o">.</span><span class="n">PublisherClient</span><span class="p">()</span>
-    <span class="n">topic</span> <span class="o">=</span> <span class="s">'projects/{}/topics/{}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">,</span> <span class="n">TOPIC</span><span class="p">)</span>
+    <span class="n">topic</span> <span class="o">=</span> <span class="s">'projects/{}/topics/{}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">,</span> <span class="n">TOPIC</span><span class="p">)</span>
     <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">ids</span><span class="p">):</span>
         <span class="n">publisher</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
 
@@ -372,8 +372,8 @@ s6eS8cmwg_Q
 
 <p>Once it completes, your queue has been filled to the brim with IDs ready for downloading. Next, we need to create the script we’ll run on each worker:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># worker.py</span>
-<span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">pubsub</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># worker.py
+</span><span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">pubsub</span>
 <span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">monitoring</span>
 <span class="kn">import</span> <span class="nn">subprocess</span> <span class="k">as</span> <span class="n">sp</span>
 <span class="kn">import</span> <span class="nn">time</span>
@@ -394,26 +394,26 @@ s6eS8cmwg_Q
 <span class="k">def</span> <span class="nf">download_video</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
     <span class="n">sp</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span>
         <span class="s">'youtube-dl -f mp4 "http://youtube.com/watch?v={id}" -o {id}.mp4 --no-cache-dir'</span>
-        <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">),</span>
+        <span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">),</span>
         <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">copy_to_gcs</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
-    <span class="n">sp</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s">'gsutil mv {}.mp4 gs://{}/tmp/videos/'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">BUCKET</span><span class="p">),</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">sp</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s">'gsutil mv {}.mp4 gs://{}/tmp/videos/'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">BUCKET</span><span class="p">),</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">handle_message</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
     <span class="nb">id</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">data</span>
     <span class="n">download_video</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
-    <span class="c"># copy_to_gcs(id)</span>
-    <span class="n">message</span><span class="o">.</span><span class="n">ack</span><span class="p">()</span>
+    <span class="c1"># copy_to_gcs(id)
+</span>    <span class="n">message</span><span class="o">.</span><span class="n">ack</span><span class="p">()</span>
 
 
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">monitoring</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">PROJECT</span><span class="p">)</span>
 
     <span class="n">subscriber</span> <span class="o">=</span> <span class="n">pubsub</span><span class="o">.</span><span class="n">SubscriberClient</span><span class="p">()</span>
-    <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriber</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">'projects/{}/subscriptions/{}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriber</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">'projects/{}/subscriptions/{}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span>
         <span class="n">PROJECT</span><span class="p">,</span> <span class="n">SUBSCRIPTION</span><span class="p">))</span>
     <span class="n">subscription</span><span class="o">.</span><span class="nb">open</span><span class="p">(</span><span class="n">handle_message</span><span class="p">)</span>
 

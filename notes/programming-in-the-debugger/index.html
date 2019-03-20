@@ -141,16 +141,16 @@
 
 <p>However, after using Jupyter for a while, I’ve noticed that it has changed my programming process in a way more fundamental than simply inlining visualization of results. Specifically, <em class="hl">Jupyter enables programmers to edit their program while it is running.</em> Here’s a quick example. Let’s say I have some expensive computation (detect faces in a video) and I want to post-process the results (draw boxes on the faces). Normally, the development process would be, I write a first draft of the program:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## face.py</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">## face.py
+</span>
+<span class="c1"># Takes 1 minute
+</span><span class="n">video</span> <span class="o">=</span> <span class="n">load_video</span><span class="p">()</span>
 
-<span class="c"># Takes 1 minute</span>
-<span class="n">video</span> <span class="o">=</span> <span class="n">load_video</span><span class="p">()</span>
+<span class="c1"># Takes 20 minutes
+</span><span class="n">all_faces</span> <span class="o">=</span> <span class="n">detect_faces</span><span class="p">(</span><span class="n">video</span><span class="p">)</span>
 
-<span class="c"># Takes 20 minutes</span>
-<span class="n">all_faces</span> <span class="o">=</span> <span class="n">detect_faces</span><span class="p">(</span><span class="n">video</span><span class="p">)</span>
-
-<span class="c"># Takes 1 minute</span>
-<span class="k">for</span> <span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">frame_faces</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">video</span><span class="o">.</span><span class="n">frames</span><span class="p">(),</span> <span class="n">all_faces</span><span class="p">):</span>
+<span class="c1"># Takes 1 minute
+</span><span class="k">for</span> <span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">frame_faces</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">video</span><span class="o">.</span><span class="n">frames</span><span class="p">(),</span> <span class="n">all_faces</span><span class="p">):</span>
     <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s">'frame{}.jpg'</span><span class="p">,</span> <span class="n">draw_faces</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">frame_faces</span><span class="p">))</span>
 </code></pre></div></div>
 
@@ -189,10 +189,10 @@
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>
 
-<span class="c">### new code block ###</span>
-
+<span class="c1">### new code block ###
+</span>
 <span class="n">x</span> <span class="o">+=</span> <span class="mi">1</span>
-<span class="k">print</span><span class="p">(</span><span class="s">'{}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'{}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
 </code></pre></div></div>
 
 <p>Then if I fix the variable name error (<code class="highlighter-rouge">format(x)</code> instead of <code class="highlighter-rouge">y</code>) and re-run the code block, the value of <code class="highlighter-rouge">x</code> has changed, and my program output depends on the number of times I debugged the function. Not good! Essentially we need some kind of <a href="http://jakob.engbloms.se/archives/1554">reverse debugging</a> (also time-traveling debugging), where we can rewind the state of the program back to a reasonable point before the error occured. This <a href="https://morepypy.blogspot.com/2016/07/reverse-debugging-for-python.html">has</a> <a href="https://everythingsysadmin.com/2014/04/time-travel-pdb.html">been</a> <a href="http://www.imperial.ac.uk/media/imperial-college/faculty-of-engineering/computing/public/NiklasSteidl.pdf">done</a> for Python, but to my knowledge has never been integrated into Jupyter in a sensible way.</p>
