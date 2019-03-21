@@ -1,1 +1,1 @@
-Sitemap: /sitemap.xml
+Sitemap: http://willcrichton.net/sitemap.xml
