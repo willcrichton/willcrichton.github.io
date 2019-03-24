@@ -1,4 +1,176 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.2">Jekyll</generator><link href="http://willcrichton.net/feed.xml" rel="self" type="application/atom+xml" /><link href="http://willcrichton.net/" rel="alternate" type="text/html" /><updated>2019-03-21T19:05:01+00:00</updated><id>http://willcrichton.net/feed.xml</id><title type="html">Will Crichton</title><entry><title type="html">Partial Function Application as a Design Pattern</title><link href="http://willcrichton.net/notes/partial-application-design-pattern/" rel="alternate" type="text/html" title="Partial Function Application as a Design Pattern" /><published>2019-01-04T00:00:00+00:00</published><updated>2019-01-04T00:00:00+00:00</updated><id>http://willcrichton.net/notes/partial-application-design-pattern</id><content type="html" xml:base="http://willcrichton.net/notes/partial-application-design-pattern/">&lt;p&gt;Partial function application is a common feature of functional programming languages where functions can be given some, but not all, of their arguments. As a simple example, we can curry an “add” function in OCaml to produce a more specialized function:&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.2">Jekyll</generator><link href="http://willcrichton.net/feed.xml" rel="self" type="application/atom+xml" /><link href="http://willcrichton.net/" rel="alternate" type="text/html" /><updated>2019-03-24T05:24:48+00:00</updated><id>http://willcrichton.net/feed.xml</id><title type="html">Will Crichton</title><entry><title type="html">Compiling Knowledge into Probabilistic Models</title><link href="http://willcrichton.net/notes/compiling-knowledge-probability/" rel="alternate" type="text/html" title="Compiling Knowledge into Probabilistic Models" /><published>2019-03-23T00:00:00+00:00</published><updated>2019-03-23T00:00:00+00:00</updated><id>http://willcrichton.net/notes/compiling-knowledge-probability</id><content type="html" xml:base="http://willcrichton.net/notes/compiling-knowledge-probability/">&lt;div style=&quot;display: none&quot;&gt;
+$$
+\newcommand{\dataset}{\mathcal{D}}
+\newcommand{\count}[1]{\#\ \text{#1}}
+\newcommand{\bern}{\text{Bernoulli}}
+\DeclareMathOperator*{\argmax}{arg\!\max}
+$$
+&lt;/div&gt;
+
+&lt;p&gt;In programming, compilation is about translating between equivalent representations of things. For example, gcc (the C compiler) takes a C program, a representation of a thing your computer should do, and translates it into an assembly program, also a representation of a thing your computer should do, just in a language the computer actually understands. Ideally, those two programs are “equivalent” in the sense that the C specification defines a behavior for how the C program should work, and the computer executes the assembly in a manner consistent with the spec.&lt;/p&gt;
+
+&lt;p&gt;Unbeknownst to the compiler, a second kind of compilation occurs behind the scenes: from a C programmer’s mental model of their program into the C program. For example, if I think “I need to loop through this array and print each element”, then that translates into:&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;%d&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Again, there are two representations: the mental model and the textual C program, which the programmer wants to be equivalent, but may not be if they wrote a typo, or don’t know how C works, or have an incorrect expectation of how C works&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;. And a final kind of compilation occurs when a programmer translates from their mental model of the problem being solved into a “programmatic” mental model of the solution, e.g. formulating an algorithm, designing a system, and so on. For example, if my problem is to sum the elements of an array, I can compile this into a C/systems/low-level/imperative programmatic model&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Make a temporary sum variable and index. Write a for loop that iterates over the array. Get the i-th element and add into the sum.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Which then “compiles” into C:&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I could also compile this into an OCaml/functional/declarative programmatic model:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Reduce the list with a sum operator.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;language-ocaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reduce&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This kind of commonplace “knowledge compilation” characterizes what I’ll call procedural knowledge, i.e. verbs or actions, how to actually do something in a domain, usuall in the form of a function or code fragment. Programmers also frequently compile ontological (or structural) knowledge, i.e. nouns or objects, how a domain is structured, usually in the form of a type or class definition. For example, if two distinct quantities are related, like the x/y of a 2D point, this is programmatically a product type, e.g. a struct in C:&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;point_t&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Or a record (or tuple) in OCaml:&lt;/p&gt;
+
+&lt;div class=&quot;language-ocaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Point&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;PointTuple&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If one quantity is dependent upon another, then we need a function type:&lt;/p&gt;
+
+&lt;div class=&quot;language-ocaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;PointGenerator&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Point&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If an entity is made up of categories, then we need a sum type (or variant, or tagged union):&lt;/p&gt;
+
+&lt;div class=&quot;language-ocaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Chart&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Scatter&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Point&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;list&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Pie&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;list&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;These are all examples of identifying structure within a domain and encoding that structure, that ontology, into a program so that we may structure our remaining program around it. Programming languages offer an ontological toolbox of functions, products, sums, lists, and so on that we programmers adapt to a given domain.&lt;/p&gt;
+
+&lt;p&gt;While some programmers learn these skills implicitly through writing many programs, we have more resources than ever today on explicit methodologies for compiling knowledge into programs. For example, &lt;em&gt;&lt;a href=&quot;https://www.htdp.org/2019-02-24/&quot;&gt;How to Design Programs&lt;/a&gt;&lt;/em&gt; is a great introductory CS textbook that explains a methodology for designing programs around data types.&lt;/p&gt;
+
+&lt;h2 id=&quot;rich-in-methods-poor-in-methodologies&quot;&gt;Rich in methods, poor in methodologies&lt;/h2&gt;
+
+&lt;p&gt;If such methodologies exist for general-purpose programming, do they exist for probabilistic modeling? Given a probabilistic mental model of a domain, how can I compile that model into an executable program? Over the last two quarters at Stanford, I took Stefano Ermon’s course on &lt;a href=&quot;https://cs228.stanford.edu/&quot;&gt;probabilistic graphical models&lt;/a&gt; and Noah Goodman’s course on &lt;a href=&quot;https://cocolab.stanford.edu/psych204-fall2018.html&quot;&gt;cognitive science through probabilistic programming&lt;/a&gt; seeking such enlightenment. While the path to nirvana was not neatly laid out before me, I have seen an ephemeral glimpse at a brighter future.&lt;/p&gt;
+
+&lt;p&gt;At their core, I think probabilistic models offer two fundamental capabilities: reasoning under uncertainty, and learning from data. One form of uncertainity arises from nondeterminism, i.e. some input to your problem changes in ways not fully predictable, e.g. Google modeling search inputs from people, or NASA modeling noisy communications from space probes. Probability theory has a rich standard library of models (e.g. Bernoulli, Gaussian, Poisson, …) with mathematical properties that make them easy to use programmatically in modeling sources of noise/nondeterminisim.&lt;/p&gt;
+
+&lt;p&gt;Another kind of uncertainty is incomplete information. Even in a system that’s fully deterministic, if a function is not bijective, then it can be impossible to reconstruct events only knowing partial information about inputs, outputs and intermediates. The standard example from a probability textbook is that if you wake up in the morning to see your lawn is wet, did it rain or did your sprinkler turn on? Probabilistic models offer the ability to explicitly represent these situations and answer these questions by marginalizing out unknown information.&lt;/p&gt;
+
+&lt;p&gt;Moreover, these models can permit &lt;a href=&quot;https://en.wikipedia.org/wiki/Non-monotonic_logic&quot;&gt;nonmonotonic reasoning&lt;/a&gt;, i.e. my conclusion can change after seeing more evidence. For example, I might assume my sprinkler turned on because that happens more often than rain, but if I go outside and the roof is wet, then that suggests rain was the true culprit—adding information changed my conclusion.&lt;/p&gt;
+
+&lt;p&gt;Lastly, probabilistic models provide an explicit formalism for bridging domain knowledge and domain data. For example, if I know the causal structure of a domain, I can represent that as a graphical model: either rain or a sprinkler caused my lawn to get wet. The parameters (probability lawn is wet given rain or given sprinkler, and baseline probability of rain and sprinkler) can then be learned from the data. Parameters can also be augmented with human knowledge through priors in a Bayesian learning setup. In the general-purpose programming context, imagine if you could give examples of a program output (domain data) along with a skeleton of a program (source file with incomplete parts) and ask a system to fill in the holes. This kind of program synthesis task fits well as a probabilistic model.&lt;/p&gt;
+
+&lt;h2 id=&quot;example-knowledge-compilations&quot;&gt;Example knowledge compilations&lt;/h2&gt;
+
+&lt;p&gt;To concretize these points, I’ll show a few examples of compiling knowledge into probabilistic models.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Example:&lt;/strong&gt; I have a fair coin.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;General case:&lt;/strong&gt; Something happens with two possible outcomes, or an object has two possible categories. Each outcome/category is equally likely.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Mathematical model:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\text{CoinFlip} \sim \bern(p = 0.5)&lt;/script&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Example:&lt;/strong&gt; I have an unfair 6-sided dice, where the first side is rolled 50% of the time, and the rest 10%.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;General case:&lt;/strong&gt; Something happens with N possible outcomes, and each outcome can have a different probability.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Mathematical model:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\text{DiceRoll} \sim \text{Categorical}(\theta = \{0.5, 0.1, 0.1, 0.1, 0.1, 0.1\})&lt;/script&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Example:&lt;/strong&gt; I have a 6-sided dice, and I think that one of the sides is biased, but I’m not sure which.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;General case:&lt;/strong&gt; Something happens with N possible outcomes, and one outcome is more likely than the rest.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Mathematical model:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align*}
+\text{DicePrior} &amp;\sim \text{Dirichlet}(\alpha = \{0.5, 0.5, 0.5, 0.5, 0.5, 0.5\}) \\
+\text{DiceRoll} &amp;\sim \text{Categorical}(\theta = \text{DicePrior})
+\end{align*} %]]&gt;&lt;/script&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Example:&lt;/strong&gt; The higher my GPA, the more likely I’ll get into college.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;General case:&lt;/strong&gt; The probability of an event is correlated with a real-valued outcome, with an expected positive correlation.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Mathematical model:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align*}
+\text{GPAWeight} &amp;\sim \mathcal{N}(\mu = 1, \sigma = 0.5) \\
+\text{Accepted} &amp;\sim \text{Bernoulli}\left(p = \cfrac{1}{1 + \exp(-(\text{GPAWeight} * \text{GPA}))}\right)
+\end{align*} %]]&gt;&lt;/script&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;These are all examples of structural/ontological probabilistic knowledge, i.e. they describe the shape of a situation with uncertainty. Next, let’s look at procedural probabilistic knowledge, i.e. how to answer questions against these models.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Example:&lt;/strong&gt; If 5 people with GPA 3.0 and 10 people with GPA 4.0 got accepted, what’s the most suitable parameters for GPA weight?&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;General case:&lt;/strong&gt; What parameters best explain the dataset, i.e. maximize the probability of all data under the model?&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Mathematical model:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\hat{\mu}, \hat{\sigma} = \argmax_{\mu, \sigma} \prod_{(\text{acc}, \text{gpa}) \in \dataset} P_{\mu,\sigma}(\text{Accepted} = \text{acc}, \text{GPA} = \text{gpa})&lt;/script&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Example:&lt;/strong&gt; If someone was accepted to college, what was their most likely GPA?&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;General case:&lt;/strong&gt; Given observations, what values for unknown data maximize the joint probability under the model?&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Mathematical model:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\hat{\text{gpa}} = \argmax_{\text{gpa}} P(\text{GPA} = \text{gpa} \mid \text{Accepted} = \text{yes})&lt;/script&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Both of these questions, parameter learning and conditional inference, are still answered at a high level of abstraction. From my impression taking the graphical models course, a lot of work in practice is picking the right method to accomplish a particular task, e.g. doing inference with exact (&lt;a href=&quot;https://ermongroup.github.io/cs228-notes/inference/ve/&quot;&gt;variable elimination&lt;/a&gt;, &lt;a href=&quot;https://ermongroup.github.io/cs228-notes/inference/jt/&quot;&gt;belief propagation&lt;/a&gt;) vs. approximate methods (&lt;a href=&quot;https://ermongroup.github.io/cs228-notes/inference/sampling/&quot;&gt;MCMC&lt;/a&gt;, &lt;a href=&quot;https://ermongroup.github.io/cs228-notes/inference/variational/&quot;&gt;variational inference&lt;/a&gt;). These methods also have hyperparameters that need to be carefully tuned, e.g. mixing time for MCMC, or variational family for variational inference.&lt;sup id=&quot;fnref:3&quot;&gt;&lt;a href=&quot;#fn:3&quot; class=&quot;footnote&quot;&gt;3&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+
+&lt;p&gt;Regardless, it seems to me that the the act of compiling knowledge into probabilistic models is still more art than science. At best, we are left to learn from &lt;a href=&quot;http://forestdb.org/&quot;&gt;repositories of examples&lt;/a&gt; and to try to back out a methodology accordingly. That’s quite inefficient! And as we hurtle towards a data-driven world where more and more programmers are likely to need probabilistic models as a part of their daily routine, we ought to invest more in developing explicit techniques for probabilistic knowledge compilation. The examples given here are just a seed of an idea, but who knows, maybe a &lt;em&gt;How to Design Probabilistic Programs&lt;/em&gt; textbook could be just around the corner.&lt;/p&gt;
+
+&lt;div class=&quot;footnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:1&quot;&gt;
+      &lt;p&gt;For example, if I thought arrays in C were 1-indexed, then I could translate my goal into a C program that’s consistent with my expectations, but will not execute as I expect because of my misunderstanding. That’s a different kind of bug then if I accidentally 1-indexed and didn’t mean to. &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:2&quot;&gt;
+      &lt;p&gt;Entertainingly, some old psychology of programming literature cite this kind of an example as the way “all experienced programmers” would decompose the problem. Sheil, B. A. “The Psychological Study of Programming.” ACM Computing Surveys, 1981. &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:3&quot;&gt;
+      &lt;p&gt;Worth noting that the &lt;a href=&quot;http://pyro.ai/&quot;&gt;industrial-strength probabilistic programming frameworks&lt;/a&gt; focus mostly on variational inference, suggesting that for models of real-world scale, approximate methods are necessary for computational feasibility. &lt;a href=&quot;#fnref:3&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;</content><author><name></name></author><summary type="html">$$ \newcommand{\dataset}{\mathcal{D}} \newcommand{\count}[1]{\#\ \text{#1}} \newcommand{\bern}{\text{Bernoulli}} \DeclareMathOperator*{\argmax}{arg\!\max} $$</summary></entry><entry><title type="html">Partial Function Application as a Design Pattern</title><link href="http://willcrichton.net/notes/partial-application-design-pattern/" rel="alternate" type="text/html" title="Partial Function Application as a Design Pattern" /><published>2019-01-04T00:00:00+00:00</published><updated>2019-01-04T00:00:00+00:00</updated><id>http://willcrichton.net/notes/partial-application-design-pattern</id><content type="html" xml:base="http://willcrichton.net/notes/partial-application-design-pattern/">&lt;p&gt;Partial function application is a common feature of functional programming languages where functions can be given some, but not all, of their arguments. As a simple example, we can curry an “add” function in OCaml to produce a more specialized function:&lt;/p&gt;
 
 &lt;div class=&quot;language-ocaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;(* In non-functional languages, multiple arguments are given as tuples *)&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;add&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
@@ -1506,85 +1678,4 @@ designed and implemented by more than one person.&lt;/li&gt;
       &lt;p&gt;The web ecosystem, of course, is not perfect. Javascript is an experiment in large-scale distributed programming language design. HTML/CSS are limited and so have spawned dozens of derivative languages and templating systems (SASS, Jade, etc.) in their wake. But it’s inarguable that more time has been spent developing GUI tools for the web than any other medium. &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
-&lt;/div&gt;</content><author><name></name></author><summary type="html">For the past year, I’ve been working on a research project to analyze American TV news using modern computer vision techniques at scale (on the order of 100,000 hours of video, see: Processing Terabytes of Video on Hundreds of Machines). The work isn’t published yet (more on that later!), but I now have a wealth of experience in building infrastructure to enable our tiny rag-tag team of academics to deal with all the issues of data science, machine learning, computer vision, distributed systems, and human-computer interfaces that accompany these sorts of endeavors. In this note, I want to discuss one particular design process that’s emerged for us which I haven’t seen elsewhere: prototyping UIs in Jupyter, specifically in the data science context.</summary></entry><entry><title type="html">Remixing as Learning in Creative Media</title><link href="http://willcrichton.net/notes/remixing-as-learning-in-creative-media/" rel="alternate" type="text/html" title="Remixing as Learning in Creative Media" /><published>2018-05-04T00:00:00+00:00</published><updated>2018-05-04T00:00:00+00:00</updated><id>http://willcrichton.net/notes/remixing-as-learning-in-creative-media</id><content type="html" xml:base="http://willcrichton.net/notes/remixing-as-learning-in-creative-media/">&lt;p&gt;In &lt;em&gt;&lt;a href=&quot;https://www.amazon.com/Mindstorms-Children-Computers-Powerful-Ideas/dp/0465046746&quot;&gt;Mindstorms&lt;/a&gt;&lt;/em&gt;, a short but wonderful book about how children can use computers to learn in new ways, Seymour Papert argues that the process of creating and debugging a computer program intuitively matches the way that children naturally form theories about the world. For example, he says that if you ask a young child “what makes the wind blow?” then you will rarely get an “I don’t know,” but instead get an answer like “the trees waving makes the wind blow.” In essence, children attempt to understand complex systems like the weather by searching for correlations—the trees always wave when the wind blows, so that’s a clear possible cause.&lt;/p&gt;
-
-&lt;p&gt;Of course, such children are too young to fully understand correlation vs. causation (or the Coriolis effect), but the key idea is that this process of theory formation comes naturally to us. Papert claims that this intuitive process gets stamped out in schools by enforcing a rigid notion of correctness. Rather than rewarding children for identifying patterns, they are told that their theories are wrong and should think otherwise. Papert spends the rest of the book explaining how his LOGO language/system, the precursor to LEGO Mindstorms (controlling robots with simple commands) helps children gain a motivated yet bottom-up understanding of formal thinking, encouraging them to use analogies between the motion of their own bodies and that of the robot’s to carefully introspect and construct algorithms.&lt;/p&gt;
-
-&lt;p&gt;After reading the book, I started thinking about how this methodology could be applied to other more complex pursuits. Learning programming, generally, uses a bottom-up approach. A top-down approach would be something like, “let’s start with the source code for the Linux kernel and understand how operating systems work.” Doesn’t seem very feasible. By contrast, a bottom-up approach says “lets learn one concept at a time in isolation, then slowly put them together, e.g. learn about virtual memory, process scheduling, etc. and then build an OS from them.” This is a much more successful pedagogy, but &lt;em class=&quot;hl&quot;&gt;the core problem is that the sub-components tend to feel less motivated until the full system brought together&lt;/em&gt;. You have to slog through a virtual memory implementation until you start to write a process scheduler, and only then appreciate the idea of memory isolation.&lt;/p&gt;
-
-&lt;p&gt;When thinking about my own learning experiences, I realized that while my formal computer science education largely followed that mold, my unstructured education in creative media—games, websites, and music—took an entirely different approach. &lt;em class=&quot;hl&quot;&gt;In each discipline, I started with some existing implementation of a game/website/song and then tweaked it, remixed it, slowly poked and prodded the black box until I got more of a feel for what was going on.&lt;/em&gt; And it was so much fun! I felt like the aforementioned children, learning about a system by immersing myself in it and finding patterns, not by building up a mental model from first principles. Critically, it was motivated at every step of the way. I wasn’t dealing with trivial homework problems, but instead creating a game that I actually wanted to play, or music I actually wanted to hear.&lt;/p&gt;
-
-&lt;p&gt;In formal education, I’ve never felt the same way I have exploring systems on my own, which is a tragedy—my unstructured education has had far more of an impact on who I am as a person and a thinker than any individual class I took. I think it’s worth asking, then: what are the characteristics of this kind of learning? Could we design new curricula around these principles? For starters, I’ll tell you my story, and we’ll see what patterns we can find across these anecdotes.&lt;/p&gt;
-
-&lt;h2 id=&quot;example-1-games&quot;&gt;Example #1: Games&lt;/h2&gt;
-
-&lt;p&gt;As you might notice from this blog’s design and my &lt;a href=&quot;http://willcrichton.net/&quot;&gt;homepage&lt;/a&gt;, I’m a big fan of video games. Loved them growing up, played them on every platform, and they still bring me joy to this day. The entire reason I became a programmer is because of one game: &lt;a href=&quot;https://store.steampowered.com/app/4000/Garrys_Mod/&quot;&gt;Garry’s Mod&lt;/a&gt; (Gmod). Gmod is a sandbox game built on the Source Engine, the game engine powering Valve’s games like Half-Life 2, Portal, and others. Its basic premise is basically to make the underlying game engine more accessible. It’s less of a game and more of a framework that enables the creation of custom structures, game modes, maps, and more.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://steamcdn-a.akamaihd.net/steam/apps/4000/ss_c13ffded1d71bedfa7ede94c11cbd21fbd21a32c.600x338.jpg?t=1497714104&quot; alt=&quot;&quot; /&gt;
-&lt;img src=&quot;https://steamcdn-a.akamaihd.net/steam/apps/4000/ss_4162b10390d84aa600e5ed895fdc885482eb2e71.600x338.jpg?t=1497714104&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Like many other games, Gmod uses the &lt;a href=&quot;https://www.lua.org/&quot;&gt;Lua&lt;/a&gt; scripting language to provide a &lt;a href=&quot;https://wiki.garrysmod.com/page/Beginner_Tutorial_Intro&quot;&gt;simple API&lt;/a&gt; for programmatically modifying the game. However, when I picked up the game at 14, I knew absolutely nothing about Lua or really programming in general. I had tried in vain to follow a Python tutorial before, but lost interest every time. Once I started playing Gmod, I was hooked. I had always loved building things, starting with Lincoln Logs and LEGOs. I had never before had an unfettered digital sandbox to build whatever I wanted, and Gmod has a bunch of amazing addons like &lt;a href=&quot;https://steamcommunity.com/sharedfiles/filedetails/?id=160250458&quot;&gt;Wiremod&lt;/a&gt; for creating all sorts of intricate structures. And that was without every touching a line of code.&lt;/p&gt;
-
-&lt;p&gt;However, perhaps a year into my experience, I became increasingly dissatisfied with the game. I saw other people on the servers I attended programming these amazing light displays or creating custom entities, whereas I was just stuck with the vanilla tools the game provides. When I ran my own gamemodes, I couldn’t change the default settings provided by the mode creators. &lt;em class=&quot;hl&quot;&gt;So for my initial foray into Lua scripting, I decided to just tweak simple gameplay settings&lt;/em&gt;. I was running a roleplay server, and wanted to change the starting money provided to a particular class. Simple enough, but man, did that take &lt;em&gt;forever&lt;/em&gt;. The tutorials were not nearly the same quality as today, and I had to figure out: where were the relevant files in my file system? How do I edit them? How do I know if my changes work? How can I debug a broken change? What is Lua? What is a function? And so on.&lt;/p&gt;
-
-&lt;p&gt;But, at some point, I figured it out, and it was &lt;em&gt;liberating&lt;/em&gt;. &lt;em class=&quot;hl&quot;&gt;I felt empowered that I could navigate the game engine morass and actually write a line of code.&lt;/em&gt; It started with more money in my roleplay game, but over time I gradually expanded the scope of my ambitions. I modified existing libraries into a &lt;a href=&quot;https://garrysmods.org/download/7135/the-aurora-cannon-v20&quot;&gt;custom entity&lt;/a&gt;, then a custom map, then a &lt;a href=&quot;http://www.moddb.com/mods/tacticalassault&quot;&gt;custom&lt;/a&gt; &lt;a href=&quot;https://github.com/willcrichton/tacticalassault&quot;&gt;gamemode&lt;/a&gt;. I dived into the rendering internals, and later after learning about HTML/CSS, rewrote the imperative GUI system into a &lt;a href=&quot;https://github.com/willcrichton/dml&quot;&gt;declarative GUI language&lt;/a&gt;. Although my learning was bottom-up in the sense that I started small and worked upwards, I was always modifying parts of a bigger system which kept the experience enjoyable, not rote.&lt;/p&gt;
-
-&lt;p&gt;A number of factors made Gmod amenable to remixing:&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;&lt;em class=&quot;hl&quot;&gt;Lua is a wonderful starting language.&lt;/em&gt; Dynamic typing means you don’t have to worry about compilation. Since it’s usually embedded in a game engine, the language itself is quite simple—everything is just a &lt;a href=&quot;https://www.lua.org/pil/2.5.html&quot;&gt;table&lt;/a&gt;, and once you understand that, you get 95% of the Lua mental model. By contrast, other dynamic languages like Python are complex beasts, as one needs to understand list comprehensions, classes and inheritance, “LEGB” scoping, and more to fully grok most code.&lt;/li&gt;
-  &lt;li&gt;&lt;em class=&quot;hl&quot;&gt;Gmod has a thriving community of players and developers&lt;/em&gt; that would help and encourage each other during development. I frequented the &lt;a href=&quot;https://forum.facepunch.com/f/&quot;&gt;developer forum&lt;/a&gt; and often found a place to get a question answered if I was stymied.&lt;/li&gt;
-  &lt;li&gt;Due to its scriptable nature, &lt;em class=&quot;hl&quot;&gt;sharing code openly was the norm in the community&lt;/em&gt;, and it was easy to find everything from huge gamemodes to tiny self-contained snippets that were easy to copy/paste and modify. No one ever cared about licensing so long as proper attribution was provided.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;example-2-websites&quot;&gt;Example #2: Websites&lt;/h2&gt;
-
-&lt;p&gt;My earliest exposure to programming was 12 years ago, 2006, in sixth grade. Our ELP teacher provided us a dead-simple HTML template and had us pick our favorite topic, then make a website about it. Sadly, it appears that my website has disappeared, despite the best efforts of the &lt;a href=&quot;https://web.archive.org/web/20061006122037/http://www.vestavia.k12.al.us/pizitz/index.php?module=htmlpages&amp;amp;func=display&amp;amp;pid=89&quot;&gt;Internet Archive&lt;/a&gt; (mine was the one about “Magic”). You can get a sense of the style in the remains of the &lt;a href=&quot;https://web.archive.org/web/20061011110948/http://www.vestavia.k12.al.us/pizitz/0506webs/Abyssiniancats.html/&quot;&gt;Abyssinian cats&lt;/a&gt; website.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/assets/remixing1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;At the time, all we had was an &lt;a href=&quot;https://www.imore.com/sites/imore.com/files/styles/xlarge/public/field/image/2016/03/02emac_3q.jpg?itok=CA69PX0o&quot;&gt;eMac&lt;/a&gt; and the 2006 equivalent of Notepad on OS X, but that was all we needed. &lt;em class=&quot;hl&quot;&gt;One of the first things I remember about programming with HTML is the sheer immediacy of it&lt;/em&gt;: type a letter, refresh the page, and see your change instantly. Once I started to realize the full extent of the visual magic one could work—blinks! marquees! cursor trails!—I was utterly determined to stuff every feature possible into my website. The content was ancillary, what mattered was the visuals. My crowning achievement was finding a &lt;a href=&quot;https://codepen.io/syropian/pen/bLzAi&quot;&gt;Matrix-style text effect&lt;/a&gt; in JavaScript and somehow incorporating it into my website about magicians. Truly a gem lost to the sands of time.&lt;/p&gt;
-
-&lt;p&gt;I don’t think I’m alone in saying that web design was my first spark in lighting the programming fire. In discussing this with my friends, in particular amongst women, &lt;em class=&quot;hl&quot;&gt;sites like Neopets and MySpace with customizable HTML/CSS introduced a lot of kids in my generation to programming&lt;/em&gt;. There was simply no better way to show how cool you were than to bask in the glory of the Geocities aesthetic. As kids, we often had limited artistic control over our immediate environment; activities like drawing on the walls or splashing paint on the ceiling were generally off-limits. But these websites offered us the ability to have our own corner of the world that’s entirely ours to make, no matter how horrendous the color palette. It’s a little sad that such customizability is quite rare in today’s websites.&lt;/p&gt;
-
-&lt;p&gt;But what is it that made HTML/CSS so friendly to beginners? Consider for a moment a world where websites were created in LaTeX instead of HTML: obtuse syntax, confusing semantics, full of inscrutable syntax errors. It would be a disaster! But specifically, &lt;em class=&quot;hl&quot;&gt;I think it’s the copy/pastability of HTML and CSS that make them so uniquely beginner-friendly.&lt;/em&gt; Even if I understand almost nothing about the languages, I can take code that someone else wrote, throw it into my website, and most of the time it will just work! There are never compiler errors, only visual tweaks to be made. There is no scary program complaining that your program is “incorrect.” This makes remixing a painless process, even if the bugs can be hard to diagnose.&lt;/p&gt;
-
-&lt;h2 id=&quot;example-3-music&quot;&gt;Example #3: Music&lt;/h2&gt;
-
-&lt;p&gt;The remixing style of learning isn’t just for technical fields, however! During my undergrad at CMU, I started to become more interested in all the non-technical activities I completely missed out on in high school, namely music. I knew absolutely nothing about music in theory or practice beyond my feeble attempts to sing in the shower. But practice I did, and eventually I found an a cappella group that would take me in. Over time, I started to gain an ear for the intervals, chords, melodies, and progressions underlying the songs we performed.&lt;/p&gt;
-
-&lt;p&gt;However, since I had no formal training in music, I was unfamiliar with the notation. Reading sheet music took a long time, and it certainly wasn’t to the point where I could hear the music in my head as I read. I couldn’t easily translate any of my intuitions about music into concrete directions on how or what to sing, yet I still wanted to be able to write music.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/assets/remixing2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Thankfully, most collegiate a cappella music is cover songs, so I didn’t have to start from scratch. I decided to cover &lt;a href=&quot;https://www.youtube.com/watch?v=u5CVsCnxyXg&quot;&gt;No Surprises&lt;/a&gt; by Radiohead. I searched only for a piano cover of the song and found the sheet music. Armed with the seed for my composition, I transcribed it into the key tool underlying my learning efforts: &lt;a href=&quot;http://noteflight.com/&quot;&gt;Noteflight&lt;/a&gt; (pictured above). &lt;em class=&quot;hl&quot;&gt;For me, the critical feature of Noteflight was enabling me to listen to the score as I was changing it&lt;/em&gt;. You can either click on individual notes to hear them standalone, or play the whole score to hear it in unison. This meant that I could listen to the MIDI playback and test whether my changes made sense by ear.&lt;/p&gt;
-
-&lt;p&gt;For the No Surprises cover, I took the transcribed piano sheet and the guitar chords and converted them into separate a cappella parts (lead, soprano, alto, tenor, baritone, bass, beatboxer). The main challenge was ensuring that for any given part, the singers didn’t have to jump around too much in the progress for vocal consistency. Then I searched around for inspiration on how to remix the song to add our own flair, and pulled in ideas a few different covers, e.g. the composition from &lt;a href=&quot;https://www.youtube.com/watch?v=8FF1mVlPUz8&quot;&gt;choir! choir! choir!&lt;/a&gt;. Ultimately I settled on a piece I was quite happy with for my first effort (&lt;a href=&quot;https://www.noteflight.com/scores/view/09c3f2285a1ed72a848cf28d3858c4f6563548c1&quot;&gt;link&lt;/a&gt;).&lt;/p&gt;
-
-&lt;p&gt;Did I get every chord progression correct or match strict musical standards? Unlikely. Would I have been able to write a piece from scratch? Nope. Is the MIDI playback the same as how it would be sung by actual people? Of course not. But Noteflight’s playback feature made it so I could vet all my changes with an “ear test” before showing it to my friends. &lt;em class=&quot;hl&quot;&gt;With zero prior knowledge, I was able to use this tool to successfully remix songs&lt;/em&gt; (see &lt;a href=&quot;https://www.noteflight.com/scores/view/c140d888c8fbafdcc8f8bbcd45d7e317735c9d4f&quot;&gt;Pokemon Johto/Main Theme&lt;/a&gt;, &lt;a href=&quot;https://www.noteflight.com/scores/view/9fdad03da3700f5f261b91b76e00f68fd8496617&quot;&gt;Addicted to You&lt;/a&gt;), and even though my formal musical knowledge is still lacking, the experience significantly improved my ability to read and write sheet music.&lt;/p&gt;
-
-&lt;h2 id=&quot;analysis&quot;&gt;Analysis&lt;/h2&gt;
-
-&lt;p&gt;The examples above all share a few common features:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;&lt;em class=&quot;hl&quot;&gt;Experimentation was possible through rapid feedback.&lt;/em&gt; HTML and Noteflight (and to some extent Gmod) both enable creators to have an immediate connection from their program to their output (as &lt;a href=&quot;https://www.youtube.com/watch?v=PUv66718DII&quot;&gt;Bret Victor would say&lt;/a&gt;). As a learner, when you’re dealing with a big system that you don’t fully understand whether it’s programming languages or music, the ability to try something, see if it works, and branch on that decision is absolutely critical. This is particularly true for more mature learners who are quick to pick up patterns, but need short iteration times to determine which direction to take.&lt;/li&gt;
-  &lt;li&gt;&lt;em class=&quot;hl&quot;&gt;Third-party content was easily accessible and modifiable.&lt;/em&gt; Noteflight and Gmod both have built-in infrastructure for distributing open-source libraries/compositions, and part of their culture is the sharing and reuse of others work. On the web, getting simple content is as easy as View Source (modulo all the JavaScript these days), and copy/pasting nearly always works.&lt;/li&gt;
-  &lt;li&gt;&lt;em class=&quot;hl&quot;&gt;Large creations have many independent parts with localizable modifications.&lt;/em&gt; In each medium, a large creation taken from someone else (a game mode, a website template, a full score) usually has well defined entry points, and modifications aren’t likely to affect other parts of the system.
-    &lt;ul&gt;
-      &lt;li&gt;Gmod scripts are structurally required to separate out client code (running on the player’s computer, controlling GUIs/rendering) from server code (running on the server, controlling game logic), and server/client only interact on well-defined boundaries so changes from one likely don’t affect the other.&lt;/li&gt;
-      &lt;li&gt;Websites have their logical visual structure embedded in the indentation of the source code (not necessarily true for imperative GUIs). Changing text or color in one &lt;code class=&quot;highlighter-rouge&quot;&gt;div&lt;/code&gt; is not likely to affect other &lt;code class=&quot;highlighter-rouge&quot;&gt;div&lt;/code&gt;s not nested near your current one.&lt;/li&gt;
-      &lt;li&gt;Musical scores often have both well-defined overarching structure (e.g. verse, prechorus, chorus, bridge) and local structure (e.g. four chord progression), and by design changing one note of a score does not literally change the others even though the overall sound may change.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;It’s also important to note that all of the above activities have an inherent sensory component, either visual or auditory. For a lot of people, this provides a baseline excitement/involvment in interacting with these media. &lt;em class=&quot;hl&quot;&gt;To what extent does this exist or could this exist for other less sensory pursuits?&lt;/em&gt; Let’s consider the example of data analysis, specifically machine learning, on each of these criteria.&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Rapid feedback: in 2018, machine learning is hardly interactive—training a model can take hours or days and cost a lot of money if you have to rent hardware.&lt;/li&gt;
-  &lt;li&gt;Third-party content: while ML frameworks like TensorFlow and PyTorch go a long way towards defining a common format for sharing models, it’s still quite hard in practice to take an arbitrary model off the shelf and run it, fine-tune it, optimize it, and so on.&lt;/li&gt;
-  &lt;li&gt;Localizable modifications: most modern models are not well understood. Changing one part of a neural network and retraining could have huge implications in training time, hyperparameter choice, and overall accuracy. In general, there is no clear way to make small changes that only affect a small part of the system.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Ultimately, what this means is that newcomers cannot learn how to make machine learning models in the same way they can learn how to make games, websites, and music. This limits the ability of learners to play around, remix, and theorize without a thorough bottom-up grounding in the theory and practice of machine learning, which in turn makes the field less approachable. However, I hope that by looking at how we learn through remixing in creative media, we can continue to gain insight that guide the development of tools and curriculum in other fields.&lt;/p&gt;
-
-&lt;p&gt;As always, let me know what you think. Either send me an email at &lt;a href=&quot;mailto:wcrichto@cs.stanford.edu&quot;&gt;wcrichto@cs.stanford.edu&lt;/a&gt; or comment on &lt;a href=&quot;https://news.ycombinator.com/item?id=17005470&quot;&gt;Hacker News thread&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><summary type="html">In Mindstorms, a short but wonderful book about how children can use computers to learn in new ways, Seymour Papert argues that the process of creating and debugging a computer program intuitively matches the way that children naturally form theories about the world. For example, he says that if you ask a young child “what makes the wind blow?” then you will rarely get an “I don’t know,” but instead get an answer like “the trees waving makes the wind blow.” In essence, children attempt to understand complex systems like the weather by searching for correlations—the trees always wave when the wind blows, so that’s a clear possible cause.</summary></entry></feed>
+&lt;/div&gt;</content><author><name></name></author><summary type="html">For the past year, I’ve been working on a research project to analyze American TV news using modern computer vision techniques at scale (on the order of 100,000 hours of video, see: Processing Terabytes of Video on Hundreds of Machines). The work isn’t published yet (more on that later!), but I now have a wealth of experience in building infrastructure to enable our tiny rag-tag team of academics to deal with all the issues of data science, machine learning, computer vision, distributed systems, and human-computer interfaces that accompany these sorts of endeavors. In this note, I want to discuss one particular design process that’s emerged for us which I haven’t seen elsewhere: prototyping UIs in Jupyter, specifically in the data science context.</summary></entry></feed>
