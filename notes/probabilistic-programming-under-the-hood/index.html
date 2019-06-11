@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="This note explains stochastic variational inference from the ground up using the Pyro probabilistic programming language. I explore the basics of probabilistic programming and the machinery underlying SVI, such as autodifferentiation, guide functions, and approximating the difference between probability distributions.">
+    
+    
+    <title>
+      
+      Probabilistic Programming with Variational Inference: Under the Hood | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\brc}[1]{\{{#1}\}}
+
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\rec}[3]{\msf{rec}(#1; ~ x.y.#2)(#3)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+
+      % Typed lambda calculus - types
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wblockr}[2]{\msf{block}~{#1}~{#2}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[3]{\msf{label}_{#1}~\{#2\}~{#3}}
+      \newcommand{\wframe}[1]{\msf{frame}~{#1}}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[2]{\msf{breaking}_{#1}~{#2}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}~{#1};~\msf{mem}~{#2};~\msf{locals}~{#3};~\msf{stack}~{#4};~\msf{instrs}~{#5}\}}
+      \newcommand{\wfunc}[3]{\{\msf{params}~{#1};~\msf{locals}~{#2};~\msf{body}~{#3}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}~{#1}\}}
+
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      \newcommand{\semii}[3]{{#1};~{#2};~{#3}}
+      \newcommand{\semiii}[4]{{#1};~{#2};~{#3};~{#4}}
+      \newcommand{\semiiii}[5]{{#1};~{#2};~{#3};~{#4};~{#5}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Probabilistic Programming with Variational Inference: <br />Under the Hood
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    June 4, 2019
+  </div>
+  <div class="abstract">This note explains stochastic variational inference from the ground up using the Pyro probabilistic programming language. I explore the basics of probabilistic programming and the machinery underlying SVI, such as autodifferentiation, guide functions, and approximating the difference between probability distributions.</div>
+  <p>This note provides an introduction to probabilistic programming and variational inference using <a href="http://pyro.ai/">Pyro</a>. The Pyro website also has a <a href="http://pyro.ai/examples/intro_part_i.html">great tutorial</a>, but it’s distinctly oriented more towards people with probability backgrounds than systems backgrounds. If you, like me, are good at software engineering and bad at probability (single-letter variables in particular), then this note is for you.</p>
+
+<p>The pedagogy here is to use small code samples to run experiments that slowly build intuition for how the system works. The beauty of having a programming language, as opposed to learning from a probability textbook/class, is that we can turn questions into executable programs and see if reality matches our expectations. The ultimate goal is that you will have an end-to-end understanding of variational inference for simple probabilistic inference problems.</p>
+
+<p>I highly recommend you follow along in a Jupyter notebook. Tweak parameters, ask questions, and stay engaged! You can use the notebook in the accompanying repository here: <a href="https://github.com/willcrichton/pyro-under-the-hood">https://github.com/willcrichton/pyro-under-the-hood</a></p>
+
+<h2 id="probabilistic-programs-and-distributions">Probabilistic programs and distributions</h2>
+
+<p>A probabilistic program is a program that samples from probability distributions. For example:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pyro.distributions</span> <span class="k">as</span> <span class="n">dist</span>
+<span class="kn">from</span> <span class="nn">pyro</span> <span class="kn">import</span> <span class="n">sample</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">tensor</span>
+
+<span class="c1"># A fair coin
+</span><span class="n">coinflip</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="s">"coinflip"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="n">probs</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
+<span class="c1"># e.g. coinflip == tensor(0.)
+</span>
+<span class="c1"># A noisy sample
+</span><span class="n">noisy_sample</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="s">"noisy_sample"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="c1"># e.g. noisy_sample == tensor(0.35)
+</span></code></pre></div></div>
+
+<p>A probability distribution has two key functions: <code class="highlighter-rouge">sample</code>, which returns a single value in accordance with its probability (e.g. above, 0 and 1 are equally likely from the coin flip), and <code class="highlighter-rouge">log_prob</code>, which returns the log probability of a sample under the model.</p>
+
+<blockquote>
+  <p>Aside: Instead of doing <code class="highlighter-rouge">dist.sample</code>, we use <code class="highlighter-rouge">sample(name, dist)</code> for reasons you’ll see in a bit.</p>
+</blockquote>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span><span class="o">.</span><span class="n">exp</span><span class="p">())</span> <span class="c1"># 0.5000
+</span><span class="k">print</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.35</span><span class="p">))</span><span class="o">.</span><span class="n">exp</span><span class="p">())</span> <span class="c1"># 0.3752
+</span></code></pre></div></div>
+
+<p>By sampling from many distributions, we can describe a probabilistic generative model. As a running example, consider this <code class="highlighter-rouge">sleep_model</code> that describes the likely number of hours I’ll sleep on a given day. It generates a single data point by running the function top to bottom as a normal program.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">sleep_model</span><span class="p">():</span>
+    <span class="c1"># Very likely to feel lazy
+</span>    <span class="n">feeling_lazy</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="s">"feeling_lazy"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="mf">0.9</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">feeling_lazy</span><span class="p">:</span>
+        <span class="c1"># Only going to (possibly) ignore my alarm if I'm feeling lazy
+</span>        <span class="n">ignore_alarm</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="s">"ignore_alarm"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="mf">0.8</span><span class="p">))</span>
+        <span class="c1"># Will sleep more if I ignore my alarm
+</span>        <span class="n">amount_slept</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="s">"amount_slept"</span><span class="p">,</span>
+                              <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">8</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ignore_alarm</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">amount_slept</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="s">"amount_slept"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">amount_slept</span>
+
+<span class="n">sleep_model</span><span class="p">()</span> <span class="c1"># e.g. 9.91
+</span><span class="n">sleep_model</span><span class="p">()</span> <span class="c1"># e.g. 7.61
+</span><span class="n">sleep_model</span><span class="p">()</span> <span class="c1"># e.g. 8.60
+</span></code></pre></div></div>
+
+<blockquote>
+  <p>Aside: This is called a “generative” model because it has an explicit probabilistic model for every random variable (e.g. the prior on <code class="highlighter-rouge">feeling_lazy</code>). By contrast, a “discriminative” model only tries to model a conditional probabilistic distribution, where given some observations, you predict the distribution over unobserved variables.</p>
+</blockquote>
+
+<p>At this point, our stochastic functions are nothing special, as in they do not need any specialized system or machinery to work. It’s mostly just normal Python. For example, we could implement one of these distributions ourselves:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span>
+
+<span class="k">class</span> <span class="nc">Bernoulli</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">p</span>
+
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">0.</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">))</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
+
+<span class="n">b</span> <span class="o">=</span> <span class="n">Bernoulli</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">b</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span> <span class="c1"># e.g. 0.
+</span><span class="n">b</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span> <span class="c1"># 0.2
+</span></code></pre></div></div>
+
+<h2 id="traces-and-conditioning">Traces and conditioning</h2>
+
+<p>On the unconditional sleep model, we could ask a few questions, like:</p>
+<ul>
+  <li>Joint probability of a sample: what is the probability that <code class="highlighter-rouge">feeling_lazy = 1, ignore_alarm = 0, amount_slept = 10</code>?</li>
+  <li>Joint probability distribution: what is the probability for any possible assignment to all variables?</li>
+  <li>Marginal probability of a sample: what is the probability that <code class="highlighter-rouge">feeling_lazy</code> is true?</li>
+  <li>Marginal probability distribution: what is the probability over all values of <code class="highlighter-rouge">amount_slept</code>?</li>
+</ul>
+
+<p>First, we need the ability to evaluate the probability of a joint assignment to each variable.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">pyro.poutine</span> <span class="kn">import</span> <span class="n">trace</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="c1"># Runs the sleep model once and collects a trace
+</span><span class="n">tr</span> <span class="o">=</span> <span class="n">trace</span><span class="p">(</span><span class="n">sleep_model</span><span class="p">)</span><span class="o">.</span><span class="n">get_trace</span><span class="p">()</span>
+
+<span class="n">pprint</span><span class="p">({</span>
+    <span class="n">name</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">'value'</span><span class="p">:</span> <span class="n">props</span><span class="p">[</span><span class="s">'value'</span><span class="p">],</span>
+        <span class="s">'prob'</span><span class="p">:</span> <span class="n">props</span><span class="p">[</span><span class="s">'fn'</span><span class="p">]</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">props</span><span class="p">[</span><span class="s">'value'</span><span class="p">])</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">props</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">props</span><span class="p">[</span><span class="s">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="s">'sample'</span>
+<span class="p">})</span>
+<span class="c1"># {'amount_slept': {'prob': tensor(0.0799), 'value': tensor(8.2069)},
+#  'feeling_lazy': {'prob': tensor(0.9000), 'value': tensor(1.)},
+#  'ignore_alarm': {'prob': tensor(0.8000), 'value': tensor(1.)}}
+</span>
+<span class="k">print</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">log_prob_sum</span><span class="p">()</span><span class="o">.</span><span class="n">exp</span><span class="p">())</span> <span class="c1"># 0.0575
+</span></code></pre></div></div>
+
+<p>Here, the <code class="highlighter-rouge">trace</code> feature will collect values every time they are sampled with <code class="highlighter-rouge">sample</code> and store them with the corresponding string name (that’s why we give each sample a name). With a little cleanup, we can print out the value and probability of each random variable’s value, along with the joint probability of the entire trace.</p>
+
+<blockquote>
+  <p>From a software engineering and PL perspective, the ability to do things like wrap a function with <code class="highlighter-rouge">trace</code> and collect its samples (called “effect handling”) is the core functionality of a probabilistic programming language like Pyro. Most of the remaining magic is in the automatic differentiation (in PyTorch) that we’ll see later. I highly recommend reading the <a href="https://github.com/pyro-ppl/pyro/blob/dev/pyro/contrib/minipyro.py">Mini Pyro</a> implementation to see how to design a modular effects system. For this note, it suffices to know that the <code class="highlighter-rouge">sample</code> mechanism enables an external entity calling the model function to observe and modify its execution.</p>
+</blockquote>
+
+<p>The code above randomly generates a trace and shows its probability, but we want to compute the probability of a pre-selected set of values. For that, we can use <code class="highlighter-rouge">condition</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">pyro</span> <span class="kn">import</span> <span class="n">condition</span>
+
+<span class="n">cond_model</span> <span class="o">=</span> <span class="n">condition</span><span class="p">(</span><span class="n">sleep_model</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s">"feeling_lazy"</span><span class="p">:</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
+    <span class="s">"ignore_alarm"</span><span class="p">:</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">0.</span><span class="p">),</span>
+    <span class="s">"amount_slept"</span><span class="p">:</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="n">trace</span><span class="p">(</span><span class="n">cond_model</span><span class="p">)</span><span class="o">.</span><span class="n">get_trace</span><span class="p">()</span><span class="o">.</span><span class="n">log_prob_sum</span><span class="p">()</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span> <span class="c1"># 0.0097
+</span></code></pre></div></div>
+
+<p>Here, <code class="highlighter-rouge">condition</code> means “force the sample to return the provided value, and compute the trace probability as if that value was sampled.” So for example, forcing <code class="highlighter-rouge">feeling_lazy</code> to <code class="highlighter-rouge">1</code> means the trace starts with probability <code class="highlighter-rouge">0.9</code>. This also means the if statement will always go down the first branch. Inuitively, this particular choice should have low probability because if we didn’t ignore our alarm, then <code class="highlighter-rouge">amount_slept</code> should be closer to 8, not 10. That’s reflected in the low joint probability of 0.0097.</p>
+
+<p>Now, we can produce an approximate answer to any of our questions above by sampling from the distribution enough times. For example, we can look at the marginal distribution over each variable:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">traces</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="n">tr</span> <span class="o">=</span> <span class="n">trace</span><span class="p">(</span><span class="n">sleep_model</span><span class="p">)</span><span class="o">.</span><span class="n">get_trace</span><span class="p">()</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">props</span><span class="p">[</span><span class="s">'value'</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">props</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">props</span><span class="p">[</span><span class="s">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="s">'sample'</span>
+    <span class="p">}</span>
+    <span class="n">traces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">traces</span><span class="p">)</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/images/assets/ppl-joint-hist.png" alt="" /></p>
+
+<p>Look at each histogram and see if its distribution matches your expectations given the code for <code class="highlighter-rouge">sleep_model</code>. For example, the <code class="highlighter-rouge">feeling_lazy</code> histogram is true (or 1) about 90% of the time, which matches the prior belief <code class="highlighter-rouge">Bernoulli(0.9)</code>.</p>
+
+<h2 id="sampling-conditional-distributions">Sampling conditional distributions</h2>
+
+<p>Here’s a few more questions we might want to answer.</p>
+<ul>
+  <li>Given I slept 6 hours, what is the probability I was feeling lazy?</li>
+  <li>What is the probability of me sleeping exactly 7.65 hours?</li>
+</ul>
+
+<p>These are conditional probability questions, meaning they ask: given a particular value of some of the random variables, what are the likely values for the other random variables? The probability folk tend to call these “observed” and “latent” variables (often denoted by X and Z), respectively. A common use case for generative models is that the generated object is the thing you observe in the real world (like an image), and you want to guess the values of unobserved variables given that observation (like whether the image is a cat or a dog).</p>
+
+<blockquote>
+  <p>Aside: the second question is not obviously a conditional one. But to answer it, we need to compute <script type="math/tex">P(\text{feeling lazy}, \text{ignore alarm} \mid \text{amount slept})</script>. See my <a href="https://forum.pyro.ai/t/marginal-probability-of-single-assignment-to-multiple-variables/1031/3">Pyro forum post</a> for why.</p>
+</blockquote>
+
+<p>For example, a smart watch can probably record my sleep patterns, but not record whether I was being lazy. So in the sleep model, we could say <code class="highlighter-rouge">amount_slept</code> is an observed random variable while <code class="highlighter-rouge">feeling_lazy</code> and <code class="highlighter-rouge">ignore_alarm</code> are latent random variables. Applying some basic probability theory, we can write out the quantity we want to compute:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+&P(\text{feeling lazy} = T \mid \text{amount slept} = 6) \\
+=&\frac{P(\text{feeling lazy} = T, \text{amount slept} = 6)}{P(\text{amount slept} = 6)} \\
+=&\frac{\sum_{ia \in \{T, F\}} P(\text{feeling lazy} = T, \text{amount slept} = 6, \text{ignore alarm} = ia)}{\sum_{(ia, fl) \in \{T, F\}^2} P(\text{feeling lazy} = fl, \text{amount slept} = 6, \text{ignore alarm} = ia)}
+\end{align*} %]]></script>
+
+<p>Why did we rewrite the probability this way? Remember that with the unconditioned generative model, it’s easy for us to compute the probability of a joint assignment to <em>every</em> variable. So we can compute the probability of a single variable (a “marginal” probability), e.g. <script type="math/tex">P(\text{amount slept} = 6)</script>, as a sum over joint probabilities.</p>
+
+<p>However, there are two problems with this approach. First, as the number of marginalized variables grows, we have an exponential increase in summation terms. In some cases, this issue can be addressed using algorithmic techniques like dynamic programming for <a href="https://ermongroup.github.io/cs228-notes/inference/ve/">variable elimination</a> in the case of discrete variables. But the second issue is that for continuous variables, computing this marginal probability can quickly become intractable. For example, if <code class="highlighter-rouge">feeling_lazy</code> was a real-valued laziness score between 0 and 1 (presumably a more realistic model), then marginalizing that variable requires an integral instead of a sum. In general, producing an exact estimate of a conditional probability for a complex probabilistic program is not computationally feasible.</p>
+
+<h2 id="approximate-inference">Approximate inference</h2>
+
+<p>The main idea is that instead of exactly computing the conditional probability distribution (or “posterior”) of interest, we can approximate it using a variety of techniques. Generally, these fall into two camps: sampling methods and variational methods. The CS 228 (Probabilistic Graphical Models at Stanford) course notes go in depth on both (<a href="https://ermongroup.github.io/cs228-notes/inference/sampling/">sampling</a>, <a href="https://ermongroup.github.io/cs228-notes/inference/variational/">variational</a>). Essentially, for sampling methods, you use algorithms that continually draw samples from a changing probability distribution until eventually they converge on the true posterior of interest. The time to convergence is not known ahead of time. For variational methods, you use a simpler function that can be optimized to match the true posterior using standard optimization techniques like gradient descent.</p>
+
+<p>How do you know which kind to use for a given probabilistic model? This <a href="https://stats.stackexchange.com/a/271862">StackOverflow</a> answer highlights when it makes sense to use one vs. another (in summary: sampling for small data and when you <em>really</em> care about accuracy, variational otherwise). This note from <a href="http://dustintran.com/blog/on-pyro-deep-probabilistic-programming-on-pytorch">Dustin Tran</a>, a developer of the Edward PPL, highlights which kinds of inference PPLs beyond Pyro are generally used for.</p>
+
+<p>As for Pyro, the <a href="https://eng.uber.com/pyro/">introductory blog post</a> and this <a href="https://www.youtube.com/watch?v=crvNIGyqGSU&amp;feature=youtu.be">PROBPROG’18 keynote</a> provide a high-level motivation for Pyro’s focus on variational inference. One high-level theme is bringing Bayesian reasoning (i.e. quantifying uncertainty) to deep neural nets. Pyro’s integration with PyTorch is meant to facilitate the use of probabilistic programming techniques with standard neural nets. For example, one use case I heard of was using DNNs for 3D reconstruction from video, but augmenting the training process with probabilistic priors that use domain knowledge, e.g. if I’m reconstructing a stop sign, it should be close to an intersection.</p>
+
+<p>That said, the space is still wide open, and researchers are working hard to develop new applications on top of these technologies. I recommend looking at the <a href="https://probprog.cc/schedule/">PROBPROG’18</a> talks to get a more general sense of PPL applications if you’re interested.</p>
+
+<h2 id="variational-inference-1-autodifferentiation">Variational inference 1: autodifferentiation</h2>
+
+<p>Since Pyro’s stake in the ground is on variational inference, let’s explore all the mechanics underneath it. For starters, we need to understand autodifferentiation, gradients, and backpropagation in PyTorch. Let’s say I have an extremely simple model that just samples a normal distribution with fixed parameters:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">norm</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="s">"x"</span><span class="p">,</span> <span class="n">norm</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>However, let’s say I know the value of <code class="highlighter-rouge">x = 5</code> and I want to find a mean <script type="math/tex">\mu</script> to the normal distribution that maximizes the probability of seeing that <code class="highlighter-rouge">x</code>. For that, we can use a parameter:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">pyro</span> <span class="kn">import</span> <span class="n">param</span>
+
+<span class="n">mu</span> <span class="o">=</span> <span class="n">param</span><span class="p">(</span><span class="s">"mu"</span><span class="p">,</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span>
+<span class="n">norm</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="s">"x"</span><span class="p">,</span> <span class="n">norm</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>A parameter is a persistent value linked to a string name with an initial value here of 0. (It’s a Torch tensor with <code class="highlighter-rouge">requires_grad=True</code>.) Our goal is to update <code class="highlighter-rouge">mu</code> such that the probability of the value <code class="highlighter-rouge">5</code> under the normal distribution <code class="highlighter-rouge">norm</code> is maximized. PyTorch makes that quite easy:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">prob</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">prob</span><span class="o">.</span><span class="n">exp</span><span class="p">())</span> <span class="c1"># -13.4189, 0.000002
+</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span> <span class="c1"># Compute gradients with respect to probability
+</span>
+<span class="k">print</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>      <span class="c1"># 0.0
+</span><span class="k">print</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span> <span class="c1"># 5.0
+</span><span class="n">mu</span><span class="o">.</span><span class="n">data</span> <span class="o">+=</span> <span class="n">mu</span><span class="o">.</span><span class="n">grad</span> <span class="c1"># Manually take gradient step
+</span>
+<span class="k">print</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span> <span class="c1"># 0.3989
+</span></code></pre></div></div>
+
+<p>Make sure you understand what’s happening here. First, we compute the probability of 5 under the distribution <script type="math/tex">N(0, 1)</script> which is expectedly quite small. The magic happens with <code class="highlighter-rouge">prob.backward()</code>. This essentially says: for each variable involved in computing the log probability, compute a delta (gradient) such that if moved  by that delta, the log probability would increase. In this case, the gradient of 5 is the optimal solution to maximizing the probability of 5 under the model <script type="math/tex">N(5, 1)</script>, which has probability of 0.3989 as shown.</p>
+
+<blockquote>
+  <p>Note: this strategy assumes that all sampled distributions have differentiable log probability functions. Conveniently, this is true for every primitive distribution in the PyTorch standard library.</p>
+</blockquote>
+
+<p>Next, let’s generalize this to the model/trace framework we used above.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">model</span><span class="p">():</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">param</span><span class="p">(</span><span class="s">"mu"</span><span class="p">,</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">sample</span><span class="p">(</span><span class="s">"x"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">cond_model</span> <span class="o">=</span> <span class="n">condition</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s">"x"</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<span class="n">tr</span> <span class="o">=</span> <span class="n">trace</span><span class="p">(</span><span class="n">cond_model</span><span class="p">)</span><span class="o">.</span><span class="n">get_trace</span><span class="p">()</span>
+<span class="n">tr</span><span class="o">.</span><span class="n">log_prob_sum</span><span class="p">()</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+
+<span class="n">mu</span> <span class="o">=</span> <span class="n">param</span><span class="p">(</span><span class="s">"mu"</span><span class="p">)</span>
+<span class="n">mu</span><span class="o">.</span><span class="n">data</span> <span class="o">+=</span> <span class="n">mu</span><span class="o">.</span><span class="n">grad</span>
+</code></pre></div></div>
+
+<p>This code is doing the <em>exact same thing</em> the previous block, but just less manually. When we condition the model, this asserts that <code class="highlighter-rouge">x = 5</code> and adds <code class="highlighter-rouge">N(mu, 1).log_prob(5)</code> to the trace’s probability. Then running backpropagation will change the gradient on <code class="highlighter-rouge">mu</code> accordingly. This formulation is more general in that every sample location can contribute to the final log probability, and each parameter will be differentiated with respect to sum of all contributions.</p>
+
+<p>The only remaining issue is the manual gradient steps. We currently both have to identify which parameters need to be updated, and then explicitly step them. PyTorch has a wide array of <a href="https://pytorch.org/docs/stable/optim.html">optimization algorithms</a> that can do this for us, so we can just pick a common one like <a href="https://pytorch.org/docs/stable/optim.html#torch.optim.Adam">Adam</a>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">torch.optim</span> <span class="kn">import</span> <span class="n">Adam</span>
+
+<span class="k">def</span> <span class="nf">model</span><span class="p">():</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">param</span><span class="p">(</span><span class="s">"mu"</span><span class="p">,</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">sample</span><span class="p">(</span><span class="s">"x"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">model</span><span class="p">()</span> <span class="c1"># Instantiate the mu parameter
+</span><span class="n">cond_model</span> <span class="o">=</span> <span class="n">condition</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s">"x"</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+
+<span class="c1"># Large learning rate for demonstration purposes
+</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">([</span><span class="n">param</span><span class="p">(</span><span class="s">"mu"</span><span class="p">)],</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="n">mus</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">losses</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="n">tr</span> <span class="o">=</span> <span class="n">trace</span><span class="p">(</span><span class="n">cond_model</span><span class="p">)</span><span class="o">.</span><span class="n">get_trace</span><span class="p">()</span>
+
+    <span class="c1"># Optimizer wants to push positive values towards zero,
+</span>    <span class="c1"># so use negative log probability
+</span>    <span class="n">prob</span> <span class="o">=</span> <span class="o">-</span><span class="n">tr</span><span class="o">.</span><span class="n">log_prob_sum</span><span class="p">()</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+
+    <span class="c1"># Update parameters according to optimization strategy
+</span>    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="c1"># Zero all parameter gradients so they don't accumulate
+</span>    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+
+    <span class="c1"># Record probability (or "loss") along with current mu
+</span>    <span class="n">losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+    <span class="n">mus</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">(</span><span class="s">"mu"</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">"mu"</span><span class="p">:</span> <span class="n">mus</span><span class="p">,</span> <span class="s">"loss"</span><span class="p">:</span> <span class="n">losses</span><span class="p">})</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">subplots</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="/images/assets/ppl-adam.png" alt="" /></p>
+
+<h2 id="variational-inference-2-guide-functions">Variational inference 2: guide functions</h2>
+
+<p>To recap, we’ve seen now how to use autodifferentiation to optimize parameters to fit observations. Put another way, we implemented maximum likelihood learning, meaning we used optimization to find parameters that maximize the probability of data under our model. However, our goal was specifically to estimate the posterior distribution over unobserved (latent) variables. For example, returning to the <code class="highlighter-rouge">sleep_model</code>, let’s say we want to know the distribution over <code class="highlighter-rouge">feeling_lazy</code> and <code class="highlighter-rouge">ignore_alarm</code> if <code class="highlighter-rouge">amount_slept = 6</code>. Intuitively, although their prior likelihood is high, that amount of sleep is much more likely explained by not feeling lazy, so we would expect <script type="math/tex">P(fl, ia \mid as = 6)</script> to be higher for <script type="math/tex">fl = ia = 0</script>. Ideally, that would be as simple as:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Condition model on observed data
+</span><span class="n">underslept</span> <span class="o">=</span> <span class="n">condition</span><span class="p">(</span><span class="n">sleep_model</span><span class="p">,</span> <span class="p">{</span><span class="s">"amount_slept"</span><span class="p">:</span> <span class="mf">6.</span><span class="p">})</span>
+
+<span class="c1"># Draw samples from conditioned model?
+</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+  <span class="p">[</span><span class="n">trace</span><span class="p">(</span><span class="n">underslept</span><span class="p">)</span><span class="o">.</span><span class="n">get_trace</span><span class="p">()</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s">'feeling_lazy'</span><span class="p">][</span><span class="s">'value'</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+   <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)])</span> \
+  <span class="o">.</span><span class="n">hist</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/images/assets/ppl-wrong-cond.png" alt="" /></p>
+
+<p>That doesn’t work! In fact, the histogram looks almost exactly like the prior on <code class="highlighter-rouge">feeling_lazy</code>. What we know so far should be enough to deduce why this doesn’t work—think about it for a second, and maybe revisit the explanation of <code class="highlighter-rouge">condition</code> above if you’re not sure.</p>
+
+<p>Essentially, the <code class="highlighter-rouge">condition</code> only forces <code class="highlighter-rouge">amount_slept</code> to be <code class="highlighter-rouge">6</code> when we reach that point in the program, which only happens after we’ve sampled <code class="highlighter-rouge">feeling_lazy</code> and <code class="highlighter-rouge">ignore_alarm</code>. The condition has no way to exert influence opposite the flow of causality. (By contrast, if we conditioned on <code class="highlighter-rouge">feeling_lazy = 1</code>, then we could sample the model and it would work as intended!) This gets back to the intractability of computing a posterior, and why we’re using approximate methods.</p>
+
+<p>For variational inference, the key idea is that we’re going to use a separate function from the model called the “guide” to represent the posterior. The guide is a stochastic function that represents a probability distribution over the latent (unobserved) variables. For example, this is a valid guide:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">sleep_guide</span><span class="p">():</span>
+  <span class="n">sample</span><span class="p">(</span><span class="s">"feeling_lazy"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Delta</span><span class="p">(</span><span class="mf">1.</span><span class="p">))</span>
+  <span class="n">sample</span><span class="p">(</span><span class="s">"ignore_alarm"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Delta</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span>
+
+<span class="n">trace</span><span class="p">(</span><span class="n">sleep_guide</span><span class="p">)</span><span class="o">.</span><span class="n">get_trace</span><span class="p">()</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s">'feeling_lazy'</span><span class="p">][</span><span class="s">'value'</span><span class="p">]</span> <span class="c1"># 1.
+</span></code></pre></div></div>
+
+<blockquote>
+  <p>The delta distribution assigns all probability to a single value, so the above guide has <script type="math/tex">P(fl = 1, ia = 0) = 1.0</script> and all other assignments have zero probability.</p>
+</blockquote>
+
+<p>Although this is a valid guide, it’s a bad one because it’s probability distribution is very different from the <code class="highlighter-rouge">underslept</code> model. (Although if we conditioned <code class="highlighter-rouge">amount_slept = 8</code>, it would be a decent guide!) How bad is this guide? In probability theory, it’s common to quantify the difference between two probability distributions through the <a href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence">KL divergence</a>.</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+&D_{KL}(\verb|sleep_guide| || \verb|underslept|)  \\
+=& -\sum_{(fl, ia) \in \{T, F\}^2} P_{\verb|guide|}(fl, ia) \left(\log P_{\verb|model|}(fl, ia \mid as = 6) - \log P_{\verb|guide|}(fl ,ia)\right) \\
+=& -E_{fl, ia \sim P_{\verb|guide|}}\left[\log P_{\verb|model|}(fl, ia \mid as = 6) - \log P_{\verb|guide|}(fl ,ia)\right]
+\end{align*} %]]></script>
+
+<p>This essentially says: for all possible values of the latent variables, compute the difference in log probability between the model and the guide, and weight that difference by the likelihood of each assignment under the guide. In probability terms, you can think about that as an expectation of the difference in terms of the guide.</p>
+
+<blockquote>
+  <p>Note that the KL divergence is asymmetric, meaning <script type="math/tex">D_{KL}(p\|q) \neq D_{KL}(q\|p)</script>. That’s because the expression is an expectation in terms of either <script type="math/tex">p</script> or <script type="math/tex">q</script> (which ever function is on the left).</p>
+</blockquote>
+
+<p>In order to compute <script type="math/tex">P_{\verb!model!}(fl, ia \mid as = 6)</script>, this still requires us to know <script type="math/tex">P_{\verb!model!}(as = 6)</script> which is (in general) intractable due to marginalization as discussed above. Instead, we can apply a few transformations to factor out the intractable term and get a new expression called the “evidence lower bound” or ELBO:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+&\text{ELBO}(\verb!sleep_guide! || \verb|underslept|) \\
+=& E_{fl, ia \sim P_{\verb|guide|}}\left[\log P_{\verb|model|}(fl, ia, as = 6) - \log P_{\verb|guide|}(fl ,ia)\right]
+\end{align*} %]]></script>
+
+<p>The only difference is that the <script type="math/tex">P_{\verb!model!}</script> term now is a joint probability instead of a conditional probability (and the overall term is not negated). See the Edward PPL page on <a href="http://edwardlib.org/tutorials/klqp"><script type="math/tex">KL(q\|p)</script> minimiazation</a> for the gory details on how this works. We can compute this quantity in code:</p>
+
+<p>We can compute this in code:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">elbo</span><span class="p">(</span><span class="n">guide</span><span class="p">,</span> <span class="n">cond_model</span><span class="p">):</span>
+  <span class="n">dist</span> <span class="o">=</span> <span class="mf">0.</span>
+  <span class="k">for</span> <span class="n">fl</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">ia</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]</span> <span class="k">if</span> <span class="n">fl</span> <span class="o">==</span> <span class="mf">1.</span> <span class="k">else</span> <span class="p">[</span><span class="mf">0.</span><span class="p">]:</span>
+      <span class="n">log_prob</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="n">trace</span><span class="p">(</span><span class="n">condition</span><span class="p">(</span>
+        <span class="n">f</span><span class="p">,</span> <span class="p">{</span><span class="s">"feeling_lazy"</span><span class="p">:</span> <span class="n">tensor</span><span class="p">(</span><span class="n">fl</span><span class="p">),</span> <span class="s">"ignore_alarm"</span><span class="p">:</span> <span class="n">tensor</span><span class="p">(</span><span class="n">ia</span><span class="p">)}))</span> \
+        <span class="o">.</span><span class="n">get_trace</span><span class="p">()</span><span class="o">.</span><span class="n">log_prob_sum</span><span class="p">()</span>
+      <span class="n">guide_prob</span> <span class="o">=</span> <span class="n">log_prob</span><span class="p">(</span><span class="n">guide</span><span class="p">)</span>
+      <span class="n">cond_model_prob</span> <span class="o">=</span> <span class="n">log_prob</span><span class="p">(</span><span class="n">cond_model</span><span class="p">)</span>
+      <span class="n">term</span> <span class="o">=</span> <span class="n">guide_prob</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="n">cond_model_prob</span> <span class="o">-</span> <span class="n">guide_prob</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">term</span><span class="p">):</span>
+        <span class="n">dist</span> <span class="o">+=</span> <span class="n">term</span>
+  <span class="k">return</span> <span class="n">dist</span>
+
+<span class="n">elbo</span><span class="p">(</span><span class="n">sleep_guide</span><span class="p">,</span> <span class="n">underslept</span><span class="p">)</span> <span class="c1"># -4.63
+</span></code></pre></div></div>
+
+<p>Alright, well, that’s certainly a number. To check out intuition for how KL divergence works, we can also compare against a guide that has a probability distribution closer to our expected posterior.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">sleep_guide2</span><span class="p">():</span>
+  <span class="n">sample</span><span class="p">(</span><span class="s">"feeling_lazy"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Delta</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span>
+  <span class="n">sample</span><span class="p">(</span><span class="s">"ignore_alarm"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Delta</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span>
+
+<span class="n">elbo</span><span class="p">(</span><span class="n">sleep_guide2</span><span class="p">,</span> <span class="n">underslept</span><span class="p">)</span> <span class="c1"># -3.22
+</span></code></pre></div></div>
+
+<p>As expected, the guide function with latent variables closer to our expected posterior has an ELBO closer to zero (meaning smaller KL divergence, meaning the distribution is closer to the actual posterior).</p>
+
+<h2 id="variational-inference-3-elbo-optimization">Variational inference 3: ELBO optimization</h2>
+
+<p>At last, we have reached the final step in variational inference: optimization. Specifically, our goal is to use the ELBO to determine how different the guide function is from our conditioned model, then use autodifferentiation to compute a gradient of the guide with respect to the ELBO. That is, we can know how to tweak the parameters of the guide function that lower the ELBO, or push it closer to the true conditioned probability distribution.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pyro</span><span class="o">.</span><span class="n">clear_param_store</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">sleep_guide</span><span class="p">():</span>
+    <span class="c1"># Constraints ensure facts always remain true during optimization,
+</span>    <span class="c1"># e.g. that the parameter of a Bernoulli is always between 0 and 1
+</span>    <span class="n">valid_prob</span> <span class="o">=</span> <span class="n">constraints</span><span class="o">.</span><span class="n">interval</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+    <span class="n">fl_p</span> <span class="o">=</span> <span class="n">param</span><span class="p">(</span><span class="s">'fl_p'</span><span class="p">,</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">0.8</span><span class="p">),</span> <span class="n">constraint</span><span class="o">=</span><span class="n">valid_prob</span><span class="p">)</span>
+    <span class="n">ia_p</span> <span class="o">=</span> <span class="n">param</span><span class="p">(</span><span class="s">'ia_p'</span><span class="p">,</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">0.9</span><span class="p">),</span> <span class="n">constraint</span><span class="o">=</span><span class="n">valid_prob</span><span class="p">)</span>
+    <span class="n">feeling_lazy</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="s">'feeling_lazy'</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="n">fl_p</span><span class="p">))</span>
+
+    <span class="c1"># Consistent with the model, we only sample ignore_alarm if
+</span>    <span class="c1"># feeling_lazy is true
+</span>    <span class="k">if</span> <span class="n">feeling_lazy</span> <span class="o">==</span> <span class="mf">1.</span><span class="p">:</span>
+      <span class="n">sample</span><span class="p">(</span><span class="s">'ignore_alarm'</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="n">ia_p</span><span class="p">))</span>
+<span class="n">sleep_guide</span><span class="p">()</span>
+
+<span class="n">adam</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">([</span><span class="n">param</span><span class="p">(</span><span class="s">'fl_p'</span><span class="p">)</span><span class="o">.</span><span class="n">unconstrained</span><span class="p">(),</span> <span class="n">param</span><span class="p">(</span><span class="s">'ia_p'</span><span class="p">)</span><span class="o">.</span><span class="n">unconstrained</span><span class="p">()],</span>
+            <span class="n">lr</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">betas</span><span class="o">=</span><span class="p">(</span><span class="mf">0.90</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">))</span>
+<span class="n">param_vals</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">):</span>
+    <span class="c1"># We can use our elbo function from earlier and compute its gradient
+</span>    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">elbo</span><span class="p">(</span><span class="n">sleep_guide</span><span class="p">,</span> <span class="n">underslept</span><span class="p">)</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+
+    <span class="n">adam</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+    <span class="n">adam</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+
+    <span class="n">param_vals</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">param</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s">'fl_p'</span><span class="p">,</span> <span class="s">'ia_p'</span><span class="p">]})</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">param_vals</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">subplots</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="/images/assets/ppl-guide1.png" alt="" /></p>
+
+<p>Perfect! This plot reflects our belief that the probability of feeling lazy should be lower if the observed amount slept is low. Our <code class="highlighter-rouge">sleep_guide</code> now properly represents (an approximation to) the posterior <script type="math/tex">P(fl, ia \mid as = 6)</script>. Carefully observe that the parameter <code class="highlighter-rouge">fl_p</code> is distinct from the random variable <code class="highlighter-rouge">feeling_lazy</code>. That is, <code class="highlighter-rouge">fl_p</code> is a deterministic value (not sampled from a distribution) that changes during optimization, and is a parameter to the Bernoulli distribution describing how <code class="highlighter-rouge">feeling_lazy</code> is sampled.</p>
+
+<p>However, there’s two nagging questions left: what if <code class="highlighter-rouge">feeling_lazy</code> was real-valued (as opposed to 0 or 1)? And how did we come up with this guide function? As mentioned in the “Approximate inference” section, if <code class="highlighter-rouge">feeling_lazy</code> was a score (real-valued, say between 0 and 1), then we would have to change our <code class="highlighter-rouge">elbo</code> function to reflect that.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">elbo</span><span class="p">(</span><span class="n">guide</span><span class="p">,</span> <span class="n">cond_model</span><span class="p">):</span>
+  <span class="n">dist</span> <span class="o">=</span> <span class="mf">0.</span>
+  <span class="k">for</span> <span class="n">fl</span> <span class="ow">in</span> <span class="p">(</span><span class="n">every</span> <span class="n">value</span> <span class="n">between</span> <span class="mi">0</span> <span class="ow">and</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="o">...</span>
+  <span class="k">return</span> <span class="n">dist</span>
+</code></pre></div></div>
+
+<p>Again we return to “computationally intractable”. We’re essentially computing an integral, which we can either do analytically (compute a closed form for the ELBO that doesn’t have an integral in it), or approximately (pick a few values between 0 and 1, and approximate the integral with an average). The simplest approximation only uses a single assignment to the latent variables.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">pyro.poutine</span> <span class="kn">import</span> <span class="n">replay</span>
+
+<span class="k">def</span> <span class="nf">elbo_approx</span><span class="p">(</span><span class="n">guide</span><span class="p">,</span> <span class="n">cond_model</span><span class="p">):</span>
+    <span class="n">guide_trace</span> <span class="o">=</span> <span class="n">trace</span><span class="p">(</span><span class="n">guide</span><span class="p">)</span><span class="o">.</span><span class="n">get_trace</span><span class="p">()</span>
+    <span class="n">model_trace</span> <span class="o">=</span> <span class="n">trace</span><span class="p">(</span><span class="n">replay</span><span class="p">(</span><span class="n">cond_model</span><span class="p">,</span> <span class="n">guide_trace</span><span class="p">))</span><span class="o">.</span><span class="n">get_trace</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">model_trace</span><span class="o">.</span><span class="n">log_prob_sum</span><span class="p">()</span> <span class="o">-</span> <span class="n">guide_trace</span><span class="o">.</span><span class="n">log_prob_sum</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Rather than simulate the guide and model under every assignment to the latents, we instead sample the guide for a single assignment to <code class="highlighter-rouge">feeling_lazy</code> and <code class="highlighter-rouge">ignore_alarm</code> (contained in <code class="highlighter-rouge">guide_trace</code>). We then condition the model on that assignment (<code class="highlighter-rouge">replay</code> is exactly like <code class="highlighter-rouge">condition</code> except it uses a trace object instead of a dictionary), and compare the probability of the model’s trace versus the guide’s trace. Again, this is approximating the expectation with a single assignment drawn from the guide’s distribution.</p>
+
+<p>We can directly replace our <code class="highlighter-rouge">elbo</code> with <code class="highlighter-rouge">elbo_approx</code> in the optimization code from earlier, and see how it works:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">):</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">elbo_approx</span><span class="p">(</span><span class="n">sleep_guide</span><span class="p">,</span> <span class="n">underslept</span><span class="p">)</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">adam</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+    <span class="n">adam</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/images/assets/ppl-guide2.png" alt="" /></p>
+
+<p>Oh no! That didn’t work at all. The optimization seems to just have randomly moved the parameters around, not reduced them to 0 as we expected from earlier. To get an intuition for why this didn’t work, we can look at the value of the gradient on the <code class="highlighter-rouge">fl</code> parameter.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">grad_vals</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">):</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">elbo_approx</span><span class="p">(</span><span class="n">sleep_guide</span><span class="p">,</span> <span class="n">underslept</span><span class="p">)</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">grad_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">(</span><span class="s">'fl'</span><span class="p">)</span><span class="o">.</span><span class="n">unconstrained</span><span class="p">()</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+    <span class="o">...</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">grad_vals</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/images/assets/ppl-elbo-true.png" alt="" />
+<img src="/images/assets/ppl-elbo-approx.png" alt="" /></p>
+
+<p>As you can see, the gradient of the true ELBO is much smoother (lower variance), since it considers every possible latent variable assignment instead of just one. Intuitively, the reason for this variance is that the output (or “support”) of the Bernoulli distribution is discrete, i.e. true/false or 1/0. So the probability of one sample to the next can be drastically different, e.g. if <script type="math/tex">X \sim \text{Bernoulli(0.8)}</script> then <script type="math/tex">P(X = 0) = 0.2</script> and <script type="math/tex">P(X = 1) = 0.8</script>, so <script type="math/tex">P(X = 1) - P(X = 0) = 0.6</script>. By contrast, if we’re sampling a normal distribution which has many more possible outputs, a pair of samples will likely have a smaller difference in probability.</p>
+
+<p>So how do we solve this? Well, in general, dealing with tricky gradient issues is just one of the hard parts of variational inference. The <a href="https://pyro.ai/examples/svi_part_iii.html">Pyro SVI tutorial</a> discusses a few approaches, which I personally could follow mechanically, but I still don’t really get the intuition behind why they work.</p>
+
+<blockquote>
+  <p>I’ve read several blog posts about this gradient issue, but they always just seem to derive lots of formulas without really delving into the “why”… so if you have a good explanation, please let me know!</p>
+</blockquote>
+
+<p>In this specific case, it turns out that a good tool is to replace the actual ELBO with a “surrogate” objective that yields more stable gradients for our problem (again, see <a href="https://pyro.ai/examples/svi_part_iii.html#Tricky-Case:-Non-reparameterizable-Random-Variables">Pyro docs</a> for discussion).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">elbo_better_approx</span><span class="p">(</span><span class="n">guide</span><span class="p">,</span> <span class="n">cond_model</span><span class="p">):</span>
+    <span class="n">guide_trace</span> <span class="o">=</span> <span class="n">trace</span><span class="p">(</span><span class="n">guide</span><span class="p">)</span><span class="o">.</span><span class="n">get_trace</span><span class="p">()</span>
+    <span class="n">model_trace</span> <span class="o">=</span> <span class="n">trace</span><span class="p">(</span><span class="n">replay</span><span class="p">(</span><span class="n">cond_model</span><span class="p">,</span> <span class="n">guide_trace</span><span class="p">))</span><span class="o">.</span><span class="n">get_trace</span><span class="p">()</span>
+    <span class="n">elbo</span> <span class="o">=</span> <span class="n">model_trace</span><span class="o">.</span><span class="n">log_prob_sum</span><span class="p">()</span> <span class="o">-</span> <span class="n">guide_trace</span><span class="o">.</span><span class="n">log_prob_sum</span><span class="p">()</span>
+    <span class="c1"># "detach" means "don't compute gradients through this expression"
+</span>    <span class="k">return</span> <span class="n">guide_trace</span><span class="o">.</span><span class="n">log_prob_sum</span><span class="p">()</span> <span class="o">*</span> <span class="n">elbo</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">+</span> <span class="n">elbo</span>
+</code></pre></div></div>
+
+<p>Optimizing with respect to this objective yields much better results:</p>
+
+<p><img src="/images/assets/ppl-guide3.png" alt="" />
+<img src="/images/assets/ppl-elbo-better-approx.png" alt="" /></p>
+
+<p>To bring this back full circle, the hand-crafted variational inference above does (roughly) the same thing as this high-level Pyro code:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">pyro.optim</span> <span class="kn">import</span> <span class="n">Adam</span>
+<span class="kn">from</span> <span class="nn">pyro.infer</span> <span class="kn">import</span> <span class="n">SVI</span><span class="p">,</span> <span class="n">Trace_ELBO</span>
+
+<span class="n">adam</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">({</span><span class="s">"lr"</span><span class="p">:</span> <span class="mf">0.005</span><span class="p">,</span> <span class="s">"betas"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.90</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">)})</span>
+<span class="n">svi</span> <span class="o">=</span> <span class="n">SVI</span><span class="p">(</span><span class="n">underslept</span><span class="p">,</span> <span class="n">sleep_guide</span><span class="p">,</span> <span class="n">adam</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">Trace_ELBO</span><span class="p">())</span>
+
+<span class="n">param_vals</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">):</span>
+    <span class="n">svi</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+    <span class="n">param_vals</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">param</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s">"fl"</span><span class="p">,</span> <span class="s">"ia"</span><span class="p">]})</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">param_vals</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">subplots</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="/images/assets/ppl-guide-pyro.png" alt="" /></p>
+
+<p>The <code class="highlighter-rouge">SVI</code> object is responsible for collecting the different <code class="highlighter-rouge">param</code> objects and calling <code class="highlighter-rouge">loss.backward()</code>, <code class="highlighter-rouge">adam.step()</code>, and zeroing the gradients. See the <a href="https://github.com/pyro-ppl/pyro/blob/dev/pyro/contrib/minipyro.py#L247">Mini Pyro</a> implementation for how you could implement this object yourself. The <code class="highlighter-rouge">Trace_ELBO</code> object is similar to our <code class="highlighter-rouge">elbo_better_approx</code> except with a few more tricks for dealing with conditional independence in models (see the <a href="https://pyro.ai/examples/svi_part_ii.html">Pyro docs</a> for more on that).</p>
+
+<p>At this point, you should be able to read the above Pyro code and know (almost) exactly what’s going on under the hood. Similar to knowing <a href="https://github.com/alex/what-happens-when">what happens when you Google search</a>, you should know what happens when you <code class="highlighter-rouge">svi.step()</code>. To recap:</p>
+
+<ul>
+  <li>The goal is to take a model conditioned on observations, and produce a new function whose distribution over the unobserved variables is the same as the conditioned model.</li>
+  <li>The core process is to use a guide function containing parameters that are optimized with respect to the ELBO, a measure of the difference between the guide and the model.</li>
+  <li>We use Torch’s autodifferentiation to compute the gradient of the parameters with respect to the ELBO.</li>
+  <li>We approximate the true ELBO with individual samples, and use a bag of tricks to rewrite our approximate ELBO in a way that produces more stable gradients.</li>
+</ul>
+
+<p>As an exercise for the reader: we never technically answered our question, what is the probability of feeling lazy given that I slept for 6 hours? Think about how you could use the optimized <code class="highlighter-rouge">sleep_guide</code> to come up with an answer.</p>
+
+<h2 id="addendum-guide-design">Addendum: guide design</h2>
+
+<p>A still-looming question is: how did we choose our guide? I just kind of asserted that we would use the one we did. As the <a href="https://pyro.ai/examples/intro_part_ii.html#Flexible-Approximate-Inference-With-Guide-Functions">Pyro docs</a> state:</p>
+
+<blockquote>
+  <p>The guide function should generally be chosen so that, in principle, it is flexible enough to closely approximate the distribution over all unobserved <code class="highlighter-rouge">sample</code> statements in the model.</p>
+</blockquote>
+
+<p>In general, guide design seems to be something of a dark art. One basic principle is that parameters should be continuous to permit iterative optimization through gradient descent. For example, if we use a sleep guide that just uses delta distributions on boolean parameters:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">sleep_guide_delta</span><span class="p">():</span>
+    <span class="n">is_bool</span> <span class="o">=</span> <span class="n">constraints</span><span class="o">.</span><span class="n">boolean</span>
+    <span class="n">fl</span> <span class="o">=</span> <span class="n">param</span><span class="p">(</span><span class="s">'fl'</span><span class="p">,</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="n">constraint</span><span class="o">=</span><span class="n">is_bool</span><span class="p">)</span>
+    <span class="n">ia</span> <span class="o">=</span> <span class="n">param</span><span class="p">(</span><span class="s">'ia'</span><span class="p">,</span> <span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">constraint</span><span class="o">=</span><span class="n">is_bool</span><span class="p">)</span>
+    <span class="n">feeling_lazy</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="s">"feeling_lazy"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Delta</span><span class="p">(</span><span class="n">fl</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">feeling_lazy</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="n">sample</span><span class="p">(</span><span class="s">"ignore_alarm"</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">Delta</span><span class="p">(</span><span class="n">ia</span><span class="p">))</span>
+
+<span class="n">svi</span> <span class="o">=</span> <span class="n">SVI</span><span class="p">(</span><span class="n">underslept</span><span class="p">,</span> <span class="n">sleep_guide_delta</span><span class="p">,</span> <span class="n">adam</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">Trace_ELBO</span><span class="p">())</span>
+<span class="n">svi</span><span class="o">.</span><span class="n">step</span><span class="p">()</span> <span class="c1"># NotImplementedError: Cannot transform _Boolean constraints
+</span></code></pre></div></div>
+
+<p>It seems like Pyro’s VI can’t handle that case at all. But beyond that, you just experiment with different guides, run your optimization, and see what ends up closest to the desired posterior (according to the ELBO). Given the relative nascency of probabilistic programming, this seems like an active area of investigation and research. Some recent work has focused on <a href="http://www.jmlr.org/papers/volume18/16-107/16-107.pdf">automatically deriving guide functions</a>, as implemented in the <a href="http://docs.pyro.ai/en/stable/contrib.autoguide.html">pyro.contrib.autoguide</a> module. Your best bet is probably just to learn from the <a href="https://github.com/pyro-ppl/pyro/tree/dev/examples">litany of examples</a> in the Pyro repo.</p>
+
+<p>That’s all for now. I hope that you’ve found this extended exploration through the Pyro internals useful in concretizing your understanding of how probabilistic programming with variational inference works. If you’re interested in better understanding the types of problems PPLs can be used for, I encourage you to look at the <a href="http://forestdb.org/">Forest DB</a> repository of probabilistic programs, skim the <a href="https://probprog.cc/schedule/">PROBPROG’18</a> proceedings for reports from academia and industry, or read through <a href="http://probmods.org/">Probabilistic Models of Cognition</a> to see applications of PPLs to cognitive psychology.</p>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>
