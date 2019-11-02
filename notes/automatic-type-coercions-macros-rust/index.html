@@ -166,7 +166,7 @@
 
 <p>At this point, it’s clear that on the implementation side, this API style requires a fair amount of boilerplate. We can abstract that away through a procedural macro!</p>
 
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span><span class="p">[</span><span class="n">auto_into</span><span class="p">]</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[auto_into]</span>
 <span class="k">fn</span> <span class="nf">concat</span><span class="p">(</span><span class="n">t1</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="n">t2</span><span class="p">:</span> <span class="nb">String</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">String</span> <span class="p">{</span>
   <span class="n">t1</span> <span class="o">+</span> <span class="o">&amp;</span><span class="n">t2</span>
 <span class="p">}</span>

@@ -148,7 +148,7 @@
 
 <p>However, pattern-matching-based metaprogramming tools are limited to simple syntactic transformations. Many common use cases require introspecting a syntactic construct and generating code accordingly, most notably <a href="https://github.com/dtolnay/syn#example-of-a-custom-derive">custom derive</a>. In that example, the metaprogram takes a struct and generates code by looking at the struct’s fields, e.g. to automatically generate <a href="https://github.com/serde-rs/serde">serializers</a> or <a href="http://docs.diesel.rs/diesel/deserialize/trait.Queryable.html">SQL queries</a>.</p>
 
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span><span class="p">[</span><span class="nf">derive</span><span class="p">(</span><span class="n">Serialize</span><span class="p">)]</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(Serialize)]</span>
 <span class="k">struct</span> <span class="n">Point</span> <span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="nb">f32</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">f32</span> <span class="p">}</span>
 
 <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
@@ -190,7 +190,7 @@ $ rustup override set nightly-2018-03-19
 
 <p>Then we fill out the <code class="highlighter-rouge">src/main.rs</code> file:</p>
 
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="nf">feature</span><span class="p">(</span><span class="n">rustc_private</span><span class="p">,</span> <span class="n">quote</span><span class="p">)]</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#![feature(rustc_private,</span> <span class="nd">quote)]</span>
 <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{}</span>
 </code></pre></div></div>
 

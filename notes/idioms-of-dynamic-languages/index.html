@@ -186,10 +186,10 @@
 <ol>
   <li><strong><a href="https://www.javaworld.com/article/2075223/core-java/reveal-the-magic-behind-subtype-polymorphism.html">Subtype polymorphism</a>:</strong> In a class-based language like Java, one can cast all the objects a superclass like <code class="highlighter-rouge">Object</code>:
     <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
-<span class="n">Map</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;();</span>
-<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="mi">100</span><span class="o">,</span> <span class="o">(</span><span class="n">Object</span><span class="o">)</span> <span class="mi">0</span><span class="o">);</span>
-<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="mi">200</span><span class="o">,</span> <span class="o">(</span><span class="n">Object</span><span class="o">)</span> <span class="mi">200</span><span class="o">);</span>
-<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">((</span><span class="n">String</span><span class="o">)</span> <span class="n">map</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">200</span><span class="o">));</span>
+<span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;();</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="mi">100</span><span class="o">,</span> <span class="o">(</span><span class="nc">Object</span><span class="o">)</span> <span class="mi">0</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="mi">200</span><span class="o">,</span> <span class="o">(</span><span class="nc">Object</span><span class="o">)</span> <span class="mi">200</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">((</span><span class="nc">String</span><span class="o">)</span> <span class="n">map</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">200</span><span class="o">));</span>
 </code></pre></div>    </div>
     <p><strong>Pros</strong>: little syntactic overhead, no restriction on sets of types that can be placed in the container.<br />
 <strong>Cons</strong>: requires explicit typecasts in and out of the container, runtime errors possible.</p>
@@ -242,7 +242,7 @@
         <p>Here, <code class="highlighter-rouge">MyValue</code> is the sum type name, and <code class="highlighter-rouge">Int</code>/<code class="highlighter-rouge">String</code> are the branch names. By contrast, languages like <a href="https://ceylon-lang.org/documentation/tour/types/">Ceylon</a> have support for anonymous sum types:</p>
         <div class="language-ceylon highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Ceylon
 </span><span class="nd">HashMap</span><span class="o">&lt;</span><span class="nd">Integer</span><span class="o">,</span> <span class="nd">Integer</span><span class="o">|</span><span class="nd">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span>
-    <span class="nd">HashMap</span> <span class="o">{</span> <span class="mi">100</span><span class="err">-</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">,</span> <span class="mi">200</span><span class="err">-</span><span class="o">&gt;</span><span class="s">"Hello world"</span> <span class="o">}</span>
+    <span class="nd">HashMap</span> <span class="o">{</span> <span class="mi">100</span><span class="o">-&gt;</span><span class="mi">0</span><span class="o">,</span> <span class="mi">200</span><span class="o">-&gt;</span><span class="s">"Hello world"</span> <span class="o">}</span>
 </code></pre></div>        </div>
         <p>Most languages that have fully-featured sum types tend to only have named sums, one benefit being that it allows branches with the same inner type to have different names, e.g. <code class="highlighter-rouge">Foo(i32), Bar(i32)</code>.</p>
       </li>
@@ -295,14 +295,14 @@
 <ol>
   <li><strong>Subtype polymorphism:</strong> if a base class contains all the functionality necessary for a generic function, then the concrete input type can be the base class. In Java, the <code class="highlighter-rouge">Object</code> class has a <code class="highlighter-rouge">toString</code> method, so this could be defined as:
     <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
-<span class="kd">static</span> <span class="kt">void</span> <span class="nf">printList</span><span class="o">(</span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">l</span><span class="o">)</span> <span class="o">{</span>
+<span class="kd">static</span> <span class="kt">void</span> <span class="nf">printList</span><span class="o">(</span><span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">l</span><span class="o">)</span> <span class="o">{</span>
   <span class="c1">// l[0].toString() is valid</span>
   <span class="o">..</span>
 <span class="o">}</span>
 
-<span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">l</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;();</span>
-<span class="n">l</span><span class="o">.</span><span class="na">add</span><span class="o">((</span><span class="n">Object</span><span class="o">)</span> <span class="mi">0</span><span class="o">);</span>
-<span class="n">l</span><span class="o">.</span><span class="na">add</span><span class="o">((</span><span class="n">Object</span><span class="o">)</span> <span class="s">"Hello world"</span><span class="o">);</span>
+<span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">l</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;();</span>
+<span class="n">l</span><span class="o">.</span><span class="na">add</span><span class="o">((</span><span class="nc">Object</span><span class="o">)</span> <span class="mi">0</span><span class="o">);</span>
+<span class="n">l</span><span class="o">.</span><span class="na">add</span><span class="o">((</span><span class="nc">Object</span><span class="o">)</span> <span class="s">"Hello world"</span><span class="o">);</span>
 <span class="n">printList</span><span class="o">(</span><span class="n">l</span><span class="o">);</span>
 </code></pre></div>    </div>
     <p><strong>Pros:</strong> low syntactic overhead, flexible (no fixed set of types at implementation time). <br />
@@ -337,12 +337,12 @@
   <li><strong><a href="http://www.cplusplus.com/doc/oldtutorial/templates/">Compile-time metaprogramming</a>:</strong> if a language supports staging like C++ with templates, then one can write:
     <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// C++</span>
 <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-<span class="kt">void</span> <span class="n">print_list</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">l</span><span class="p">)</span> <span class="p">{</span>
+<span class="kt">void</span> <span class="nf">print_list</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">l</span><span class="p">)</span> <span class="p">{</span>
   <span class="c1">// l[0].to_string() is POSSIBLY valid</span>
 <span class="p">}</span>
 
 <span class="k">class</span> <span class="nc">Foo</span> <span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
+<span class="nl">public:</span>
   <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">to_string</span><span class="p">()</span> <span class="p">{</span> <span class="p">..</span> <span class="p">}</span>
 <span class="p">}</span>
 
@@ -351,7 +351,7 @@
 <span class="n">print_list</span><span class="o">&lt;</span><span class="n">Foo</span><span class="o">&gt;</span><span class="p">(</span><span class="n">l</span><span class="p">);</span>
 
 <span class="k">class</span> <span class="nc">Bar</span> <span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
+<span class="nl">public:</span>
   <span class="c1">// No to_string() method</span>
 <span class="p">}</span>
 
@@ -434,24 +434,24 @@
 
 <p>There’s also the “error code” approach that C, Go, and sometimes Java adopt where calling a function returns both a possible pointer to the value and an error object, e.g.:</p>
 
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Go</span><span class="x">
-</span><span class="k">func</span><span class="x"> </span><span class="n">CopyFile</span><span class="p">(</span><span class="n">dstName</span><span class="p">,</span><span class="x"> </span><span class="n">srcName</span><span class="x"> </span><span class="kt">string</span><span class="p">)</span><span class="x"> </span><span class="p">(</span><span class="n">written</span><span class="x"> </span><span class="kt">int64</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="kt">error</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
-    </span><span class="n">src</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">os</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">srcName</span><span class="p">)</span><span class="x">
-    </span><span class="k">if</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
-        </span><span class="k">return</span><span class="x">
-    </span><span class="p">}</span><span class="x">
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Go</span>
+<span class="k">func</span> <span class="n">CopyFile</span><span class="p">(</span><span class="n">dstName</span><span class="p">,</span> <span class="n">srcName</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="n">written</span> <span class="kt">int64</span><span class="p">,</span> <span class="n">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">src</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">srcName</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+        <span class="k">return</span>
+    <span class="p">}</span>
 
-    </span><span class="n">dst</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">os</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">dstName</span><span class="p">)</span><span class="x">
-    </span><span class="k">if</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
-        </span><span class="k">return</span><span class="x">
-    </span><span class="p">}</span><span class="x">
+    <span class="n">dst</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">dstName</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+        <span class="k">return</span>
+    <span class="p">}</span>
 
-    </span><span class="n">written</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">io</span><span class="o">.</span><span class="n">Copy</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span><span class="x"> </span><span class="n">src</span><span class="p">)</span><span class="x">
-    </span><span class="n">dst</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span><span class="x">
-    </span><span class="n">src</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span><span class="x">
-    </span><span class="k">return</span><span class="x">
-</span><span class="p">}</span><span class="x">
-</span></code></pre></div></div>
+    <span class="n">written</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Copy</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">src</span><span class="p">)</span>
+    <span class="n">dst</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+    <span class="n">src</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+    <span class="k">return</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <p>While you could theoretically ignore the errors and program as if they didn’t exist, this style of programming seems strictly worse compared to either exceptions or result types, since both approaches both require that an error be handled, not letting a user attempt to perform operations on an invalid handle to an object.</p>
 
@@ -479,7 +479,7 @@
   <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
     <span class="c">// do something?</span>
   <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">l</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span> <span class="err">/</span> <span class="n">n</span><span class="p">)</span><span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;&gt;</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">l</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span> <span class="err">/</span> <span class="n">n</span><span class="p">)</span><span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="mi">_</span><span class="o">&gt;&gt;</span><span class="p">();</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
@@ -506,7 +506,7 @@
     <span class="c">// do something?</span>
     <span class="k">return</span> <span class="nd">panic!</span><span class="p">(</span><span class="s">"Divide by zero"</span><span class="p">);</span>
   <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">l</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span> <span class="err">/</span> <span class="n">n</span><span class="p">)</span><span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;&gt;</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">l</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span> <span class="err">/</span> <span class="n">n</span><span class="p">)</span><span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="mi">_</span><span class="o">&gt;&gt;</span><span class="p">();</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
@@ -517,7 +517,7 @@
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Rust</span>
 <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">let</span> <span class="n">v</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Vec</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+  <span class="k">let</span> <span class="n">v</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="mi">_</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Vec</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
