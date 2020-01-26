@@ -427,7 +427,7 @@
 <span class="k">let</span> <span class="k">mut</span> <span class="n">contents</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
 <span class="n">f</span><span class="nf">.read_to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">contents</span><span class="p">)</span><span class="nf">.expect</span><span class="p">(</span><span class="s">"Failed to read"</span><span class="p">);</span>
 <span class="k">let</span> <span class="n">n</span> <span class="o">=</span> <span class="n">contents</span><span class="py">.parse</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.expect</span><span class="p">(</span><span class="s">"Failed to become int"</span><span class="p">);</span>
-<span class="nd">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span> <span class="n">n</span> / <span class="mi">10</span><span class="p">)</span>
+<span class="nd">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span> <span class="n">n</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p>All of those <code class="highlighter-rouge">expect</code> calls are saying “if this operation failed, then abort the program, otherwise get the function’s output.” (See <a href="https://doc.rust-lang.org/book/second-edition/ch09-02-recoverable-errors-with-result.html">The Book</a> for more on error handling in Rust, and how this could be made more concise.) This sort of pattern is common in languages like Haskell (but with monads) and OCaml (although the exceptions vs. monads debate is more fiery there).</p>
@@ -479,7 +479,7 @@
   <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
     <span class="c">// do something?</span>
   <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">l</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span> <span class="err">/</span> <span class="n">n</span><span class="p">)</span><span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="mi">_</span><span class="o">&gt;&gt;</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">l</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span><span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="mi">_</span><span class="o">&gt;&gt;</span><span class="p">();</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
@@ -506,7 +506,7 @@
     <span class="c">// do something?</span>
     <span class="k">return</span> <span class="nd">panic!</span><span class="p">(</span><span class="s">"Divide by zero"</span><span class="p">);</span>
   <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">l</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span> <span class="err">/</span> <span class="n">n</span><span class="p">)</span><span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="mi">_</span><span class="o">&gt;&gt;</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">l</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span><span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="mi">_</span><span class="o">&gt;&gt;</span><span class="p">();</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
