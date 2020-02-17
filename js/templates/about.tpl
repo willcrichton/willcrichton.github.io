@@ -1,7 +1,7 @@
 <img src="images/avatar_bw.png" style="height:70px" />
 <div id="text">
   <div class="section">
-    Hi, I'm Will Crichton, a second-year CS PhD student at Stanford. I've done software development for 10 years and I like programming languages and systems.
+    Hi, I'm Will Crichton, a fourth-year CS PhD student at Stanford. I do research about how to make programming languages more usable and learnable.
   </div>
   <div class="section">
     You can take a look at my <a href="#research">research</a>, or check out the projects I code in my spare time on my <a href="http://github.com/willcrichton" target="_blank">Github</a>.
