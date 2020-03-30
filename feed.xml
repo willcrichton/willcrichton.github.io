@@ -1,4 +1,154 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.2">Jekyll</generator><link href="http://willcrichton.net/feed.xml" rel="self" type="application/atom+xml" /><link href="http://willcrichton.net/" rel="alternate" type="text/html" /><updated>2020-02-17T05:10:59+00:00</updated><id>http://willcrichton.net/feed.xml</id><title type="html">Will Crichton</title><entry><title type="html">Probabilistic Programming with Variational Inference</title><link href="http://willcrichton.net/notes/probabilistic-programming-under-the-hood/" rel="alternate" type="text/html" title="Probabilistic Programming with Variational Inference" /><published>2019-06-11T00:00:00+00:00</published><updated>2019-06-11T00:00:00+00:00</updated><id>http://willcrichton.net/notes/probabilistic-programming-under-the-hood</id><content type="html" xml:base="http://willcrichton.net/notes/probabilistic-programming-under-the-hood/">&lt;p&gt;This note provides an introduction to probabilistic programming and variational inference using &lt;a href=&quot;http://pyro.ai/&quot;&gt;Pyro&lt;/a&gt;. The Pyro website also has a &lt;a href=&quot;http://pyro.ai/examples/intro_part_i.html&quot;&gt;great tutorial&lt;/a&gt;, but it’s distinctly oriented more towards people with probability backgrounds than systems backgrounds. If you, like me, are good at software engineering and bad at probability (single-letter variables in particular), then this note is for you.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.2">Jekyll</generator><link href="http://willcrichton.net/feed.xml" rel="self" type="application/atom+xml" /><link href="http://willcrichton.net/" rel="alternate" type="text/html" /><updated>2020-03-30T04:26:30+00:00</updated><id>http://willcrichton.net/feed.xml</id><title type="html">Will Crichton</title><entry><title type="html">The Last Decade of Programming, According to Google Trends</title><link href="http://willcrichton.net/notes/the-last-decade-of-programming/" rel="alternate" type="text/html" title="The Last Decade of Programming, According to Google Trends" /><published>2020-03-29T00:00:00+00:00</published><updated>2020-03-29T00:00:00+00:00</updated><id>http://willcrichton.net/notes/the-last-decade-of-programming</id><content type="html" xml:base="http://willcrichton.net/notes/the-last-decade-of-programming/">&lt;p&gt;Has programming really changed in the last decade? One way to answer this is by looking at Google searches. Changes in search queries is hopefully a meaningful proxy for the underlying popularity (but not necessarily influence!) of a tool. For example, using Google’s &lt;a href=&quot;https://trends.google.com/trends/?geo=US&quot;&gt;Trends&lt;/a&gt; tool, we can look at how frontend web development has changed by comparing frameworks (&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=jquery,react,backbone,angular,vue&quot;&gt;query&lt;/a&gt;):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A few notes on how to interpret this graph.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;The x-axis is time, going from 2004 to present (unless where specified).&lt;/li&gt;
+  &lt;li&gt;The y-axis is “interest”. According to Google, this “represents search interest relative to the highest point on the chart for the given region and time. A value of 100 is the peak popularity for the term. A value of 50 means that the term is half as popular. A score of 0 means there was not enough data for this term.”&lt;/li&gt;
+  &lt;li&gt;Each color is a different keyword. For example, jQuery is blue in the graph above.&lt;/li&gt;
+  &lt;li&gt;The searches are restricted to whatever Google classifies as the “Programming” category.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The graph above indicates that jQuery was hugely dominant in frontend web development for a long time, but has slowly died off with the rise of other frameworks. We can see the relative proportions today by zooming in to the last two years:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Neat, right? Try doing some searches yourself! Here’s the first example again if you want to play around using my configuration: &lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=jquery,react,backbone,angular,vue&quot;&gt;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=jquery,react,backbone,angular,vue&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Let’s dive into some other application areas.&lt;/p&gt;
+
+&lt;h2 id=&quot;web-servers&quot;&gt;Web servers&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fm%2F0505cl,%2Fm%2F06y_qx,%2Fm%2F0dgs72v,%2Fm%2F0bbxf89&quot;&gt;Ruby on Rails, Django, Flask, and Node.js:&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Rails is dominant for a while. Django and Flask still far from the mainstream, apparently, although “Node.js” is a little general as a query.&lt;/p&gt;
+
+&lt;h2 id=&quot;high-performance-web&quot;&gt;High-performance web&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fm%2F0505cl,%2Fm%2F06y_qx,%2Fm%2F0dgs72v,%2Fm%2F0bbxf89&quot;&gt;WebGL, WebAssembly, Emscripten, node.js&lt;/a&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A uniquely last-decade trend. WebGL, Emscripten, and Asm.js kicked off the high-performance web trend, and WebAssembly has started to pick up steam.&lt;/p&gt;
+
+&lt;h2 id=&quot;mobile-apps&quot;&gt;Mobile apps&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fm%2F02wxtgw,%2Fm%2F03wbl14,%2Fg%2F11ggsjzp49&quot;&gt;Android, iOS, and iPad&lt;/a&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Android and iOS are still neck-and-neck, although popularity has dimmed over the last decade.&lt;/p&gt;
+
+&lt;h2 id=&quot;game-engines&quot;&gt;Game engines&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fm%2F058b6,%2Fm%2F0dmyvh,%2Fm%2F025wnp&quot;&gt;Adobe Flash, Unity, and Unreal Engine&lt;/a&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Flash has been slain at the hands of Steve Jobs. He published his famous &lt;a href=&quot;https://en.wikipedia.org/wiki/Thoughts_on_Flash&quot;&gt;“Thoughts on Flash”&lt;/a&gt; letter almost exactly a decade ago. Unity and Unreal have filled the void (or maybe Roblox and Minecraft have?).&lt;/p&gt;
+
+&lt;h2 id=&quot;data-science&quot;&gt;Data science&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fg%2F11c1q0p940,%2Fm%2F021plb,%2Fm%2F0rphppq&quot;&gt;Jupyter, numpy, and pandas&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-7.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Another last-decade trend is the overall rise of the data scientist. Correspondingly, their faithful tools have gained popularity: Jupyter, numpy, and pandas all rose with numpy at the top.&lt;/p&gt;
+
+&lt;h2 id=&quot;data-visualization&quot;&gt;Data visualization&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fm%2F0k2kwt4,%2Fm%2F08b9rm,%2Fm%2F0gythct&quot;&gt;D3.js, Matplotlib, ggplot2&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-8.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The inscrutable Matplotlib leads the data visualization trend, but maybe it just generates more search traffic because it’s hard to use?&lt;/p&gt;
+
+&lt;h2 id=&quot;cloud-computing&quot;&gt;Cloud computing&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fm%2F0105pbj4,%2Fm%2F05nrgx,%2Fm%2F04y7lrx&quot;&gt;Google Cloud, AWS, Azure&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-9.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;While it feels ubiquitous today, even cloud computing is really a last-decade trend. Amazon and Microsoft battle for first, while Google struggles below.&lt;/p&gt;
+
+&lt;h2 id=&quot;big-data&quot;&gt;Big data&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fm%2F0fdjtq,%2Fm%2F0ndhxqz,%2Fm%2F0zmynvd&quot;&gt;Hadoop, Spark, Kafka&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-10.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Hadoop passes the baton to Spark as it becomes the leading big data processor.&lt;/p&gt;
+
+&lt;h2 id=&quot;machine-learning&quot;&gt;Machine learning&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fg%2F11bwp1s2k3,%2Fg%2F11gd3905v1,%2Fg%2F11g6ym8nbt&quot;&gt;TensorFlow, Pytorch, Caffe, scikit-learn&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-11.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Machine learning frameworks are on the rise with the popularity of deep learning, with TensorFlow at the top, but falling precipitously. Scikit-learn was doing machine learning before it was cool.&lt;/p&gt;
+
+&lt;h2 id=&quot;embedded-computing&quot;&gt;Embedded computing&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fm%2F0gmg36g,%2Fm%2F0djmwv&quot;&gt;Raspberry Pi, Arduino&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-12.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The embedded computing platforms Raspberry Pi and Arduino both hit the big time at the beginning of the decade. Did you know that the Pi is the third best-selling general-purpose computing platform &lt;a href=&quot;https://magpi.raspberrypi.org/articles/raspberry-pi-sales&quot;&gt;of all time&lt;/a&gt;?&lt;/p&gt;
+
+&lt;h2 id=&quot;education&quot;&gt;Education&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fm%2F028167f,%2Fm%2F01c7gw,Alice&quot;&gt;Scratch, Lego Mindstorms, Alice&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-13.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The pre-college programming education landscape hasn’t changed significantly in terms of tools specialized to education (e.g. the shift to Python isn’t represnted here). Well, one notable change though…&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-14.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;version-control&quot;&gt;Version control&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://trends.google.com/trends/explore?cat=31&amp;amp;date=all&amp;amp;geo=US&amp;amp;q=%2Fm%2F05vqwg,%2Fm%2F012ct9,%2Fm%2F08441_,%2Fm%2F08w6d6&quot;&gt;Git, Subversion, Mercurial, Perforce&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-15.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Git won.&lt;/p&gt;
+
+&lt;h2 id=&quot;addendum-programming-languages&quot;&gt;Addendum: Programming Languages&lt;/h2&gt;
+
+&lt;p&gt;Since there are existing metrics for tracking programming language popularity, we can look to those to see how PLs changed over the decade. The &lt;a href=&quot;http://pypl.github.io/PYPL.html&quot;&gt;PYPL&lt;/a&gt; measures search interest for language tutorials. For example, the top 6 PLs by popularity:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-16.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Note that the graph uses a log-scale on the y-axis. The most notable trend here: Python grew from 3% of total search volume to 30% of total search volume. It wins the language of the decade award, hands down!&lt;/p&gt;
+
+&lt;p&gt;A few more comparisons:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Systems languages&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-17.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;C/C++ still hold dominant. Go moderately more popular than Rust.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Scripting languages&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-18.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Ruby and Visual Basic in decline, Javascript roughly constant, Python to the top.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Scientific computing languages&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-19.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Matlab starts to die, R gets more popular but seems to plateau.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Java-like languages&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/assets/trends-20.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Look at the elbow on the Swift line!&lt;/p&gt;</content><author><name></name></author><summary type="html">Has programming really changed in the last decade? One way to answer this is by looking at Google searches. Changes in search queries is hopefully a meaningful proxy for the underlying popularity (but not necessarily influence!) of a tool. For example, using Google’s Trends tool, we can look at how frontend web development has changed by comparing frameworks (query):</summary></entry><entry><title type="html">Probabilistic Programming with Variational Inference</title><link href="http://willcrichton.net/notes/probabilistic-programming-under-the-hood/" rel="alternate" type="text/html" title="Probabilistic Programming with Variational Inference" /><published>2019-06-11T00:00:00+00:00</published><updated>2019-06-11T00:00:00+00:00</updated><id>http://willcrichton.net/notes/probabilistic-programming-under-the-hood</id><content type="html" xml:base="http://willcrichton.net/notes/probabilistic-programming-under-the-hood/">&lt;p&gt;This note provides an introduction to probabilistic programming and variational inference using &lt;a href=&quot;http://pyro.ai/&quot;&gt;Pyro&lt;/a&gt;. The Pyro website also has a &lt;a href=&quot;http://pyro.ai/examples/intro_part_i.html&quot;&gt;great tutorial&lt;/a&gt;, but it’s distinctly oriented more towards people with probability backgrounds than systems backgrounds. If you, like me, are good at software engineering and bad at probability (single-letter variables in particular), then this note is for you.&lt;/p&gt;
 
 &lt;p&gt;The pedagogy here is to use small code samples to run experiments that slowly build intuition for how the system works. The beauty of having a programming language, as opposed to learning from a probability textbook/class, is that we can turn questions into executable programs and see if reality matches our expectations. The ultimate goal is that you will have an end-to-end understanding of variational inference for simple probabilistic inference problems.&lt;/p&gt;
 
@@ -2103,43 +2253,4 @@ designed and implemented by more than one person.&lt;/li&gt;
       &lt;p&gt;There’s some cool research out there about languages, runtimes, and IDEs that support typed holes, e.g. see &lt;a href=&quot;http://hazel.org/&quot;&gt;Hazel&lt;/a&gt; and &lt;a href=&quot;http://docs.idris-lang.org/en/latest/tutorial/typesfuns.html#holes&quot;&gt;Idris&lt;/a&gt;. &lt;a href=&quot;#fnref:3&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
-&lt;/div&gt;</content><author><name></name></author><summary type="html">Here’s a fact: a lot of people use dynamic languages1. The web world is the most prominent use case, having both frontend and backend often written in dynamic languages (Python, PHP, Ruby, Javascript), but these languages are also widespread in other fields like data science (Python, R, Matlab, Julia), game scripting (Lua), hardware (Perl), and more. Dynamic languages are increasingly used for introductory computer science education—Stanford’s new CS 106J uses Javascript, Berkeley’s CS 61A and CMU’s 15-112 use Python, and Brown’s CSCI 0190 uses Racket. Even the College Board is moving its new AP CS Principles away from Java and towards dynamic languages. I’m using “dynamic language” roughly as short-hand for “dynamically-typed language,” but also to convey a more general sentiment about the feel of a language rather than simply a feature of the type system. A “static language” will be any language that’s not a dynamic language. &amp;#8617;</summary></entry><entry><title type="html">Automatic Type Coercions with Procedural Macros in Rust</title><link href="http://willcrichton.net/notes/automatic-type-coercions-macros-rust/" rel="alternate" type="text/html" title="Automatic Type Coercions with Procedural Macros in Rust" /><published>2018-06-12T00:00:00+00:00</published><updated>2018-06-12T00:00:00+00:00</updated><id>http://willcrichton.net/notes/automatic-type-coercions-macros-rust</id><content type="html" xml:base="http://willcrichton.net/notes/automatic-type-coercions-macros-rust/">&lt;p&gt;As an eminently lazy Rust programmer, I often take one too many shortcuts. For example, the other day I was writing a function that takes as input a string.&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Except I frequently invoked this function with a variety of things that turned into strings, including &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;amp;str&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;i32&lt;/code&gt;, and other types, so much that I was frequently invoking the &lt;a href=&quot;https://doc.rust-lang.org/std/string/trait.ToString.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;ToString&lt;/code&gt;&lt;/a&gt; trait. So I thought, why not move this into the API?&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Into&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.into&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Then I started thinking, how far can we take this pattern? Because the &lt;a href=&quot;https://doc.rust-lang.org/std/convert/trait.Into.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;.into()&lt;/code&gt;&lt;/a&gt; function relies on Rust’s trait resolution to figure out what type to coerce into, it feels kind of like a dynamically typed language. For example, here’s a function that concatenates two strings:&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;concat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Into&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Into&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.into&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t2&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.into&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t2&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}, {}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-    &lt;span class=&quot;nf&quot;&gt;concat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;B&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
-    &lt;span class=&quot;nf&quot;&gt;concat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Hello&quot;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.to_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()));&lt;/span&gt;
-  &lt;span class=&quot;c&quot;&gt;// prints &quot;AB, 1Hello&quot;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;At this point, it’s clear that on the implementation side, this API style requires a fair amount of boilerplate. We can abstract that away through a procedural macro!&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;#[auto_into]&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;concat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t2&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://gist.github.com/willcrichton/d49783efee8366d6de110e1960279544&quot;&gt;See here&lt;/a&gt; for the barebones macro implementation (nightly required). This is cool because, in a sense, it makes your API strictly more general than before. Any calls that were valid before are still valid after &lt;code class=&quot;highlighter-rouge&quot;&gt;#[auto_into]&lt;/code&gt;, except now you can pass any values which could be coerced into the desired input types.&lt;/p&gt;
-
-&lt;p&gt;That said, is this a good idea? Probably not in the general case, since implicit type coercions are a scary source of bugs, particularly for a language like Rust that errs on the side of explicitness. But it’s a neat pattern enabled by the trait system that could be used for more practical designs, e.g. a student in my Programming Languages course used a similar idea to implement a fluent API for &lt;a href=&quot;http://cs242.stanford.edu/assets/projects/2017/diamondm-mvilim.pdf&quot;&gt;dependency injection&lt;/a&gt; in Rust.&lt;/p&gt;</content><author><name></name></author><summary type="html">As an eminently lazy Rust programmer, I often take one too many shortcuts. For example, the other day I was writing a function that takes as input a string.</summary></entry></feed>
+&lt;/div&gt;</content><author><name></name></author><summary type="html">Here’s a fact: a lot of people use dynamic languages1. The web world is the most prominent use case, having both frontend and backend often written in dynamic languages (Python, PHP, Ruby, Javascript), but these languages are also widespread in other fields like data science (Python, R, Matlab, Julia), game scripting (Lua), hardware (Perl), and more. Dynamic languages are increasingly used for introductory computer science education—Stanford’s new CS 106J uses Javascript, Berkeley’s CS 61A and CMU’s 15-112 use Python, and Brown’s CSCI 0190 uses Racket. Even the College Board is moving its new AP CS Principles away from Java and towards dynamic languages. I’m using “dynamic language” roughly as short-hand for “dynamically-typed language,” but also to convey a more general sentiment about the feel of a language rather than simply a feature of the type system. A “static language” will be any language that’s not a dynamic language. &amp;#8617;</summary></entry></feed>
