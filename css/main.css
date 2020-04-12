@@ -687,6 +687,11 @@ table {
     .note h2 {
       line-height: 1em;
       font-size: 26px; } }
+.note h3 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 5px; }
 .note img, .note video {
   max-width: 100%;
   max-height: 500px;
