@@ -724,10 +724,13 @@ table {
   border: 2px solid #eee; }
   .note pre code {
     font-size: 16px;
-    padding: 0; }
+    padding: 0;
+    border: 0; }
 .note code {
   font-size: 16px;
-  padding: 3px 5px; }
+  padding: 3px 5px;
+  color: #aa3f3f;
+  border: 1px solid #eee; }
 .note a code {
   padding: 0; }
 .note sup {

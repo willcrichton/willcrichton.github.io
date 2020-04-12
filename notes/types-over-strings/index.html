@@ -513,7 +513,7 @@
 <p>Then we can modify our <code class="highlighter-rouge">WebServer</code> example to use an inductive structure:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">DIBuilder</span> <span class="k">for</span> <span class="n">WebServer</span> <span class="p">{</span>
-  <span class="k">type</span> <span class="n">Input</span> <span class="o">=</span> <span class="p">(</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Database</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="p">(</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">ServerConfig</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="p">()));</span>
+  <span class="k">type</span> <span class="n">Input</span> <span class="o">=</span> <span class="p">(</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Database</span><span class="o">&gt;&gt;</span><span class="p">,(</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">ServerConfig</span><span class="o">&gt;&gt;</span><span class="p">,()));</span>
   <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">WebServer</span><span class="p">;</span>
 
   <span class="k">fn</span> <span class="nf">build</span><span class="p">((</span><span class="n">db</span><span class="p">,</span> <span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="p">())):</span> <span class="nn">Self</span><span class="p">::</span><span class="n">Input</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">WebServer</span> <span class="p">{</span>
@@ -523,7 +523,7 @@
 </code></pre></div></div>
 
 <blockquote>
-  <p>Aside: in practice, rather than doing nested pairs, you can use a macro to create the <code class="highlighter-rouge">GetInput</code> impl <a href="https://github.com/amethyst/shred/blob/0.10.2/src/system.rs#L438-L469">like this</a>.</p>
+  <p>Aside: in practice, rather than doing nested pairs, you can use a macro to create the <code class="highlighter-rouge">GetInput</code> impl for many tuple types <a href="https://github.com/amethyst/shred/blob/0.10.2/src/system.rs#L438-L469">like this</a>.</p>
 </blockquote>
 
 <p>And at last, we can implement <code class="highlighter-rouge">DIManager::build</code>:</p>
@@ -545,10 +545,10 @@
 
 <p>With the API complete, our example now looks like this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let mut manager = DIManager::new();
-manager.build::&lt;MySQL&gt;().unwrap();
-let server = manager.build::&lt;WebServer&gt;().unwrap();
-server.lock().unwrap().run();
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">manager</span> <span class="o">=</span> <span class="nn">DIManager</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+<span class="n">manager</span><span class="py">.build</span><span class="p">::</span><span class="o">&lt;</span><span class="n">MySQL</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="k">let</span> <span class="n">server</span> <span class="o">=</span> <span class="n">manager</span><span class="py">.build</span><span class="p">::</span><span class="o">&lt;</span><span class="n">WebServer</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="n">server</span><span class="nf">.lock</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()</span><span class="nf">.run</span><span class="p">();</span>
 </code></pre></div></div>
 
 <p>We can construct a <code class="highlighter-rouge">WebServer</code> without explicitly passing in a <code class="highlighter-rouge">dyn Database</code> instance. When we use the <code class="highlighter-rouge">server</code>, we have to explicitly call <code class="highlighter-rouge">.lock()</code> now that it’s wrapped in a mutex. And lo, our dependencies have been injected.</p>
