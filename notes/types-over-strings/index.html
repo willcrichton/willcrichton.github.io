@@ -283,7 +283,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Look carefully at <code class="highlighter-rouge">get_mut</code>. The inner hash map returns a value of type <code class="highlighter-rouge">Box&lt;dyn Any&gt;</code>, which we can <code class="highlighter-rouge">downcast_mut</code> to become a value of type <code class="highlighter-rouge">&amp;mut T</code>. This operation is guaranteed to not fail, because only values of type <code class="highlighter-rouge">T</code> are stored in the hasmap under the key for <code class="highlighter-rouge">T</code>.</p>
+<p>Look carefully at <code class="highlighter-rouge">get_mut</code>. The inner hash map returns a value of type <code class="highlighter-rouge">Box&lt;dyn Any&gt;</code>, which we can <code class="highlighter-rouge">downcast_mut</code> to become a value of type <code class="highlighter-rouge">&amp;mut T</code>. This operation is guaranteed to not fail, because only values of type <code class="highlighter-rouge">T</code> are stored in the hash map under the key for <code class="highlighter-rouge">T</code>.</p>
 
 <h3 id="finishing-our-event-system">Finishing our event system</h3>
 
@@ -441,7 +441,7 @@
 <span class="k">impl</span> <span class="n">DIManager</span> <span class="p">{</span>
   <span class="k">fn</span> <span class="n">build</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">DIBuilder</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nn">T</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">input</span> <span class="o">=</span> <span class="cm">/* get the inputs, somehow */</span><span class="p">;</span>
-    <span class="k">let</span> <span class="n">obj</span> <span class="o">=</span> <span class="nn">T</span><span class="p">::</span><span class="nf">build</span><span class="p">(</span><span class="n">deps</span><span class="p">);</span>
+    <span class="k">let</span> <span class="n">obj</span> <span class="o">=</span> <span class="nn">T</span><span class="p">::</span><span class="nf">build</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
     <span class="k">let</span> <span class="n">sync_obj</span> <span class="o">=</span> <span class="nn">Arc</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="nn">Mutex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">obj</span><span class="p">));</span>
     <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="py">.set</span><span class="p">::</span><span class="o">&lt;</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nn">T</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">sync_obj</span><span class="nf">.clone</span><span class="p">());</span>
     <span class="nf">Some</span><span class="p">(</span><span class="n">sync_obj</span><span class="p">)</span>
