@@ -732,7 +732,9 @@ table {
   color: #aa3f3f;
   border: 1px solid #eee; }
 .note a code {
-  padding: 0; }
+  padding: 0;
+  color: #2169a5;
+  border: 0; }
 .note sup {
   font-size: 18px; }
 .note blockquote {

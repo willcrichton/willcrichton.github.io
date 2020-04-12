@@ -135,7 +135,9 @@
     April 12, 2020
   </div>
   <div class="abstract">I show how to implement event listeners and dependency injection using Rust's type system to avoid common errors in stringly-typed versions of these extensible architectures.</div>
-  <p>Types are a useful tool to make sure software libraries work together. I expect an int, you give me a string, compiler raises an error. In my experience, types, interfaces and encapsulation work best when using black-box APIs: hash maps, regexes, HTTP requests. The programmer controls the top-level program, i.e. the types that orchestrate the individual pieces.</p>
+  <p><em>All code in this note is available <a href="https://github.com/willcrichton/types-over-strings">on Github</a>.</em></p>
+
+<p>Types are a useful tool to make sure software libraries work together. I expect an int, you give me a string, compiler raises an error. In my experience, types, interfaces and encapsulation work best when using black-box APIs: hash maps, regexes, HTTP requests. The programmer controls the top-level program, i.e. the types that orchestrate the individual pieces.</p>
 
 <p>However, the Type Life tends to become harder when dealing with frameworks, or any kind of <em>extensible architecture</em> where the programmer is plugging components into a bigger system they don’t control. For example, consider the venerable <a href="https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener"><code class="highlighter-rouge">EventTarget.addEventListener</code></a> from JavaScript:</p>
 
