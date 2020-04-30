@@ -558,7 +558,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>To represent the inductive cases (e.g. <code class="highlighter-rouge">Send</code>), we use a <code class="highlighter-rouge">where</code> class to perform an inductive computation. For example:</p>
+<p>To represent the inductive cases (e.g. <code class="highlighter-rouge">Send</code>), we use a <code class="highlighter-rouge">where</code> clause to perform an inductive computation. For example:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">S</span><span class="o">&gt;</span> <span class="n">ComputeDual</span> <span class="k">for</span> <span class="nb">Send</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">S</span><span class="o">&gt;</span> <span class="k">where</span> <span class="n">S</span><span class="p">:</span> <span class="n">ComputeDual</span> <span class="p">{</span>
   <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">Recv</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Dual</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&gt;&gt;</span><span class="p">;</span>
@@ -572,7 +572,7 @@
 \dual{\ssend{\tau}{\sigma}} &= \srecv{\tau}{\dual{\sigma}}
 \end{align*} %]]></script>
 
-<p>The key idea is that normally a <code class="highlighter-rouge">where</code> bound <em>constrains</em> a trait implementation, e.g. <code class="highlighter-rouge">ToString</code> for <code class="highlighter-rouge">Vec&lt;T&gt;</code> is only implemented where <code class="highlighter-rouge">T: ToString</code>. Here, we re-purpose the bound to <em>perform a computation</em>, i.e. inductively getting the <code class="highlighter-rouge">Dual</code> of <code class="highlighter-rouge">S</code>.</p>
+<p>Usually, a <code class="highlighter-rouge">where</code> bound <em>constrains</em> a trait implementation, e.g. <code class="highlighter-rouge">ToString</code> for <code class="highlighter-rouge">Vec&lt;T&gt;</code> is only implemented where <code class="highlighter-rouge">T: ToString</code>. Here, we re-purpose the bound to <em>perform a computation</em>, i.e. inductively getting the <code class="highlighter-rouge">Dual</code> of <code class="highlighter-rouge">S</code>.</p>
 
 <blockquote>
   <p>Note that trait bounds have the form <code class="highlighter-rouge">Type: Trait</code>, so we can’t say <code class="highlighter-rouge">S: Dual</code> as <code class="highlighter-rouge">Dual</code> is a type. We use <code class="highlighter-rouge">ComputeDual</code> in the trait bound, then <code class="highlighter-rouge">Dual&lt;S&gt;</code> when used as a type.</p>
@@ -653,7 +653,7 @@
 \msf{nth}~(\tau, l)~(i+1) &= \msf{nth}~l~i
 \end{align*} %]]></script>
 
-<p>Then the encoding becomes 1-to-1:</p>
+<p>Then the encoding of <code class="highlighter-rouge">Nth</code> into Rust traits becomes 1-to-1:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">L</span><span class="o">&gt;</span> <span class="n">ComputeNth</span><span class="o">&lt;</span><span class="n">Z</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">Push</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">L</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span>
@@ -708,7 +708,7 @@
 
 <ul>
   <li>
-    <p>Domain-specific type systems enable powerful compile-type checks on complex properties. Checking that communication protocols are followed, or that secure information is protected, usually requires external model checkers.</p>
+    <p>Domain-specific type systems enable powerful compile-time checks on complex properties. Checking that communication protocols are followed, or that secure information is protected, usually requires external model checkers. Here, we just need Rust!</p>
   </li>
   <li>
     <p>Encoding logic rules into Rust traits in a practical way is not obvious at first glance. There aren’t many examples of this pattern to generalize from.</p>
