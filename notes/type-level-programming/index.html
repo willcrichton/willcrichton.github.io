@@ -269,6 +269,10 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
+<blockquote>
+  <p>For a discussion about the use of <code class="highlighter-rouge">unsafe</code> in this example and the rest of the article, see this <a href="https://www.reddit.com/r/rust/comments/gaxlm3/typelevel_programming_in_rust/fp2gjhg/">/r/rust</a> thread.</p>
+</blockquote>
+
 <p>This pattern works effectively for simple finite state machines, where the logic to determine the next state is straightforward. In this note, I will explore situations where determining the next state is not so simple. In the process, we’ll talk about <strong>type-level programming</strong>, or how you can use Rust’s type system to encode <strong>computations on types</strong>.</p>
 
 <blockquote>
