@@ -405,7 +405,8 @@
 <p>Here’s an example of using the type operator:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="mi">_</span> <span class="p">:</span> <span class="n">MaxLevel</span><span class="o">&lt;</span><span class="n">HighSec</span><span class="p">,</span> <span class="n">LowSec</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">HighSec</span><span class="p">;</span> <span class="c">// ok</span>
-<span class="k">let</span> <span class="mi">_</span> <span class="p">:</span> <span class="n">MaxLevel</span><span class="o">&lt;</span><span class="n">LowSec</span><span class="p">,</span> <span class="n">LowSec</span><span class="o">&gt;</span>  <span class="o">=</span> <span class="n">LowSec</span><span class="p">;</span>  <span class="c">// type error</span>
+<span class="k">let</span> <span class="mi">_</span> <span class="p">:</span> <span class="n">MaxLevel</span><span class="o">&lt;</span><span class="n">LowSec</span> <span class="p">,</span> <span class="n">LowSec</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">LowSec</span><span class="p">;</span>  <span class="c">// ok</span>
+<span class="k">let</span> <span class="mi">_</span> <span class="p">:</span> <span class="n">MaxLevel</span><span class="o">&lt;</span><span class="n">LowSec</span> <span class="p">,</span> <span class="n">LowSec</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">HighSec</span><span class="p">;</span> <span class="c">// type error</span>
 </code></pre></div></div>
 
 <p>Now, we can implement <code class="highlighter-rouge">SecureVec::push</code> in one method:</p>
