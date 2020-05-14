@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <meta name="description"
-          content="Using type-level programming, I show how to use a jQuery-like selector language to perform updates on nested types.">
+          content="Using type-level programming, I show how to use a jQuery-like selector language to perform updates on nested types in Rust.">
     
     
     <title>
@@ -220,8 +220,8 @@
     &nbsp; &mdash; &nbsp;
     May 14, 2020
   </div>
-  <div class="abstract">Using type-level programming, I show how to use a jQuery-like selector language to perform updates on nested types.</div>
-  <p><em>Part of an ongoing series about type-level programming in Rust. Read <a href="http://willcrichton.net/notes/type-level-programming/">part one</a> first!<br />Also, all code in this note is available on GitHub: <a href="https://github.com/willcrichton/tquery">willcrichton/tquery</a></em></p>
+  <div class="abstract">Using type-level programming, I show how to use a jQuery-like selector language to perform updates on nested types in Rust.</div>
+  <p><em>Part of an ongoing series about type-level programming in Rust. Read <a href="http://willcrichton.net/notes/type-level-programming/">part one</a> first!<br />All code in this note is available on GitHub: <a href="https://github.com/willcrichton/tquery">willcrichton/tquery</a></em></p>
 
 <p>When doing type-level programming, sometimes our types become quite large, which can make them unwieldy to work with. In this note, we’re going to develop a library of <em>type selectors</em> to perform accesses and updates on deeply nested types.</p>
 
@@ -241,16 +241,16 @@ ResultSet---OR-|‾Open----AND-|                                     |_Inserted
 
 <p>To encode this diagram in Rust with typestate, each branch of an “OR” is a unique struct, and each branch of an “AND” is a type parameter to a struct.</p>
 
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">ResultSet</span><span class="o">&lt;</span><span class="n">SetState</span><span class="o">&gt;</span><span class="p">(</span><span class="n">PhantomData</span><span class="o">&lt;</span><span class="n">SetState</span><span class="o">&gt;</span><span class="p">);</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// obligatory PhantomData are omitted</span>
+<span class="k">struct</span> <span class="n">ResultSet</span><span class="o">&lt;</span><span class="n">SetState</span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="k">struct</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;</span><span class="p">(</span>
-  <span class="n">PhantomData</span><span class="o">&lt;</span><span class="p">(</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="p">)</span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">struct</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="k">struct</span> <span class="n">Closed</span><span class="p">;</span>
 
-<span class="k">struct</span> <span class="n">CurrentRow</span><span class="o">&lt;</span><span class="n">CRowState</span><span class="o">&gt;</span><span class="p">(</span><span class="n">PhantomData</span><span class="o">&lt;</span><span class="n">CRowState</span><span class="o">&gt;</span><span class="p">);</span>
-<span class="k">struct</span> <span class="n">InsertRow</span><span class="o">&lt;</span><span class="n">InsState</span><span class="o">&gt;</span><span class="p">(</span><span class="n">PhantomData</span><span class="o">&lt;</span><span class="n">InsState</span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">struct</span> <span class="n">CurrentRow</span><span class="o">&lt;</span><span class="n">CRowState</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">InsertRow</span><span class="o">&lt;</span><span class="n">InsState</span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="k">struct</span> <span class="n">ValidRow</span><span class="o">&lt;</span><span class="n">VRowState</span><span class="o">&gt;</span><span class="p">(</span><span class="n">PhantomData</span><span class="o">&lt;</span><span class="n">VRowState</span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">struct</span> <span class="n">ValidRow</span><span class="o">&lt;</span><span class="n">VRowState</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="k">struct</span> <span class="n">InvalidRow</span><span class="p">;</span>
 
 <span class="k">struct</span> <span class="n">Read</span><span class="p">;</span>
@@ -259,11 +259,11 @@ ResultSet---OR-|‾Open----AND-|                                     |_Inserted
 <span class="k">struct</span> <span class="n">Inserting</span><span class="p">;</span>
 <span class="k">struct</span> <span class="n">Inserted</span><span class="p">;</span>
 
-<span class="k">struct</span> <span class="n">Concurrency</span><span class="o">&lt;</span><span class="n">CcState</span><span class="o">&gt;</span><span class="p">(</span><span class="n">PhantomData</span><span class="o">&lt;</span><span class="n">CcState</span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">struct</span> <span class="n">Concurrency</span><span class="o">&lt;</span><span class="n">CcState</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="k">struct</span> <span class="n">ReadOnly</span><span class="p">;</span>
 <span class="k">struct</span> <span class="n">Updatable</span><span class="p">;</span>
 
-<span class="k">struct</span> <span class="n">Direction</span><span class="o">&lt;</span><span class="n">DirState</span><span class="o">&gt;</span><span class="p">(</span><span class="n">PhantomData</span><span class="o">&lt;</span><span class="n">DirState</span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">struct</span> <span class="n">Direction</span><span class="o">&lt;</span><span class="n">DirState</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="k">struct</span> <span class="n">Scrollable</span><span class="p">;</span>
 <span class="k">struct</span> <span class="n">ForwardOnly</span><span class="p">;</span>
 </code></pre></div></div>
@@ -354,9 +354,7 @@ ResultSet---OR-|‾Open----AND-|                                     |_Inserted
 <p>This translation is fairly mechanical, so we can implement it with a custom derive. I won’t go into the details, but you can find a proof-of-concept <a href="https://github.com/willcrichton/tquery/blob/master/tquery-derive/src/lib.rs">here</a>.</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(TQuery)]</span>
-<span class="k">struct</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;</span><span class="p">(</span>
-  <span class="n">PhantomData</span><span class="o">&lt;</span><span class="p">(</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="p">)</span><span class="o">&gt;</span>
-<span class="p">);</span>
+<span class="k">struct</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;</span><span class="p">;</span>
 </code></pre></div></div>
 
 <p>Now, we can use our getter/setter type operators. For example:</p>
@@ -461,9 +459,7 @@ ResultSet---OR-|‾Open----AND-|                                     |_Inserted
 <p>While the type signature externally looks nice, the selector is still hard to read. To understand what <code class="highlighter-rouge">U0</code> means, you have to go back to the original struct type parameters and do the lookup yourself. One way around this is to create struct-specific named aliases. For example:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(TQuery)]</span>
-<span class="k">struct</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;</span><span class="p">(</span>
-  <span class="n">PhantomData</span><span class="o">&lt;</span><span class="p">(</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="p">)</span><span class="o">&gt;</span>
-<span class="p">);</span>
+<span class="k">struct</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="k">type</span> <span class="n">TPosition</span> <span class="o">=</span> <span class="n">U0</span><span class="p">;</span>
 <span class="k">type</span> <span class="n">TConcurrency</span> <span class="o">=</span> <span class="n">U1</span><span class="p">;</span>
 <span class="k">type</span> <span class="n">TDirection</span> <span class="o">=</span> <span class="n">U2</span><span class="p">;</span>
