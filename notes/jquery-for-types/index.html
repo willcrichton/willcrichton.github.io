@@ -376,9 +376,9 @@ ResultSet---OR-|‾Open----AND-|                                     |_Inserted
 <p>Think about traversing a nested tuple in Rust. It looks like this:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="p">(((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">4</span><span class="p">);</span>
-<span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">t</span><span class="err">.</span><span class="mf">0.0</span><span class="err">.</span><span class="mi">1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-<span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">t</span><span class="err">.</span><span class="mi">1</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span>
-<span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">t</span><span class="err">.</span><span class="mf">0.2</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span>
+<span class="k">assert</span><span class="o">!</span><span class="p">(((</span><span class="n">t</span><span class="err">.</span><span class="mi">0</span><span class="p">)</span><span class="err">.</span><span class="mi">0</span><span class="p">)</span><span class="err">.</span><span class="mi">1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">);</span>
+<span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">t</span><span class="err">.</span><span class="mi">1</span> <span class="o">==</span> <span class="mi">4</span><span class="p">);</span>
+<span class="k">assert</span><span class="o">!</span><span class="p">((</span><span class="n">t</span><span class="err">.</span><span class="mi">0</span><span class="p">)</span><span class="err">.</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">3</span><span class="p">);</span>
 </code></pre></div></div>
 
 <blockquote>
