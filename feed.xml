@@ -1,4 +1,216 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.2">Jekyll</generator><link href="http://willcrichton.net/feed.xml" rel="self" type="application/atom+xml" /><link href="http://willcrichton.net/" rel="alternate" type="text/html" /><updated>2020-06-21T07:39:59+00:00</updated><id>http://willcrichton.net/feed.xml</id><title type="html">Will Crichton</title><entry><title type="html">jQuery, but for types</title><link href="http://willcrichton.net/notes/jquery-for-types/" rel="alternate" type="text/html" title="jQuery, but for types" /><published>2020-05-14T00:00:00+00:00</published><updated>2020-05-14T00:00:00+00:00</updated><id>http://willcrichton.net/notes/jquery-for-types</id><content type="html" xml:base="http://willcrichton.net/notes/jquery-for-types/">&lt;p&gt;&lt;em&gt;Part of an ongoing series about type-level programming in Rust. Read &lt;a href=&quot;http://willcrichton.net/notes/type-level-programming/&quot;&gt;part one&lt;/a&gt; first!&lt;br /&gt;All code in this note is available on GitHub: &lt;a href=&quot;https://github.com/willcrichton/tquery&quot;&gt;willcrichton/tquery&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.2">Jekyll</generator><link href="http://willcrichton.net/feed.xml" rel="self" type="application/atom+xml" /><link href="http://willcrichton.net/" rel="alternate" type="text/html" /><updated>2020-06-22T05:17:39+00:00</updated><id>http://willcrichton.net/feed.xml</id><title type="html">Will Crichton</title><entry><title type="html">Implementing a Type-safe printf in Rust</title><link href="http://willcrichton.net/notes/type-safe-printf/" rel="alternate" type="text/html" title="Implementing a Type-safe printf in Rust" /><published>2020-06-21T00:00:00+00:00</published><updated>2020-06-21T00:00:00+00:00</updated><id>http://willcrichton.net/notes/type-safe-printf</id><content type="html" xml:base="http://willcrichton.net/notes/type-safe-printf/">&lt;p&gt;&lt;em&gt;Part of an ongoing series about type-level programming in Rust. Consider reading &lt;a href=&quot;http://willcrichton.net/notes/type-level-programming/&quot;&gt;part one&lt;/a&gt; first!&lt;br /&gt; All code in this node can be found in &lt;a href=&quot;https://gist.github.com/willcrichton/e7fcf1b0e84b4be7f172f0e0245cf149&quot;&gt;this gist&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Rust has a great printf function, &lt;a href=&quot;https://doc.rust-lang.org/std/macro.println.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;println!&lt;/code&gt;&lt;/a&gt;. It has a rich formatting language, but also catches mistakes at compile-time. For example, &lt;code class=&quot;highlighter-rouge&quot;&gt;println!&lt;/code&gt; will check that the number of arguments matches the number of holes in the format string:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;error: 2 positional arguments in format string, but there is 1 argument
+  --&amp;gt; src/printf.rs:36:13
+   |
+36 |   println!(&quot;{} {}&quot;, &quot;Hello&quot;);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;How does the Rust compiler make this check? Because both the format string and the argument are within the macro, Rust will check that the number of holes matches the number of arguments. Consequently, format strings &lt;em&gt;have&lt;/em&gt; to be within the macro. If we write:&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;{} {}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;hi&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This code fails to compile with the error:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;error: format argument must be a string literal
+  --&amp;gt; src/printf.rs:42:12
+   |
+42 |   println!(s, &quot;hi&quot;);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I’ll show you how to implement type-safe printf without using procedural macros. More generally, this note contains a Rust recipe for functions where:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Arguments are variadic&lt;/li&gt;
+  &lt;li&gt;Each argument can be a different type (&lt;code class=&quot;highlighter-rouge&quot;&gt;Vec&amp;lt;T&amp;gt;&lt;/code&gt; not allowed)&lt;/li&gt;
+  &lt;li&gt;Multiple variadic inputs need to have matching length/types&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;core-mechanism-hlist&quot;&gt;Core mechanism: HList&lt;/h2&gt;
+
+&lt;p&gt;First, we need to understand the main type-level mechanism: a heterogeneous list (or H-list). An H-list is a sequence of values of potentially different types. For example, &lt;code class=&quot;highlighter-rouge&quot;&gt;[1, &quot;a&quot;, true]&lt;/code&gt; is an H-list, but not a valid Rust vector. H-lists are implemented in Rust using a linked-list style:&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HNil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Tail&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;tail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Tail&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HNil&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HNil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The key idea is that the type of an H-list changes every time you make a change to it. By contrast, if you push to a &lt;code class=&quot;highlighter-rouge&quot;&gt;Vec&amp;lt;T&amp;gt;&lt;/code&gt;, the type of the vector stays the same.&lt;/p&gt;
+
+&lt;p&gt;Just like Rust has &lt;code class=&quot;highlighter-rouge&quot;&gt;vec![]&lt;/code&gt;, we can use the &lt;a href=&quot;https://github.com/lloydmeta/frunk#hlist&quot;&gt;frunk&lt;/a&gt; crate to get an &lt;code class=&quot;highlighter-rouge&quot;&gt;hlist!&lt;/code&gt; macro.&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;hlist!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;// same as above&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;setting-up-printf&quot;&gt;Setting up printf&lt;/h2&gt;
+
+&lt;p&gt;Let’s go back to the ingredients of printf. We need a format string and an argument list. The key idea is to represent both with an H-list, and carefully use Rust’s traits to ensure our desired equal-length property.&lt;/p&gt;
+
+&lt;p&gt;First, to represent format strings, we will have a sequence of structs that represent each part of the string.&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;FString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'static&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FVar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;// Assume that we compile &quot;Hello {}! The first prime is {}&quot; into this code.&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;// That would be a simple syntactic transformation.&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;hlist!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+  &lt;span class=&quot;nf&quot;&gt;FString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FVar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;FString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;! The first prime is &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FVar&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To represent arguments, we will use a matching H-list of values. For example:&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;hlist!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;world&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Then, our goal is to create a function &lt;code class=&quot;highlighter-rouge&quot;&gt;format&lt;/code&gt; such that this is true:&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;assert_eq!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+  &lt;span class=&quot;s&quot;&gt;&quot;Hello world! The first prime is 2&quot;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And this should be a compile-time (NOT run-time) error:&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;hlist!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Only one arg&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;the-format-trait&quot;&gt;The Format trait&lt;/h2&gt;
+
+&lt;p&gt;In the spirit of type-level computation, we start by defining a trait.&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here, &lt;code class=&quot;highlighter-rouge&quot;&gt;self&lt;/code&gt; is the H-list of the format directives, and &lt;code class=&quot;highlighter-rouge&quot;&gt;Args&lt;/code&gt; is the H-list of the variadic arguments. &lt;code class=&quot;highlighter-rouge&quot;&gt;Format&lt;/code&gt; need to take &lt;code class=&quot;highlighter-rouge&quot;&gt;Args&lt;/code&gt; as a type parameter, because its type will change as we remove elements from the &lt;code class=&quot;highlighter-rouge&quot;&gt;Args&lt;/code&gt; list.&lt;/p&gt;
+
+&lt;p&gt;Now, we proceed to implement the &lt;code class=&quot;highlighter-rouge&quot;&gt;Format&lt;/code&gt; trait by cases. First, the base case for reaching the end of the format list &lt;code class=&quot;highlighter-rouge&quot;&gt;HNil&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HNil&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HNil&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HNil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.to_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This impl says that when we reach the end of a format list, just return the empty string. And the only argument we will accept is an empty argument list. Combined with the next impls, this inductively ensures that extra arguments are not accepted.&lt;/p&gt;
+
+&lt;p&gt;Next, we will implement &lt;code class=&quot;highlighter-rouge&quot;&gt;FString&lt;/code&gt;. This implementation should use the string constant contained in the &lt;code class=&quot;highlighter-rouge&quot;&gt;FString&lt;/code&gt; struct, and combine it recursively with the rest of the format list. We don’t use variadic arguments for &lt;code class=&quot;highlighter-rouge&quot;&gt;FString&lt;/code&gt;, so they get passed along. In Rust, this English specification becomes:&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FmtList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FmtList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FmtList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.head&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.to_owned&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.tail&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Note that we have to add &lt;code class=&quot;highlighter-rouge&quot;&gt;FmtList: Format&amp;lt;ArgList&amp;gt;&lt;/code&gt; to ensure the recursive call to &lt;code class=&quot;highlighter-rouge&quot;&gt;self.tail.format&lt;/code&gt; works. Also note that we aren’t implementing &lt;code class=&quot;highlighter-rouge&quot;&gt;Format&lt;/code&gt; directly on &lt;code class=&quot;highlighter-rouge&quot;&gt;FString&lt;/code&gt;, but rather on an H-list containing &lt;code class=&quot;highlighter-rouge&quot;&gt;FString&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Finally, the most complex case, &lt;code class=&quot;highlighter-rouge&quot;&gt;FVar&lt;/code&gt;. We want this impl to take an argument from the &lt;code class=&quot;highlighter-rouge&quot;&gt;ArgList&lt;/code&gt;, then format the remaining format list with the remaining arguments.&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FmtList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FVar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FmtList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;where&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;FmtList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ToString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.head&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.to_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.tail&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.tail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Be careful to observe which H-list is being accessed by &lt;code class=&quot;highlighter-rouge&quot;&gt;head&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;tail&lt;/code&gt;. Here, the &lt;code class=&quot;highlighter-rouge&quot;&gt;args&lt;/code&gt; H-list provides the data to fill the hole via &lt;code class=&quot;highlighter-rouge&quot;&gt;args.head&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;checking-our-properties&quot;&gt;Checking our properties&lt;/h2&gt;
+
+&lt;p&gt;With this implementation, our correct example successfully compiles and runs:&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;hlist!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+  &lt;span class=&quot;nf&quot;&gt;FString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FVar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;FString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;! The first prime is &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FVar&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;assert_eq!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;hlist!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;world&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]),&lt;/span&gt;
+  &lt;span class=&quot;s&quot;&gt;&quot;Hello world! The first prime is 2&quot;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;What about our incorrect example? If we write this:&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;hlist!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;just one arg&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This code fails to compile with the error:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;error[E0308]: mismatched types
+  --&amp;gt; src/printf.rs:48:18
+   |
+48 |   example.format(hlist![&quot;just one arg&quot;]);
+   |                  ^^^^^^^^^^^^^^^^^^^^^^
+   |                  expected struct `Cons`, found struct `HNil`
+   |
+   = note: expected struct `HCons&amp;lt;_, HNil&amp;gt;`
+              found struct `HNil`
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;While the error is enigmatic, our mistake is at least correctly caught at compile-time. This is because Rust deduces that &lt;code class=&quot;highlighter-rouge&quot;&gt;example.format()&lt;/code&gt; expects an H-list of the shape &lt;code class=&quot;highlighter-rouge&quot;&gt;HCons&amp;lt;_, HCons&amp;lt;_, HNil&amp;gt;&amp;gt;&lt;/code&gt;, but it finds &lt;code class=&quot;highlighter-rouge&quot;&gt;HNil&lt;/code&gt; too soon in our 1-element H-list. A similar error occurs when providing too many args.&lt;/p&gt;
+
+&lt;p&gt;Stupendous! We have successfully implemented a type-safe printf using H-lists and traits.&lt;/p&gt;
+
+&lt;h2 id=&quot;extending-our-abstraction&quot;&gt;Extending our abstraction&lt;/h2&gt;
+
+&lt;p&gt;Right now, our &lt;code class=&quot;highlighter-rouge&quot;&gt;Format&lt;/code&gt; function just checks that the format list and argument list are the same length. We could extend our format structures, for example to ensure that an &lt;code class=&quot;highlighter-rouge&quot;&gt;FVar&lt;/code&gt; must be a particular type, or must use &lt;code class=&quot;highlighter-rouge&quot;&gt;Debug&lt;/code&gt; vs. &lt;code class=&quot;highlighter-rouge&quot;&gt;Display&lt;/code&gt;. Here’s the sketch of such a strategy:&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;marker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PhantomData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;// Add flags for whether using Display or Debug&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FDisplay&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FDebug&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;// Use a type parameter with PhantomData to represent the intended type&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FVar&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Flag&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PhantomData&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Flag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;// Now, T has to be the same between the format list and arg list&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;// Also, FDisplay flag requires that `T: Display`&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FmtList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FVar&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FDisplay&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FmtList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;where&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;FmtList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Display&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HCons&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;// using format! is cheating, but you get the idea&lt;/span&gt;
+    &lt;span class=&quot;nd&quot;&gt;format!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.tail&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.tail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;// Similar impl for `T: Debug` when `FDebug` is used&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;With this approach, if our format list and arg list differ in type:&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fmt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;hlist!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;FString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;n: &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;FVar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FDisplay&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PhantomData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)];&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;fmt&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;hlist!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;not a number&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Then the code will not compile with the error, &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;amp;'static str is not i32&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Shout-out to &lt;a href=&quot;https://www.servant.dev/posts/2018-07-12-servant-dsl-typelevel.html&quot;&gt;this blog post&lt;/a&gt; from Haskell’s servant framework which got me thinking about adapting their strategy into Rust.&lt;/p&gt;</content><author><name></name></author><summary type="html">Part of an ongoing series about type-level programming in Rust. Consider reading part one first! All code in this node can be found in this gist.</summary></entry><entry><title type="html">jQuery, but for types</title><link href="http://willcrichton.net/notes/jquery-for-types/" rel="alternate" type="text/html" title="jQuery, but for types" /><published>2020-05-14T00:00:00+00:00</published><updated>2020-05-14T00:00:00+00:00</updated><id>http://willcrichton.net/notes/jquery-for-types</id><content type="html" xml:base="http://willcrichton.net/notes/jquery-for-types/">&lt;p&gt;&lt;em&gt;Part of an ongoing series about type-level programming in Rust. Read &lt;a href=&quot;http://willcrichton.net/notes/type-level-programming/&quot;&gt;part one&lt;/a&gt; first!&lt;br /&gt;All code in this note is available on GitHub: &lt;a href=&quot;https://github.com/willcrichton/tquery&quot;&gt;willcrichton/tquery&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;When doing type-level programming, sometimes our types become quite large, which can make them unwieldy to work with. In this note, we’re going to develop a library of &lt;em&gt;type selectors&lt;/em&gt; to perform accesses and updates on deeply nested types.&lt;/p&gt;
 
@@ -2404,469 +2616,4 @@ $$
 
 &lt;p&gt;&lt;img src=&quot;/images/assets/pl-benchmarks.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;The moral of the story is that I think this kind of combined benchmark/user-study could tell us a lot more about the utility of programming languages than just highly-optimized benchmarks. On one hand, I suspect that it probably takes a decent amount of effort to make a program written in a low-level language &lt;em&gt;that&lt;/em&gt; much faster than a high-level one with an optimized runtime. On the other hand, when performance &lt;em&gt;really&lt;/em&gt; matters, it will probably take less time to maximize the performance of a low-level program with strict control of the hardware than a high-level program at the mercy of a JIT.&lt;/p&gt;</content><author><name></name></author><summary type="html">Software is rarely static. Over time, requirements change, designs improve, features come and go, and the program must gradually evolve as the world changes around it. A fundamental utility of a programming language is to provide tools that improve productivity when evolving software. From a correctness standpoint, this is a major use of static typing—refactors become way less scary when the compiler will let you know if you accidentally typo’d a variable name, or passed a bad parameter to a function, and so on.</summary></entry><entry><title type="html">“Do What I Mean”: Name Resolution in Programming Languages</title><link href="http://willcrichton.net/notes/specificity-programming-languages/" rel="alternate" type="text/html" title="&quot;Do What I Mean&quot;: Name Resolution in Programming Languages" /><published>2018-09-16T00:00:00+00:00</published><updated>2018-09-16T00:00:00+00:00</updated><id>http://willcrichton.net/notes/specificity-programming-languages</id><content type="html" xml:base="http://willcrichton.net/notes/specificity-programming-languages/">&lt;p&gt;Abstraction through names is a fundamental building block of any programming language. Names, or variables, serve as placeholders which permit a piece of code to abstract over its inputs until the name is resolved.&lt;/p&gt;
-
-&lt;div class=&quot;language-js highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Concrete code (sum to 10)&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;// Abstract code (sum to N)&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;sum_to&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The process of name resolution is the question: when should a name be given a value, and which value should it be? In the above example, it’s simple: when I call &lt;code class=&quot;highlighter-rouge&quot;&gt;sum_to(10)&lt;/code&gt;, the name &lt;code class=&quot;highlighter-rouge&quot;&gt;N&lt;/code&gt; means &lt;code class=&quot;highlighter-rouge&quot;&gt;10&lt;/code&gt;. However, conflict arises when multiple values &lt;em&gt;could&lt;/em&gt; apply to a given name. For example, if I typo’d the sum variable:&lt;/p&gt;
-
-&lt;div class=&quot;language-js highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;sum_to&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;N&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;N&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Then what happens? Or a better question: what &lt;em&gt;should&lt;/em&gt; happen? This is the core challenge of name resolution, is determining a means of resolving conflicts in a sensible way. In this note, I’m going to explore what “sensible” name resolution means in a few different areas of programming languages, showing along the way that seemingly disparate language features share similar problems.&lt;/p&gt;
-
-&lt;h2 id=&quot;1-variable-scope&quot;&gt;1. Variable scope&lt;/h2&gt;
-
-&lt;p&gt;The simplest and most canonical example of name resolution is variable scoping, or mapping variables to values. For example, consider this program&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
-
-&lt;div class=&quot;language-js highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;When executing the inner &lt;code class=&quot;highlighter-rouge&quot;&gt;g&lt;/code&gt; function, it has the following call stack:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/assets/names-1.png&quot; alt=&quot;&quot; width=&quot;300&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Take a second to walk through the code and verify this diagram matches your expectations. When executing &lt;code class=&quot;highlighter-rouge&quot;&gt;g&lt;/code&gt;, the name resolution question here is: in the expression &lt;code class=&quot;highlighter-rouge&quot;&gt;x + z&lt;/code&gt; what does &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; refer to? There are two options: the &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; defined in the top-level scope, and the &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; defined in the function &lt;code class=&quot;highlighter-rouge&quot;&gt;f&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;The first option, picking &lt;code class=&quot;highlighter-rouge&quot;&gt;x = 1&lt;/code&gt;, is called &lt;em&gt;lexical&lt;/em&gt; scoping. The intuition behind lexical scoping is that the program structure defines a series of “scopes” that we can infer just by reading the program, without actually running the code.&lt;/p&gt;
-
-&lt;div class=&quot;language-js highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// The {N, ...} syntax indicates which scopes are &quot;active&quot; a given&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;// point in the program.&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;// BEGIN SCOPE 1 -- {1}&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// BEGIN SCOPE 2 -- {1, 2}&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// END SCOPE 2&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;// BEGIN SCOPE -- {1, 3}&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;// END SCOPE&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;// END SCOPE 1&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The nested structure of our program implies that at any line, we have a stack of scopes as annotated in the program above. To resolve a name, we walk the stack and search for the closest declaration of our desired variable. In the example, because scope 3 is not in the stack of scope 2, &lt;code class=&quot;highlighter-rouge&quot;&gt;x + z&lt;/code&gt; resolves to the binding of &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; in scope 1, not scope 3.&lt;/p&gt;
-
-&lt;p&gt;Again, we call this “lexical” scoping because the scope stack is determined &lt;em&gt;statically&lt;/em&gt; from the program source code (i.e. at compile-time, before the program is executed). The alternative approach, the one that resolves to &lt;code class=&quot;highlighter-rouge&quot;&gt;x = 4&lt;/code&gt;, is called &lt;em&gt;dynamic&lt;/em&gt; scoping. Recall our call stack above:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/assets/names-1.png&quot; alt=&quot;&quot; width=&quot;300&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;As you may have inferred at this point, dynamic scoping looks at the runtime call stack to find the most recent declaration of &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; and uses that value. Here, the binding &lt;code class=&quot;highlighter-rouge&quot;&gt;x = 4&lt;/code&gt; in &lt;code class=&quot;highlighter-rouge&quot;&gt;f&lt;/code&gt; is more recent than the binding &lt;code class=&quot;highlighter-rouge&quot;&gt;x = 1&lt;/code&gt; in the top-level scope.&lt;/p&gt;
-
-&lt;p&gt;In both cases, dynamic or lexical, &lt;strong&gt;the core algorithm is the same&lt;/strong&gt;: given a stack of scopes, walk up the stack to find the most recent name declaration. The only difference is whether the the scope stack is determined at compile-time or at run-time.&lt;/p&gt;
-
-&lt;p&gt;So which scoping method is preferable? Judging by popularity, lexical scoping has won the war. The vast majority of programming languages, Javascript included, use lexical scoping&lt;sup id=&quot;fnref:4&quot;&gt;&lt;a href=&quot;#fn:4&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;. Generally, the pro-lexical arguments are:&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;Unbound variable errors can be caught at compile time. If you typo a variable name, then the program can be checked for this issue before execution.&lt;/li&gt;
-  &lt;li&gt;“Spooky action at a distance”: with dynamic scoping, name bindings in very different parts of the program can affect your local implementation.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Few languages today make any serious attempt at having dynamic scoping, usually just flavors of Lisp. However, the arguments for dynamic scoping raise important concerns about limitations of lexical scoping. &lt;a href=&quot;https://dspace.mit.edu/handle/1721.1/6094&quot;&gt;“The Art of the Interpreter”&lt;/a&gt; (Steele and Sussman, 1978, p.43-45) and &lt;a href=&quot;https://www.gnu.org/software/emacs/emacs-paper.html#SEC17&quot;&gt;“EMACS: The Extensible, Customizable Display Editor”&lt;/a&gt; (Stallman, 1981) lay out the essential arguments. Quoting Stallman:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Some language designers believe that dynamic binding should be avoided, and explicit argument passing should be used instead. Imagine that function A binds the variable FOO, and calls the function B, which calls the function C, and C uses the value of FOO. Supposedly A should pass the value as an argument to B, which should pass it as an argument to C.&lt;/p&gt;
-
-  &lt;p&gt;This cannot be done in an extensible system, however, because the author of the system cannot know what all the parameters will be. Imagine that the functions A and C are part of a user extension, while B is part of the standard system. The variable FOO does not exist in the standard system; it is part of the extension. To use explicit argument passing would require adding a new argument to B, which means rewriting B and everything that calls B. In the most common case, B is the editor command dispatcher loop, which is called from an awful number of places.&lt;/p&gt;
-
-  &lt;p&gt;What’s worse, C must also be passed an additional argument. B doesn’t refer to C by name (C did not exist when B was written). It probably finds a pointer to C in the command dispatch table. This means that the same call which sometimes calls C might equally well call any editor command definition. So all the editing commands must be rewritten to accept and ignore the additional argument. By now, none of the original system is left!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;While lexical scoping proponents argue that their scheme improves modularity by limiting cross-module effects (names can’t be unexpectedly bound outside of their module), Stallman here advocates that dynamic scoping also improves modularity. In the natural course of software design, dynamic scoping improves the separation of concerns by not requiring the creators of middleware to know all the parameters that need to pass down through their interface.&lt;/p&gt;
-
-&lt;p&gt;To my knowledge, however, no formal study has ever been done on the impact/usability of lexical vs. dynamic scoping. And since dynamic scoping never really caught on, it’s difficult beyond anecdotal experience to say how true arguments on either side are.&lt;/p&gt;
-
-&lt;h2 id=&quot;2-control-flow&quot;&gt;2. Control flow&lt;/h2&gt;
-
-&lt;p&gt;This core idea of walking stacks to find names comes up in a surprising number of places in programming langauge design. You’ve probably seen a language that has labels to allow breaking out of arbitrarily nested loops. Here’s an example in Rust:&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;'outer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;nv&quot;&gt;'inner&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;'outer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;This is an example of a &lt;em&gt;lexically&lt;/em&gt; scoped jump—to determine what label &lt;code class=&quot;highlighter-rouge&quot;&gt;outer&lt;/code&gt; refers to, we walk up the “label scope” stack (at compile time) to find the closest definition of &lt;code class=&quot;highlighter-rouge&quot;&gt;outer&lt;/code&gt;&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;3&lt;/a&gt;&lt;/sup&gt;. What would a &lt;em&gt;dynamically&lt;/em&gt; scoped jump look like? Here’s an imaginary language:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;def div(m, n) {
-  if n == 0 {
-    break error(&quot;Div by 0&quot;);
-  }
-
-  return m / n;
-}
-
-def main() {
-  let x = div(5, 3);
-  let y = div(x, 0);
-  print(&quot;Success!&quot;, y);
-  return;
-
-  error(s) {
-    print(&quot;Error&quot;, s);
-  }
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Here, the idea is that the &lt;code class=&quot;highlighter-rouge&quot;&gt;div&lt;/code&gt; function uses a dynamically-scoped label &lt;code class=&quot;highlighter-rouge&quot;&gt;error&lt;/code&gt; to jump to if the function fails. That error label could be anywhere on the call stack above the &lt;code class=&quot;highlighter-rouge&quot;&gt;div&lt;/code&gt; function. This might sound familiar, because this is how exceptions work! Here’s an actual example in OCaml:&lt;/p&gt;
-
-&lt;div class=&quot;language-ocaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;exception&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Error&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;m&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Error&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Div by 0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;m&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt;
-    &lt;span class=&quot;nn&quot;&gt;Printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Success: %d&quot;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Error&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nn&quot;&gt;Printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Error: %s&quot;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;(* Prints &quot;Error: Div by 0&quot; *)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;A &lt;code class=&quot;highlighter-rouge&quot;&gt;raise&lt;/code&gt; is a control flow mechanism that relies on dynamically-scoped labels, or &lt;code class=&quot;highlighter-rouge&quot;&gt;try&lt;/code&gt; blocks. One point this shows is that both lexical and dynamic jumps seem useful, and some languages do incorporate variants of both. It is possible for lexical/dynamic scoping to co-exist, at least for control flow.&lt;/p&gt;
-
-&lt;p&gt;Interestingly, the arguments against dynamic scoping for labels are somewhat the inverse of the arguments against dynamic scope for variables. A library that relies on dynamically scoped variables is concerned with outside modules accidentally modifying its state, while outside modules are concerned with their libraries raising exceptions that leave the library.&lt;/p&gt;
-
-&lt;h2 id=&quot;3-method-resolution-with-oop&quot;&gt;3. Method resolution with OOP&lt;/h2&gt;
-
-&lt;p&gt;A common issue in programming is associating functions with data. In languages like C, this is often done via convention in function naming.&lt;/p&gt;
-
-&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stack_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;stack_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;stack_new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;stack_push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stack_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;stack_pop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stack_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;stack_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stack&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stack_new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;stack_push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;%d&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stack_pop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Even in more modern languages like OCaml, this is still basically how function/data associations work.&lt;/p&gt;
-
-&lt;div class=&quot;language-ocaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Stack&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sig&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;make&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;push&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pop&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Stack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;make&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Stack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Stack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pop&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt;
-&lt;span class=&quot;nn&quot;&gt;Printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;%d&quot;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Most other modern languages, particularly object-oriented languages, use &lt;em&gt;type-directed&lt;/em&gt; name resolution to use functions associated with data. For example, in Python:&lt;/p&gt;
-
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;save&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;save&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Resolves to A.save(a)
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Here, because &lt;code class=&quot;highlighter-rouge&quot;&gt;a&lt;/code&gt; is of type &lt;code class=&quot;highlighter-rouge&quot;&gt;A&lt;/code&gt;, when we try to call functions on &lt;code class=&quot;highlighter-rouge&quot;&gt;a&lt;/code&gt;, the runtime can determine that the &lt;code class=&quot;highlighter-rouge&quot;&gt;a.save&lt;/code&gt; function should refer to &lt;code class=&quot;highlighter-rouge&quot;&gt;A.save&lt;/code&gt;. Object-oriented languages also support inheritance, which complicates name resolution:&lt;/p&gt;
-
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;save&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;to_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;to_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# resolves to B.to_string(b)
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;save&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;      &lt;span class=&quot;c1&quot;&gt;# resolves to A.save(b)
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Conceptually, single-inheritance represents a stack of methods. When asking for a particular method, resolving the method involves walking the stack of methods for the closest declaration&lt;sup id=&quot;fnref:3&quot;&gt;&lt;a href=&quot;#fn:3&quot; class=&quot;footnote&quot;&gt;4&lt;/a&gt;&lt;/sup&gt; (this should sound familiar). Here, &lt;code class=&quot;highlighter-rouge&quot;&gt;to_string&lt;/code&gt; resolves to the closest declaration in &lt;code class=&quot;highlighter-rouge&quot;&gt;B&lt;/code&gt;, while &lt;code class=&quot;highlighter-rouge&quot;&gt;save&lt;/code&gt; resolves to the closest declaration in &lt;code class=&quot;highlighter-rouge&quot;&gt;A&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;The hard part here is that while single-inheritance represents a stack, which has a clear means of resolving names (walk the stack for the closest name), multiple-inheritance turns this problem into a directed acyclic graph (DAG). Quoting from Guido’s post on the history of &lt;a href=&quot;http://python-history.blogspot.com/2010/06/method-resolution-order.html&quot;&gt;Method Resolution Order&lt;/a&gt; in Python:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Classic classes used a simple MRO scheme: when looking up a method, base classes were searched using a simple depth-first left-to-right scheme. The first matching object found during this search would be returned. For example, consider these classes:&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;save&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;C&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;save&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;C&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;If we created an instance x of class D, the classic method resolution order would order the classes as D, B, A, C. Thus, a search for the method x.save() would produce A.save() (and not C.save()). This scheme works fine for simple cases, but has problems that become apparent when one considers more complicated uses of multiple inheritance. One problem concerns method lookup under “diamond inheritance.” For example:&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;save&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;C&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;save&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;C&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Here, class D inherits from B and C, both of which inherit from class A. Using the classic MRO, methods would be found by searching the classes in the order D, B, A, C, A. Thus, a reference to x.save() will call A.save() as before. However, this is unlikely what you want in this case! Since both B and C inherit from A, one can argue that the redefined method C.save() is actually the method that you want to call, since it can be viewed as being “more specialized” than the method in A (in fact, it probably calls A.save() anyways). For instance, if the save() method is being used to save the state of an object, not calling C.save() would break the program since the state of C would be ignored.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;So how do we fix this problem? The core idea is that we want to turn this hard problem (name resolution on a DAG of classes) into an easy problem (name resolution on a stack of classes). This process is called “linearization”. The desirable properties of a linearization algorithm, as well as the actual algorithms used, are too much to discuss here. If you want to know more, you should read &lt;a href=&quot;http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.19.3910&amp;amp;rep=rep1&amp;amp;type=pdf&quot;&gt;A Monotonic Superclass Linearization for Dylan&lt;/a&gt; (Barrett et al. 1996) which defines both the problem setting and the specific algorithm (“C3”) that Python today uses.&lt;/p&gt;
-
-&lt;h2 id=&quot;4-method-resolution-with-traits&quot;&gt;4. Method resolution with traits&lt;/h2&gt;
-
-&lt;p&gt;Traits are an alternative approach to function/data association that have come into vogue in the last decade, most notably in &lt;a href=&quot;https://doc.rust-lang.org/book/second-edition/ch10-02-traits.html&quot;&gt;Rust&lt;/a&gt;. They support the general notion of composition over inheritance, allowing functionality for a given data type to be broken up into multiple small chunks. For example:&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;f32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;f32&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;// Methods in this &quot;impl block&quot; are directly associated with the Point&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;// data type, no traits involved.&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;f32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;f32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-  &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;({}, {})&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Add&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;c&quot;&gt;// Self is a keyword referring to &quot;the type implementing the trait&quot;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Add&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.y&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;For methods in the initial &lt;code class=&quot;highlighter-rouge&quot;&gt;impl Point&lt;/code&gt; block, method resolution is simple. If a particular value is known to be a &lt;code class=&quot;highlighter-rouge&quot;&gt;Point&lt;/code&gt;, then calling &lt;code class=&quot;highlighter-rouge&quot;&gt;.print()&lt;/code&gt; will always resolve to the &lt;code class=&quot;highlighter-rouge&quot;&gt;Point::print&lt;/code&gt; function (these are called “inherent” methods).&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;2.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;However, if we then try to use the add method:&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;2.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;3.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;4.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;We will get the error:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;error[E0599]: no method named `add` found for type `point::Point` in the current scope
-  --&amp;gt; test.rs:32:15
-   |
-2  |   pub struct Point { x: f32, y: f32 }
-   |   ---------------- method `add` not found for this
-...
-32 |   let p3 = p1.add(&amp;amp;p2);
-   |               ^^^
-   |
-   = help: items from traits can only be used if the trait is in scope
-help: the following trait is implemented but not in scope, perhaps add a `use` for it:
-   |
-27 | use point::Add;
-   |
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Method resolution for traits has two steps: first the trait has to be imported (the &lt;code class=&quot;highlighter-rouge&quot;&gt;use&lt;/code&gt; keyword) into the current scope, and then the type system has to resolve the method name to the implementation of a corresponding trait. In the above example, this will work:&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;2.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;3.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;4.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Importing the trait is important because multiple traits could provide implementations of methods with the same name. For example, if &lt;code class=&quot;highlighter-rouge&quot;&gt;add&lt;/code&gt; were also part of another trait:&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Add&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Arithmetic&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;sub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Add&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Arithmetic&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Point&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Then in order to know which &lt;code class=&quot;highlighter-rouge&quot;&gt;add&lt;/code&gt; method a &lt;code class=&quot;highlighter-rouge&quot;&gt;p.add(..)&lt;/code&gt; refers to, exactly one of those traits must be imported into the current scope.&lt;/p&gt;
-
-&lt;p&gt;The second step, resolving the name to a trait, is simple in the example above. An example algorithm would be to enumerate all implemented traits for &lt;code class=&quot;highlighter-rouge&quot;&gt;Point&lt;/code&gt; in scope, then linear search through each trait for a method that matches the desired name and type signature. However, complications arise around generics. For example:&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Vec2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Add&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Vec2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Add&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Vec2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Vec2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;Vec2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.x&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.y&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Above, we have a generic vector of two elements, and we again implement the &lt;code class=&quot;highlighter-rouge&quot;&gt;Add&lt;/code&gt; trait, except this time our implementation is &lt;em&gt;conditional&lt;/em&gt;—&lt;code class=&quot;highlighter-rouge&quot;&gt;Vec2&lt;/code&gt; only implements &lt;code class=&quot;highlighter-rouge&quot;&gt;Add&lt;/code&gt; when its element type &lt;code class=&quot;highlighter-rouge&quot;&gt;T&lt;/code&gt; implements &lt;code class=&quot;highlighter-rouge&quot;&gt;Add&lt;/code&gt;. When we use the vector:&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Vec2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Vec2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Vec2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Vec2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;In order to resolve &lt;code class=&quot;highlighter-rouge&quot;&gt;add&lt;/code&gt;, the compiler has to prove that &lt;code class=&quot;highlighter-rouge&quot;&gt;i32: Add&lt;/code&gt; (i.e. there exists something that implements &lt;code class=&quot;highlighter-rouge&quot;&gt;Add&lt;/code&gt; for &lt;code class=&quot;highlighter-rouge&quot;&gt;i32&lt;/code&gt;). To solve a name resolution problem this complex, Rust internally has an &lt;a href=&quot;http://smallcultfollowing.com/babysteps/blog/2017/01/26/lowering-rust-traits-to-logic/&quot;&gt;entire logic programming language&lt;/a&gt; dedicated to it.&lt;/p&gt;
-
-&lt;p&gt;An important constraint on this problem is that two traits are not allowed to possibly implement the same method for the same data type. &lt;a href=&quot;http://smallcultfollowing.com/babysteps/blog/2015/01/14/little-orphan-impls/&quot;&gt;Little Orphan Impls&lt;/a&gt; covers the gory details here, but the key idea is that Rust wants to ensure that importing a crate or a type doesn’t suddenly cause your program to change because you’re accidentally using a different trait implementation than before.&lt;/p&gt;
-
-&lt;p&gt;However, this isn’t ideal because it can be useful to have more “general” implementations of a method for every type, and more “specific” implementations of a method for a few types, e.g. a general vs. customized &lt;code class=&quot;highlighter-rouge&quot;&gt;to_string&lt;/code&gt; method. Hence, a major project in the Rust pipeline is &lt;em&gt;trait specialization&lt;/em&gt;, as detailed in &lt;a href=&quot;http://aturon.github.io/2018/04/05/sound-specialization/&quot;&gt;Sound and ergonomic specialization for Rust&lt;/a&gt;. The challenge is to determine what makes a method “specific” vs. “general,” which is still being debated in the community.&lt;/p&gt;
-
-&lt;p&gt;Overall, Rust’s approach to method resolution is trying to implement a maximally flexible means of associating functionality to data, and approaching a “do what I mean” algorithm for resolving methods. The trade off is the complexity in the trait resolution algorithm, and the extent to which that complexity is passed on to the user instead of hidden in the compiler.&lt;/p&gt;
-
-&lt;h2 id=&quot;5-specificity&quot;&gt;5. Specificity&lt;/h2&gt;
-
-&lt;p&gt;While Rust has yet to settle on a notion of “specificity” for functions, CSS, the web-based style description language, has a first-class notion of specificity baked into its semantics. CSS enables users to define rules that change the visual properties of UI elements. For example, if I have the HTML:&lt;/p&gt;
-
-&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;foo&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;bar&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;The text&lt;span class=&quot;nt&quot;&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;This &lt;code class=&quot;highlighter-rouge&quot;&gt;span&lt;/code&gt; tag has some visual properties, like a text &lt;code class=&quot;highlighter-rouge&quot;&gt;color&lt;/code&gt; and a &lt;code class=&quot;highlighter-rouge&quot;&gt;font-size&lt;/code&gt;. The core algorithm in a CSS engine is to determine, given an HTML element and a set of CSS rules, the values of each visual property. For example, if our CSS is:&lt;/p&gt;
-
-&lt;div class=&quot;language-css highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;/* All span tags */&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;span&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;nl&quot;&gt;font-size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;10px&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;nl&quot;&gt;color&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;blue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;/* All tags with id &quot;foo&quot; */&lt;/span&gt;
-&lt;span class=&quot;nf&quot;&gt;#foo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;nl&quot;&gt;color&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;red&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;/* All span tags with class &quot;bar&quot; */&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;span&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;.bar&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;nl&quot;&gt;font-size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;12px&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;nl&quot;&gt;color&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;green&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Then what should the value of &lt;code class=&quot;highlighter-rouge&quot;&gt;font-size&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;color&lt;/code&gt; be? Intuitively, for each property, we want to pick the “most specific” rule that applies to our tag and provides that property. The specificity rules are surprisingly simple (quoting the &lt;a href=&quot;https://www.w3.org/TR/selectors/#specificity&quot;&gt;CSS Specification&lt;/a&gt;):&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;A selector’s &lt;strong&gt;&lt;em&gt;specificity&lt;/em&gt;&lt;/strong&gt; is calculated for a given element as follows:&lt;/p&gt;
-  &lt;ul&gt;
-    &lt;li&gt;count the number of ID selectors in the selector (= A)&lt;/li&gt;
-    &lt;li&gt;count the number of class selectors, attributes selectors, and pseudo-classes in the selector (= B)&lt;/li&gt;
-    &lt;li&gt;count the number of type selectors and pseudo-elements in the selector (= C)&lt;/li&gt;
-    &lt;li&gt;ignore the universal selector&lt;/li&gt;
-  &lt;/ul&gt;
-
-  &lt;p&gt;Specificities are compared by comparing the three components in order: the specificity with a larger A value is more specific; if the two A values are tied, then the specificity with a larger B value is more specific; if the two B values are also tied, then the specificity with a larger C value is more specific; if all the values are tied, the two specificities are equal.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;In our example above, we have:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;span     (A=0, B=0, C=1)
-#foo     (A=1, B=0, C=0)
-span.bar (A=0, B=1, C=1)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;This means that the precedence order is &lt;code class=&quot;highlighter-rouge&quot;&gt;#foo &amp;gt; span.bar &amp;gt; span&lt;/code&gt;. Correspondingly, our span then will have a &lt;code class=&quot;highlighter-rouge&quot;&gt;color: red&lt;/code&gt; (from &lt;code class=&quot;highlighter-rouge&quot;&gt;#foo&lt;/code&gt;) and a &lt;code class=&quot;highlighter-rouge&quot;&gt;font-size: 12px&lt;/code&gt; (from &lt;code class=&quot;highlighter-rouge&quot;&gt;span.bar&lt;/code&gt;).&lt;/p&gt;
-
-&lt;p&gt;In a way, you can think about this as a kind of lexical scoping. Variables use the stack-based syntax of the language to define a stack of lexical scopes, or the runtime stack to define a stack of dynamic scopes. In CSS, for a given UI element, a specificity value can be statically computed for each CSS rule, which forms a “stack” of rules (or ordered scopes). After filtering out rules that don’t apply to the element, the value of each visual property is computed by walking up the rule stack to find the closest binding.&lt;/p&gt;
-
-&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
-
-&lt;p&gt;Name resolution is a hard problem that shows up in many aspects of programming languages: variables, jumps, methods, and so on. A core idea is that most naming conflicts can be reduced to a stack of scopes (where “scope” could be a code block, a class definition, a CSS rule, etc.), and name resolution is walking up the scope stack. The hard part is instead what defines your stack: static vs. dynamic scopes for variables, linearization methods for classes, specificity heuristics for CSS rules.&lt;/p&gt;
-
-&lt;p&gt;A major tradeoff for name resolution systems is the level of complexity. More complex resolution systems like Rust’s traits or CSS’s rule specificity approach the “do what I mean” ideal where the user has to minimally disambiguate names/scopes. However, debugging naming issues with complex resolution can be difficult—every CSS programmer knows the shame of decorating rules with &lt;code class=&quot;highlighter-rouge&quot;&gt;!important&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;I would love to see a more unified theory of name resolution be applied to uniformly understand and solve the issues raised above. We also need more studies to understand what name resolution systems maximize productivity as a function of intuitiveness, error-proneness, and debuggability.&lt;/p&gt;
-
-&lt;p&gt;If you have comments, please send them my way at &lt;a href=&quot;mailto:wcrichto@cs.stanford.edu&quot;&gt;wcrichto@cs.stanford.edu&lt;/a&gt; or leave them on &lt;a href=&quot;https://news.ycombinator.com/item?id=18002190&quot;&gt;Hacker News&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;P.S. A &lt;a href=&quot;https://lobste.rs/s/jnesul/do_what_i_mean_name_resolution#c_lwtnxk&quot;&gt;few&lt;/a&gt; &lt;a href=&quot;https://www.reddit.com/r/ProgrammingLanguages/comments/9gfnvv/do_what_i_mean_name_resolution_in_programming/e64qrdq/&quot;&gt;folk&lt;/a&gt; have pointed out that Perl 6 has a good number of the features above. Also that there’s been recent work on a &lt;a href=&quot;http://swerl.tudelft.nl/twiki/pub/Main/TechnicalReports/TUD-SERG-2015-001.pdf&quot;&gt;theory of name resolution&lt;/a&gt;.&lt;/p&gt;
-
-&lt;div class=&quot;footnotes&quot;&gt;
-  &lt;ol&gt;
-    &lt;li id=&quot;fn:1&quot;&gt;
-      &lt;p&gt;Example and diagram taken from &lt;a href=&quot;https://www.amazon.com/Concepts-Programming-Languages-John-Mitchell/dp/0521780985&quot;&gt;Concepts in Programming Languages&lt;/a&gt;. &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-    &lt;li id=&quot;fn:4&quot;&gt;
-      &lt;p&gt;Some languages have more complex scoping mechanisms like Python’s &lt;a href=&quot;https://docs.python.org/3/tutorial/classes.html#python-scopes-and-namespaces&quot;&gt;LEGB&lt;/a&gt; scoping, but usually they’re bastardized variants of lexical scoping. &lt;a href=&quot;#fnref:4&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-    &lt;li id=&quot;fn:2&quot;&gt;
-      &lt;p&gt;This is basically how &lt;a href=&quot;https://webassembly.github.io/spec/core/exec/instructions.html#blocks&quot;&gt;control flow in WebAssembly&lt;/a&gt; works. &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-    &lt;li id=&quot;fn:3&quot;&gt;
-      &lt;p&gt;I highly recommend implementing an &lt;a href=&quot;https://www.lua.org/pil/16.2.html&quot;&gt;inheritance mechanism in Lua&lt;/a&gt; to gain an appreciation for how this works concretely. &lt;a href=&quot;#fnref:3&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-  &lt;/ol&gt;
-&lt;/div&gt;</content><author><name></name></author><summary type="html">Abstraction through names is a fundamental building block of any programming language. Names, or variables, serve as placeholders which permit a piece of code to abstract over its inputs until the name is resolved.</summary></entry></feed>
+&lt;p&gt;The moral of the story is that I think this kind of combined benchmark/user-study could tell us a lot more about the utility of programming languages than just highly-optimized benchmarks. On one hand, I suspect that it probably takes a decent amount of effort to make a program written in a low-level language &lt;em&gt;that&lt;/em&gt; much faster than a high-level one with an optimized runtime. On the other hand, when performance &lt;em&gt;really&lt;/em&gt; matters, it will probably take less time to maximize the performance of a low-level program with strict control of the hardware than a high-level program at the mercy of a JIT.&lt;/p&gt;</content><author><name></name></author><summary type="html">Software is rarely static. Over time, requirements change, designs improve, features come and go, and the program must gradually evolve as the world changes around it. A fundamental utility of a programming language is to provide tools that improve productivity when evolving software. From a correctness standpoint, this is a major use of static typing—refactors become way less scary when the compiler will let you know if you accidentally typo’d a variable name, or passed a bad parameter to a function, and so on.</summary></entry></feed>
