@@ -232,7 +232,7 @@
 <span class="p">});</span>
 </code></pre></div></div>
 
-<p>This is an extensible architecture in the sense that you don’t control the DOM API, nor can you control what events are registered to DOM nodes. That changes all the. You can just hook-in to events the browser provides.</p>
+<p>This is an extensible architecture in the sense that you don’t control the DOM API, nor can you control what events are registered to DOM nodes. That changes all the time. You can only hook in to events the browser provides.</p>
 
 <p>Let’s look at this function with two related questions: what is the type of <code class="highlighter-rouge">addEventListener</code>? And what kinds of errors can we make using this function?</p>
 
@@ -247,7 +247,7 @@
     <p><strong>Typo the event name</strong>: as with all stringly-typed programming, we can write the event name incorrectly, like <code class="highlighter-rouge">"clack"</code> instead of <code class="highlighter-rouge">"click"</code>. This error gets caught at runtime, usually when we register the handler.</p>
   </li>
   <li>
-    <p><strong>Use the event object incorrectly:</strong> while all events implement the base <a href="https://developer.mozilla.org/en-US/docs/Web/API/Event"><code class="highlighter-rouge">Event</code> interface</a>, each individual event has different fields. For example, click is a <a href="https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent"><code class="highlighter-rouge">MouseEvent</code></a> so it contains fields <code class="highlighter-rouge">clientX</code> and <code class="highlighter-rouge">clientY</code>. But what if I tried to access <code class="highlighter-rouge">clientX</code> on a <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent"><code class="highlighter-rouge">KeyboardEvent</code></a>? That error gets caught at runtime, when we execute the offending code path in the handler.</p>
+    <p><strong>Use the event object incorrectly:</strong> while all events implement the base <a href="https://developer.mozilla.org/en-US/docs/Web/API/Event"><code class="highlighter-rouge">Event</code> interface</a>, each individual event has different fields. For example, “click” is a <a href="https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent"><code class="highlighter-rouge">MouseEvent</code></a> so it contains fields <code class="highlighter-rouge">clientX</code> and <code class="highlighter-rouge">clientY</code>. But what if I tried to access <code class="highlighter-rouge">clientX</code> on a <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent"><code class="highlighter-rouge">KeyboardEvent</code></a>? That error gets caught at runtime, when we execute the offending code path in the handler.</p>
   </li>
 </ul>
 
@@ -281,10 +281,10 @@
 <span class="p">})</span>
 </code></pre></div></div>
 
-<p>In the snippet above, the event parameter <code class="highlighter-rouge">E</code> is inferred from the type parameter <code class="highlighter-rouge">OnClick</code> of the closure, rather than using a string argument. This solves both of our errors:</p>
+<p>In the snippet above, the event type is inferred from the type parameter <code class="highlighter-rouge">OnClick</code> of the closure, rather than using a string argument. This solves both of our errors:</p>
 <ul>
   <li>If we wrote <code class="highlighter-rouge">&amp;OnClack</code>, the type checker will say <code class="highlighter-rouge">OnClack not found</code>.</li>
-  <li>If we wrote <code class="highlighter-rouge">event.keyboard_input</code>, the typechecker will say <code class="highlighter-rouge">no field keyboard_input on OnClick</code>.</li>
+  <li>If we wrote <code class="highlighter-rouge">event.keyboard_input</code> instead of <code class="highlighter-rouge">event.mouse_x</code>, the typechecker will say <code class="highlighter-rouge">no field keyboard_input on type OnClick</code>.</li>
 </ul>
 
 <p>Stupendous! But how does it work? Here’s the basic structure.</p>
@@ -413,7 +413,7 @@
 
 <h2 id="type-safe-dependency-injection">Type-safe dependency injection</h2>
 
-<p>To avoid the impression that this pattern is specific to event listeners, I want to show another example of using types over strings in extensible architectures. I started playing with <a href="https://github.com/amethyst/specs">specs</a> recently, an entity-component-system architecture written in Rust. Its <code class="highlighter-rouge">System</code> uses a dependency-injection-like pattern, so I wanted to distill that to a pedagogical example here.</p>
+<p>To avoid the impression that this pattern is specific to event listeners, I want to show another example of using types-over-strings in extensible architectures. I started playing with <a href="https://github.com/amethyst/specs">specs</a> recently, an entity-component-system architecture written in Rust. Its <code class="highlighter-rouge">System</code> uses a dependency-injection-like pattern, so I wanted to distill that to a pedagogical example here.</p>
 
 <p>Dependency injection is often found rife with <a href="https://www.vogella.com/tutorials/SpringDependencyInjection/article.html">XML file</a>, string keys, and other issues akin to those with event systems. Hence, it makes for a good use case here.</p>
 
