@@ -344,15 +344,15 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<blockquote>
-  <p>Aside: the syntax <code class="highlighter-rouge">::&lt;OnClick&gt;</code> is Rust’s “turbofish”. It explicitly binds a type parameter of a polymorphic function, rather than leaving it to be inferred. <a href="https://stackoverflow.com/questions/52360464/what-is-the-syntax-instance-methodsomething/52361559">Further</a> <a href="https://matematikaadit.github.io/posts/rust-turbofish.html">explanation</a> <a href="https://techblog.tonsser.com/posts/what-is-rusts-turbofish">here</a>.</p>
-</blockquote>
-
 <p>This means our map has one unique value for a given type. For example, if we use the <code class="highlighter-rouge">TypeMap</code> like this:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">map</span> <span class="o">=</span> <span class="nn">TypeMap</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
 <span class="n">map</span><span class="py">.set</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 </code></pre></div></div>
+
+<blockquote>
+  <p>Aside: the syntax <code class="highlighter-rouge">::&lt;i32&gt;</code> is Rust’s “turbofish”. It explicitly binds a type parameter of a polymorphic function, rather than leaving it to be inferred. <a href="https://stackoverflow.com/questions/52360464/what-is-the-syntax-instance-methodsomething/52361559">Further</a> <a href="https://matematikaadit.github.io/posts/rust-turbofish.html">explanation</a> <a href="https://techblog.tonsser.com/posts/what-is-rusts-turbofish">here</a>.</p>
+</blockquote>
 
 <p>Then we insert a value <code class="highlighter-rouge">1</code> at the key <code class="highlighter-rouge">TypeId::of::&lt;i32&gt;()</code>. We can also implement <code class="highlighter-rouge">has</code> and <code class="highlighter-rouge">get</code> functions:</p>
 
@@ -415,11 +415,11 @@
 
 <p>To avoid the impression that this pattern is specific to event listeners, I want to show another example of using types-over-strings in extensible architectures. I started playing with <a href="https://github.com/amethyst/specs">specs</a> recently, an entity-component-system architecture written in Rust. Its <code class="highlighter-rouge">System</code> uses a dependency-injection-like pattern, so I wanted to distill that to a pedagogical example here.</p>
 
-<p>Dependency injection is often found rife with <a href="https://www.vogella.com/tutorials/SpringDependencyInjection/article.html">XML file</a>, string keys, and other issues akin to those with event systems. Hence, it makes for a good use case here.</p>
+<p>Dependency injection systems are often rife with <a href="https://www.vogella.com/tutorials/SpringDependencyInjection/article.html">XML files</a>, string keys, and other stringly-typed problems. DI makes for a good use case here.</p>
 
 <h3 id="motivation">Motivation</h3>
 
-<p>The basic idea of dependency injection (DI) is that you have a component that depends on another, like a web server using a database. However, you don’t want to hard-code a particular database constructor, and rather make it easy to swap in-and-out different databases. For example:</p>
+<p>The basic idea of dependency injection (DI) is that you have a component that depends on another, like a web server using a database. However, you don’t want to hard-code a particular database constructor, and rather make it easy to swap in different databases. For example:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Database</span> <span class="p">{</span>
   <span class="k">fn</span> <span class="nf">name</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nv">'static</span> <span class="nb">str</span><span class="p">;</span>
