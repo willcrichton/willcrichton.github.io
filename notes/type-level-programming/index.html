@@ -271,7 +271,7 @@
 </code></pre></div></div>
 
 <blockquote>
-  <p>There are <a href="https://www.reddit.com/r/rust/comments/gaxlm3/typelevel_programming_in_rust/fp2gjhg/">many</a> <a href="https://www.reddit.com/r/rust/comments/gaxlm3/typelevel_programming_in_rust/fp2gjhg/">readers</a> concerned with the use of <code class="highlighter-rouge">transmute</code>. The use of <code class="highlighter-rouge">#[repr(transparent)]</code> ensures that the layout of <code class="highlighter-rouge">Channel</code> is <a href="https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent">stable across transmutations</a> of the marker type.</p>
+  <p>There are <a href="https://news.ycombinator.com/item?id=24688233">many</a> <a href="https://www.reddit.com/r/rust/comments/gaxlm3/typelevel_programming_in_rust/fp2gjhg/">readers</a> concerned with the use of <code class="highlighter-rouge">transmute</code>. The use of <code class="highlighter-rouge">#[repr(transparent)]</code> ensures that the layout of <code class="highlighter-rouge">Channel</code> is <a href="https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent">stable across transmutations</a> of the marker type.</p>
 </blockquote>
 
 <p>This pattern works effectively for simple finite state machines, where the logic to determine the next state is straightforward. In this note, I will explore situations where determining the next state is not so simple. In the process, we’ll talk about <strong>type-level programming</strong>, or how you can use Rust’s type system to encode <strong>computations on types</strong>.</p>
