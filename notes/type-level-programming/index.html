@@ -237,6 +237,7 @@
 <span class="k">struct</span> <span class="n">Sending</span><span class="p">;</span>
 
 <span class="c">// The state machine is parameterized by the state</span>
+<span class="nd">#[repr(transparent)]</span>
 <span class="k">struct</span> <span class="n">Channel</span><span class="o">&lt;</span><span class="n">State</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="n">chan</span><span class="p">:</span> <span class="o">...</span><span class="p">,</span>
   <span class="mi">_</span><span class="n">state</span><span class="p">:</span> <span class="n">PhantomData</span><span class="o">&lt;</span><span class="n">State</span><span class="o">&gt;</span>
@@ -270,7 +271,7 @@
 </code></pre></div></div>
 
 <blockquote>
-  <p>For a discussion about the use of <code class="highlighter-rouge">unsafe</code> in this example and the rest of the article, see this <a href="https://www.reddit.com/r/rust/comments/gaxlm3/typelevel_programming_in_rust/fp2gjhg/">/r/rust</a> thread.</p>
+  <p>There are <a href="https://www.reddit.com/r/rust/comments/gaxlm3/typelevel_programming_in_rust/fp2gjhg/">many</a> <a href="https://www.reddit.com/r/rust/comments/gaxlm3/typelevel_programming_in_rust/fp2gjhg/">readers</a> concerned with the use of <code class="highlighter-rouge">transmute</code>. The use of <code class="highlighter-rouge">#[repr(transparent)]</code> ensures that the layout of <code class="highlighter-rouge">Channel</code> is <a href="https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent">stable across transmutations</a> of the marker type.</p>
 </blockquote>
 
 <p>This pattern works effectively for simple finite state machines, where the logic to determine the next state is straightforward. In this note, I will explore situations where determining the next state is not so simple. In the process, we’ll talk about <strong>type-level programming</strong>, or how you can use Rust’s type system to encode <strong>computations on types</strong>.</p>
@@ -290,6 +291,7 @@
 <span class="k">struct</span> <span class="n">LowSec</span><span class="p">;</span>
 
 <span class="c">// An Item wraps an arbitrary type T, associating it with a Level</span>
+<span class="nd">#[repr(transparent)]</span>
 <span class="k">struct</span> <span class="n">Item</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Level</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="n">t</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
   <span class="mi">_</span><span class="n">marker</span><span class="p">:</span> <span class="n">PhantomData</span><span class="o">&lt;</span><span class="n">Level</span><span class="o">&gt;</span>
@@ -339,7 +341,8 @@
 
 <p>A basic type-state attempt looks like this. We can create and read a low-security vector:</p>
 
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">SecureVec</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Level</span><span class="o">&gt;</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[repr(transparent)]</span>
+<span class="k">struct</span> <span class="n">SecureVec</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Level</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="n">items</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Item</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Level</span><span class="o">&gt;&gt;</span><span class="p">,</span>
   <span class="mi">_</span><span class="n">marker</span><span class="p">:</span> <span class="n">PhantomData</span><span class="o">&lt;</span><span class="n">Level</span><span class="o">&gt;</span>
 <span class="p">}</span>
