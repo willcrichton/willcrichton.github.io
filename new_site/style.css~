@@ -1,0 +1,74 @@
+@font-face {
+	font-family: 'Minion Pro';
+	src: url('fonts/MinionPro-Regular.eot');
+	src: url('fonts/MinionPro-Regular.eot?#iefix') format('embedded-opentype'),
+		url('fonts/MinionPro-Regular.woff') format('woff'),
+		url('fonts/MinionPro-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+body {
+    background: url('profile3.jpg');
+    font-family: 'Minion Pro', serif;
+    font-size: 16px;
+}
+
+.container {
+    width: 600px;
+    background: url('bg2.jpg');
+}
+
+header {
+    margin-top: 20px;
+    overflow: auto;
+}
+
+header > * {
+    float: left;
+}
+
+h1, h2 {
+    font-family: 'Goudy Bookletter 1911', 'Minion Pro', serif;
+}
+
+h1 {
+    font-size: 72px;
+    margin-top: 0;
+}
+
+.subtitle {
+    font-size: 18px;
+    margin: -5px 0 0 15px;
+}
+
+img.profile {
+    border-radius: 50%;
+    width: 110px;
+    margin-right: 20px;
+    cursor: move;
+}
+
+.links {
+    margin: 20px 0;
+    text-align: center;
+    padding: 10px 0;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+}
+
+.links a {
+    padding: 0 30px;
+}
+
+.research-statement {
+    font-size: 28px;
+}
+
+h2 {
+    margin-bottom: 5px;
+}
+
+p {
+    margin-bottom: 30px;
+}

@@ -1,0 +1,15 @@
+ongoing:
+- title: >-
+    [Esper](https://github.com/scanner-research/esper/): Query, Analysis, and Visualization of Large Video Collections
+- title: >-
+    An Analysis of the Rust Community through Online Discourse
+
+published:
+- title: >-
+    Scanner: Efficient Video Analysis at Scale
+  authors: >-
+    Alex Poms, **Will Crichton**, Pat Hanrahan, Kayvon Fatahalian.
+  meta: >-
+    SIGGRAPH 2018. [Paper](http://graphics.stanford.edu/papers/scanner/scanner_sig18.pdf). [Github](https://github.com/scanner-research/scanner).
+  icon: >-
+    http://willcrichton.net/stanford-graphics-website/assets/images/publications/scanner/banner-small.jpg

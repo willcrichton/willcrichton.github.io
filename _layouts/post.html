@@ -1,0 +1,24 @@
+---
+layout: default
+---
+<div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    {% if page.subtitle %}
+    {{ page.title }}: <br />{{ page.subtitle }}
+    {% else %}
+    {{ page.title }}
+    {% endif %}
+  </h1>
+  <div class="date">
+    {% if page.author %}
+    {{ page.author }}
+    {% else %}
+    Will Crichton
+    {% endif %}
+    &nbsp; &mdash; &nbsp;
+    {{ page.date | date: "%B %-d, %Y" }}
+  </div>
+  <div class="abstract">{{ page.abstract }}</div>
+  {{ content }}
+</div>

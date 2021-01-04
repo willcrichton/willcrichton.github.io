@@ -1,0 +1,8 @@
+$(function() {
+    var rot = 0;
+    setInterval(function() {
+	$('.profile').css('transform', 'rotate(' + rot + 'deg)');
+	$('html').css('transform', 'rotate(' + (360 - rot) + 'deg)');
+	rot = (rot + 1) % 360;
+    }, 20);
+});

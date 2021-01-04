@@ -1,0 +1,10 @@
+title: "Will Crichton"
+markdown: kramdown
+highlighter: rouge
+sass:
+  sass_dir: _sass
+permalink: /notes/:title/
+url: "http://willcrichton.net"
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
