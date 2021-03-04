@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="Using type-level programming, I show how to use a jQuery-like selector language to perform updates on nested types in Rust.">
+    
+    
+    <title>
+      
+      jQuery, but for types | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    jQuery, but for types
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    May 14, 2020
+  </div>
+  <div class="abstract">Using type-level programming, I show how to use a jQuery-like selector language to perform updates on nested types in Rust.</div>
+  <p><em>Part of an ongoing series about type-level programming in Rust. Read <a href="http://willcrichton.net/notes/type-level-programming/">part one</a> first!<br />All code in this note is available on GitHub: <a href="https://github.com/willcrichton/tquery">willcrichton/tquery</a></em></p>
+
+<p>When doing type-level programming, sometimes our types become quite large, which can make them unwieldy to work with. In this note, we’re going to develop a library of <em>type selectors</em> to perform accesses and updates on deeply nested types.</p>
+
+<p>As a real world example, we’re going to look at the state machine underlying Java’s <a href="http://www.cs.cmu.edu/~jssunshi/pubs/thesis-extras/PlaiddocResultSet.html">ResultSet API</a> for handling database query outputs. The linked documentation contains the full description, but here’s a brief ASCII diagram summarizing the state.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>                                                                  |‾InvalidRow
+                                                |‾CurrentRow----OR-|_ValidRow-----OR-|‾NotYetRead
+                             |‾Position------OR-|                                    |_Read
+                             |                  |_InsertRow-----OR-|‾Inserting
+ResultSet---OR-|‾Open----AND-|                                     |_Inserted
+               |             | Concurrency---OR-|‾ReadOnly
+               |             |                  |_Updatable
+               |             |_Direction-----OR-|‾Scrollable
+               |                                |_ForwardOnly
+               |_Closed
+</code></pre></div></div>
+
+<p>To encode this diagram in Rust with typestate, each branch of an “OR” is a unique struct, and each branch of an “AND” is a type parameter to a struct.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// obligatory PhantomData are omitted</span>
+<span class="k">struct</span> <span class="n">ResultSet</span><span class="o">&lt;</span><span class="n">SetState</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">Closed</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">CurrentRow</span><span class="o">&lt;</span><span class="n">CRowState</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">InsertRow</span><span class="o">&lt;</span><span class="n">InsState</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">ValidRow</span><span class="o">&lt;</span><span class="n">VRowState</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">InvalidRow</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">Read</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">NotYetRead</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">Inserting</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">Inserted</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">Concurrency</span><span class="o">&lt;</span><span class="n">CcState</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">ReadOnly</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">Updatable</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">Direction</span><span class="o">&lt;</span><span class="n">DirState</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">Scrollable</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">ForwardOnly</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Here’s an example of a possible state of the result set.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ResultSet</span><span class="o">&lt;</span>
+  <span class="n">Open</span><span class="o">&lt;</span>
+    <span class="n">CurrentRow</span><span class="o">&lt;</span><span class="n">ValidRow</span><span class="o">&lt;</span><span class="n">Read</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+    <span class="n">ReadOnly</span><span class="p">,</span>
+    <span class="n">ForwardOnly</span><span class="o">&gt;&gt;</span>
+</code></pre></div></div>
+
+<p>This is a large type! It contains a lot of information. It’s like a struct, but with types instead of values.</p>
+
+<p>To see how large types can be hard to work with, let’s try to implement the <a href="http://www.cs.cmu.edu/~jssunshi/pubs/thesis-extras/PlaiddocResultSet.html#next()">next</a> method for the ResultSet. This method requires the <code class="highlighter-rouge">ResultSet</code> to be in the <code class="highlighter-rouge">CurrentRow</code> state. Then it either returns <code class="highlighter-rouge">NotYetRead</code> if successfully moving to the next row, or <code class="highlighter-rouge">InvalidRow</code> otherwise. We can write the <code class="highlighter-rouge">impl</code> like this:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span><span class="o">&lt;</span><span class="n">CRowState</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;</span>
+<span class="n">ResultSet</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">CurrentRow</span><span class="o">&lt;</span><span class="n">CRowState</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">next</span><span class="p">(</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span>
+    <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span>
+      <span class="n">ResultSet</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">CurrentRow</span><span class="o">&lt;</span><span class="n">ValidRow</span><span class="o">&lt;</span><span class="n">NotYetRead</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+                <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+      <span class="n">ResultSet</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">CurrentRow</span><span class="o">&lt;</span><span class="n">InvalidRow</span><span class="o">&gt;</span><span class="p">,</span>
+                <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;&gt;</span>
+    <span class="o">&gt;</span> <span class="p">{</span>
+    <span class="o">...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Whew, that’s a lot of characters for a return type! Contrast this with the concision of the ResultSet documentation:</p>
+
+<p><img src="/images/assets/tquery-1.png" alt="" /></p>
+
+<p>Intuitively, the difference is that the documentation only references a <em>change</em>, i.e. the part of the ResultSet state that was modified as a result of <code class="highlighter-rouge">next()</code>. By contrast, our Rust code has to spell out the entire type each time, even though e.g. <code class="highlighter-rouge">Concurrency</code> and <code class="highlighter-rouge">Direction</code> are the same.</p>
+
+<p>Ideally, we’d have some way of describing these kinds of surgical updates to a type in Rust. Think about it like a struct. What if I could write this:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">RS</span> <span class="o">=</span> <span class="n">ResultSet</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">CurrentRow</span><span class="o">&lt;</span><span class="n">CRowState</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="n">RS</span><span class="py">.SetState.Position.CRowState</span> <span class="o">=</span> <span class="n">InvalidRow</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>That kind of nested mutation on a struct works perfectly fine for values, but we don’t have an equivalent notation for types. Another way to think about it is as a <em>language of selectors</em>. In JavaScript, you can use jQuery to access an arbitrary part of the DOM tree:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">$</span><span class="p">(</span><span class="dl">'</span><span class="s1">#result-set .set-state .position .c-row-state</span><span class="dl">'</span><span class="p">).</span><span class="nx">html</span><span class="p">(</span>
+  <span class="dl">'</span><span class="s1">&lt;div class="InvalidRow" /&gt;</span><span class="dl">'</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>Let’s do that, but for types!</p>
+
+<h2 id="accessing-individual-types">Accessing individual types</h2>
+
+<p>First, we need some way of reading and writing to the sub-pieces of a type. For example, <code class="highlighter-rouge">Open&lt;P, C, D&gt;</code> is essentially a tuple with three components. I want an API that looks like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Get</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">P</span>
+<span class="n">Get</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">2</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">D</span>
+<span class="n">Set</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span>
+</code></pre></div></div>
+
+<p>Using our <a href="http://willcrichton.net/notes/type-level-programming/">type operators</a> pattern, we can encode this idea through traits.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">ComputeGetType</span><span class="o">&lt;</span><span class="n">Idx</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">type</span> <span class="n">Output</span><span class="p">;</span> <span class="p">}</span>
+<span class="k">pub</span> <span class="k">type</span> <span class="n">GetType</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Idx</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">T</span> <span class="k">as</span> <span class="n">ComputeGetType</span><span class="o">&lt;</span><span class="n">Idx</span><span class="o">&gt;&gt;</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">ComputeSetType</span><span class="o">&lt;</span><span class="n">Idx</span><span class="p">,</span> <span class="n">NewT</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">type</span> <span class="n">Output</span><span class="p">;</span> <span class="p">}</span>
+<span class="k">pub</span> <span class="k">type</span> <span class="n">SetType</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Idx</span><span class="p">,</span> <span class="n">NewT</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">T</span> <span class="k">as</span> <span class="n">ComputeSetType</span><span class="o">&lt;</span><span class="n">Idx</span><span class="p">,</span> <span class="n">NewT</span><span class="o">&gt;&gt;</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Using the <a href="https://docs.rs/typenum/1.12.0/typenum/">typenum</a> crate for type-level numbers (e.g. <code class="highlighter-rouge">U0</code>, <code class="highlighter-rouge">U1</code>, …), we can implement these traits for e.g. the <code class="highlighter-rouge">Open</code> type.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span> <span class="n">ComputeGetType</span><span class="o">&lt;</span><span class="n">U0</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">P</span><span class="p">;</span> <span class="p">}</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span> <span class="n">ComputeGetType</span><span class="o">&lt;</span><span class="n">U1</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">C</span><span class="p">;</span> <span class="p">}</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span> <span class="n">ComputeGetType</span><span class="o">&lt;</span><span class="n">U2</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">D</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">ComputeSetType</span><span class="o">&lt;</span><span class="n">U0</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">ComputeSetType</span><span class="o">&lt;</span><span class="n">U1</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span><span class="n">T</span> <span class="o">&gt;</span> <span class="n">ComputeSetType</span><span class="o">&lt;</span><span class="n">U2</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This translation is fairly mechanical, so we can implement it with a custom derive. I won’t go into the details, but you can find a proof-of-concept <a href="https://github.com/willcrichton/tquery/blob/master/tquery-derive/src/lib.rs">here</a>.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(TQuery)]</span>
+<span class="k">struct</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Now, we can use our getter/setter type operators. For example:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">GetType</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">U1</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">C</span>
+</code></pre></div></div>
+
+<h2 id="traversing-nested-types">Traversing nested types</h2>
+
+<p>Next, we need the ability to apply multiple getters/setters to a nested type. Ultimately, my goal is to implement a type operator <code class="highlighter-rouge">UpdateCurrentRow</code> that traverses the <code class="highlighter-rouge">ResultSet</code> three layers down to change <code class="highlighter-rouge">CurrentRow</code>. For example:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">UpdateCurrentRow</span><span class="o">&lt;</span><span class="n">RS</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">???</span>
+<span class="k">type</span> <span class="n">RS2</span> <span class="o">=</span> <span class="n">UpdateCurrentRow</span><span class="o">&lt;</span>
+  <span class="n">ResultSet</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">CurrentRow</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+  <span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="n">RS2</span> <span class="o">==</span> <span class="n">ResultSet</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">CurrentRow</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;&gt;</span>
+</code></pre></div></div>
+
+<p>Think about traversing a nested tuple in Rust. It looks like this:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="p">(((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">4</span><span class="p">);</span>
+<span class="k">assert</span><span class="o">!</span><span class="p">(((</span><span class="n">t</span><span class="err">.</span><span class="mi">0</span><span class="p">)</span><span class="err">.</span><span class="mi">0</span><span class="p">)</span><span class="err">.</span><span class="mi">1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">);</span>
+<span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">t</span><span class="err">.</span><span class="mi">1</span> <span class="o">==</span> <span class="mi">4</span><span class="p">);</span>
+<span class="k">assert</span><span class="o">!</span><span class="p">((</span><span class="n">t</span><span class="err">.</span><span class="mi">0</span><span class="p">)</span><span class="err">.</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">3</span><span class="p">);</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>This code would, of course, be extremely bad style in practice. But when we’re in type-land, we don’t get to live a life of luxury.</p>
+</blockquote>
+
+<p>Similarly for the ResultSet, I will represent the type traversal as a list of indices.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">UpdateCurrentRow</span><span class="o">&lt;</span><span class="n">RS</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="o">=</span>
+  <span class="n">Replace</span><span class="o">&lt;</span><span class="n">RS</span><span class="p">,</span> <span class="p">(</span><span class="n">U0</span><span class="p">,</span> <span class="p">(</span><span class="n">U0</span><span class="p">,</span> <span class="p">(</span><span class="n">U0</span><span class="p">,</span> <span class="p">()))),</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Now our challenge is to implement the <code class="highlighter-rouge">Replace</code> operator. It should take as input a type, a selector, and a new type to replace at the location of the selector. Before looking at the gory Rust code, consider a simple implementation in OCaml-style:</p>
+
+<div class="language-ocaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">rec</span> <span class="n">replace</span> <span class="p">(</span><span class="n">t1</span> <span class="o">:</span> <span class="k">type</span><span class="p">)</span> <span class="p">(</span><span class="n">sel</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span><span class="p">)</span> <span class="p">(</span><span class="n">t2</span> <span class="o">:</span> <span class="k">type</span><span class="p">)</span> <span class="o">=</span>
+  <span class="k">match</span> <span class="n">sel</span> <span class="k">with</span>
+  <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="n">t2</span>
+  <span class="o">|</span> <span class="p">(</span><span class="n">n</span> <span class="o">::</span> <span class="n">sel'</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="k">let</span> <span class="n">t2'</span> <span class="o">=</span> <span class="n">replace</span> <span class="p">(</span><span class="n">type_get</span> <span class="n">t1</span> <span class="n">n</span><span class="p">)</span> <span class="n">sel'</span> <span class="n">t2</span> <span class="k">in</span>
+    <span class="n">type_set</span> <span class="n">t1</span> <span class="n">n</span> <span class="n">t2'</span>
+</code></pre></div></div>
+
+<p>To replace a type, we recursively iterate over the selector list. In the base case, we return the replacing type. In the inductive case, we get the N-th type from <code class="highlighter-rouge">t1</code>, then recurse with the remaining selector <code class="highlighter-rouge">sel'</code>. We place this updated type back into its context in <code class="highlighter-rouge">t1</code> using <code class="highlighter-rouge">type_set</code>.</p>
+
+<p>To lower this code into a Rust type operator, we first define the trait as usual:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">ComputeReplace</span><span class="o">&lt;</span><span class="n">Selector</span><span class="p">,</span> <span class="n">Replacement</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">type</span> <span class="n">Output</span><span class="p">;</span> <span class="p">}</span>
+<span class="k">pub</span> <span class="k">type</span> <span class="n">Replace</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Selector</span><span class="p">,</span> <span class="n">Replacement</span><span class="o">&gt;</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="n">T</span> <span class="k">as</span> <span class="n">ComputeReplace</span><span class="o">&lt;</span><span class="n">Selector</span><span class="p">,</span> <span class="n">Replacement</span><span class="o">&gt;&gt;</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>The base case is fairly simple:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span><span class="o">&lt;</span><span class="n">Replacement</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">ComputeReplace</span><span class="o">&lt;</span><span class="p">(),</span> <span class="n">Replacement</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">T</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">Replacement</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The inductive case is a little crazy though:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span><span class="o">&lt;</span><span class="n">Sel</span><span class="p">,</span> <span class="n">SelList</span><span class="p">,</span> <span class="n">Replacement</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span>
+  <span class="n">ComputeReplace</span><span class="o">&lt;</span><span class="p">(</span><span class="n">Sel</span><span class="p">,</span> <span class="n">SelList</span><span class="p">),</span> <span class="n">Replacement</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">T</span>
+<span class="k">where</span>
+  <span class="n">T</span><span class="p">:</span> <span class="n">ComputeGetType</span><span class="o">&lt;</span><span class="n">Sel</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="n">GetType</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Sel</span><span class="o">&gt;</span><span class="p">:</span> <span class="n">ComputeReplace</span><span class="o">&lt;</span><span class="n">SelList</span><span class="p">,</span> <span class="n">Replacement</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="n">T</span><span class="p">:</span> <span class="n">ComputeSetType</span><span class="o">&lt;</span><span class="n">Sel</span><span class="p">,</span> <span class="n">Replace</span><span class="o">&lt;</span><span class="n">GetType</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Sel</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">SelList</span><span class="p">,</span> <span class="n">Replacement</span><span class="o">&gt;&gt;</span>
+<span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">SetType</span><span class="o">&lt;</span>
+    <span class="n">T</span><span class="p">,</span> <span class="n">Sel</span><span class="p">,</span>
+    <span class="n">Replace</span><span class="o">&lt;</span>
+      <span class="n">GetType</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Sel</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">SelList</span><span class="p">,</span> <span class="n">Replacement</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Again, this code makes most sense when placed in correspondence with the OCaml program. The <code class="highlighter-rouge">type Output</code> section describes the actual computation. The <code class="highlighter-rouge">where</code> bound is is necessary to make the computation possible.</p>
+
+<p>With this type operator in place, our <code class="highlighter-rouge">UpdateCurrentRow</code> alias now works as planned! Bringing this back to the original problem, we can rewrite the <code class="highlighter-rouge">next()</code> type signature:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">UpdateCurrentRow</span><span class="o">&lt;</span><span class="n">RS</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="o">=</span>
+  <span class="n">Replace</span><span class="o">&lt;</span><span class="n">RS</span><span class="p">,</span> <span class="p">(</span><span class="n">U0</span><span class="p">,</span> <span class="p">(</span><span class="n">U0</span><span class="p">,</span> <span class="p">(</span><span class="n">U0</span><span class="p">,</span> <span class="p">()))),</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">S</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span> <span class="n">ResultSet</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">CurrentRow</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">next</span><span class="p">(</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span>
+    <span class="n">Result</span><span class="o">&lt;</span>
+      <span class="n">UpdateCurrentRow</span><span class="o">&lt;</span><span class="n">Self</span><span class="p">,</span> <span class="n">ValidRow</span><span class="o">&lt;</span><span class="n">NotYetRead</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+      <span class="n">UpdateCurrentRow</span><span class="o">&lt;</span><span class="n">Self</span><span class="p">,</span> <span class="n">InvalidRow</span><span class="o">&gt;</span>
+    <span class="o">&gt;</span>
+  <span class="p">{</span>
+    <span class="nd">panic!</span><span class="p">()</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Note that the wonderful implicit <code class="highlighter-rouge">Self</code> type allows us to avoid repeating the <code class="highlighter-rouge">ResultSet</code> definition, making the return type much more readable than before. Now, the change between the typestates is more clearly the focus.</p>
+
+<h2 id="named-selectors">Named selectors</h2>
+
+<p>While the type signature externally looks nice, the selector is still hard to read. To understand what <code class="highlighter-rouge">U0</code> means, you have to go back to the original struct type parameters and do the lookup yourself. One way around this is to create struct-specific named aliases. For example:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(TQuery)]</span>
+<span class="k">struct</span> <span class="n">Open</span><span class="o">&lt;</span><span class="n">Position</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">,</span> <span class="n">Direction</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">type</span> <span class="n">TPosition</span> <span class="o">=</span> <span class="n">U0</span><span class="p">;</span>
+<span class="k">type</span> <span class="n">TConcurrency</span> <span class="o">=</span> <span class="n">U1</span><span class="p">;</span>
+<span class="k">type</span> <span class="n">TDirection</span> <span class="o">=</span> <span class="n">U2</span><span class="p">;</span>
+
+<span class="n">GetType</span><span class="o">&lt;</span><span class="n">Open</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">TConcurrency</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">C</span>
+</code></pre></div></div>
+
+<p>This feature can also be <a href="https://github.com/willcrichton/tquery/blob/master/tquery-derive/src/lib.rs#L40">automatically derived</a>. So now we can rewrite our selector as:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">UpdateCurrentRow</span><span class="o">&lt;</span><span class="n">RS</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">Replace</span><span class="o">&lt;</span>
+  <span class="n">RS</span><span class="p">,</span> <span class="p">(</span><span class="n">TSetState</span><span class="p">,</span> <span class="p">(</span><span class="n">TPosition</span><span class="p">,</span> <span class="p">(</span><span class="n">TRowState</span><span class="p">,</span> <span class="p">()))),</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Much clearer than before!</p>
+
+<h2 id="is-this-jquery">Is this jQuery?</h2>
+
+<p>Wrapping up, we’ve seen how to implement a selector language for replacing nested types. The language is still pretty far from actual jQuery. There’s no way to tag classes of types, or to distinguish between a direct vs. indirect descendent. I would love to hear of any use cases for that style of functionality!</p>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>

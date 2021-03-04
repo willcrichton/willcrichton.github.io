@@ -1,0 +1,61 @@
+/* CSS files add styling rules to your content */
+
+
+body {
+  font-family: "Benton Sans", "Helvetica Neue", helvetica, arial, sans-serif;
+  margin: 2em;
+  }
+
+
+h1 {
+  font-style: italic;
+  color: #373fff;
+}
+
+
+.a-canvas.a-grab-cursor:hover{
+  cursor:url("https://cdn.glitch.com/d6ceb430-fa89-401d-811c-bc27ad01ce99%2FcursorPan.png?") !important
+}
+/*
+.a-canvas.a-grab-cursor:active,.a-grabbing{
+  cursor:default !important
+}
+*/
+
+#arrow_right{
+  position: absolute; 
+  bottom: 50%; 
+  right: 0; 
+  height: 45px;
+  z-index: 100;
+  padding-right: 13px; 
+  padding-bottom: 10px; 
+  opacity: 0;
+  /*animation: blinkRight 2s ease-in-out infinite;*/ 
+}
+
+@keyframes blinkRight {
+  50%{
+    opacity: 100; 
+    transform: translate(10px, 0);
+  }
+}
+
+#arrow_left{
+  position: absolute; 
+  bottom: 50%; 
+  left: 0; 
+  height: 45px;  
+  z-index: 100;
+  padding-left: 13px; 
+  padding-bottom: 10px; 
+  opacity: 0;
+  /*animation: blinkLeft 2s ease-in-out infinite; */
+}
+
+@keyframes blinkLeft {
+  50%{
+    opacity: 100; 
+    transform: translate(-10px, 0);
+  }
+}

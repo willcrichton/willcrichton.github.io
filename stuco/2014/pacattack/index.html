@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PacAttack</title>
+    <link rel="stylesheet" type="text/css" href="game.css">
+    <script type="text/javascript" src="paperjs/dist/paper-full.min.js"></script>
+    <script type="text/javascript" src="flock_lib.js"></script>
+    <script type="text/javascript" src="static_assets.js"></script>
+    <script type="text/javascript" src="game.js"></script>
+  </head>
+  <body style="background-image: url('pacman/background.png'); background-size: 2679px 1026px; background-position: center; background-repeat: no-repeat; margin: 0; background-color: black;">
+    <div style="visibility: hidden; font-family: '8-BIT WONDER'; float: left; position: absolute;">test</div>
+    <canvas id="canvas" height="980" width="1120" style="border-style: solid; border-color: black; margin-left:auto; margin-right:auto; display:block;" keepalive="true"></canvas>
+    <audio autoplay loop id="background-track">
+      <source src="sound/background.wav">
+    </audio>
+    <audio loop id="game-track">
+      <source src="sound/game.wav">
+    </audio>
+  </body>
+</html>

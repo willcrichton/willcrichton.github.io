@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="Resolving names is a hard problem that permeates many aspects of programming like variable scoping, structured control flow, and method resolution. I show how a few core ideas underlie seemingly disparate parts of programming language design.">
+    
+    
+    <title>
+      
+      "Do What I Mean": Name Resolution in Programming Languages | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    "Do What I Mean": Name Resolution in Programming Languages
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    September 16, 2018
+  </div>
+  <div class="abstract">Resolving names is a hard problem that permeates many aspects of programming like variable scoping, structured control flow, and method resolution. I show how a few core ideas underlie seemingly disparate parts of programming language design.</div>
+  <p>Abstraction through names is a fundamental building block of any programming language. Names, or variables, serve as placeholders which permit a piece of code to abstract over its inputs until the name is resolved.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Concrete code (sum to 10)</span>
+<span class="kd">let</span> <span class="nx">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">;</span> <span class="o">++</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">i</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Abstract code (sum to N)</span>
+<span class="kd">function</span> <span class="nx">sum_to</span><span class="p">(</span><span class="nx">N</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">N</span><span class="p">;</span> <span class="o">++</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">i</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">sum</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The process of name resolution is the question: when should a name be given a value, and which value should it be? In the above example, it’s simple: when I call <code class="highlighter-rouge">sum_to(10)</code>, the name <code class="highlighter-rouge">N</code> means <code class="highlighter-rouge">10</code>. However, conflict arises when multiple values <em>could</em> apply to a given name. For example, if I typo’d the sum variable:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">sum_to</span><span class="p">(</span><span class="nx">N</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">N</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">N</span><span class="p">;</span> <span class="o">++</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">N</span> <span class="o">+=</span> <span class="nx">i</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">N</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then what happens? Or a better question: what <em>should</em> happen? This is the core challenge of name resolution, is determining a means of resolving conflicts in a sensible way. In this note, I’m going to explore what “sensible” name resolution means in a few different areas of programming languages, showing along the way that seemingly disparate language features share similar problems.</p>
+
+<h2 id="1-variable-scope">1. Variable scope</h2>
+
+<p>The simplest and most canonical example of name resolution is variable scoping, or mapping variables to values. For example, consider this program<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="kd">function</span> <span class="nx">g</span><span class="p">(</span><span class="nx">z</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span> <span class="o">+</span> <span class="nx">z</span><span class="p">;</span> <span class="p">}</span>
+<span class="kd">function</span> <span class="nx">f</span><span class="p">(</span><span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nx">g</span><span class="p">(</span><span class="nx">y</span> <span class="o">*</span> <span class="nx">x</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">f</span><span class="p">(</span><span class="mi">3</span><span class="p">));</span>
+</code></pre></div></div>
+
+<p>When executing the inner <code class="highlighter-rouge">g</code> function, it has the following call stack:</p>
+
+<p><img src="/images/assets/names-1.png" alt="" width="300" /></p>
+
+<p>Take a second to walk through the code and verify this diagram matches your expectations. When executing <code class="highlighter-rouge">g</code>, the name resolution question here is: in the expression <code class="highlighter-rouge">x + z</code> what does <code class="highlighter-rouge">x</code> refer to? There are two options: the <code class="highlighter-rouge">x</code> defined in the top-level scope, and the <code class="highlighter-rouge">x</code> defined in the function <code class="highlighter-rouge">f</code>.</p>
+
+<p>The first option, picking <code class="highlighter-rouge">x = 1</code>, is called <em>lexical</em> scoping. The intuition behind lexical scoping is that the program structure defines a series of “scopes” that we can infer just by reading the program, without actually running the code.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// The {N, ...} syntax indicates which scopes are "active" a given</span>
+<span class="c1">// point in the program.</span>
+
+<span class="c1">// BEGIN SCOPE 1 -- {1}</span>
+<span class="kd">let</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="kd">function</span> <span class="nx">g</span><span class="p">(</span><span class="nx">z</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// BEGIN SCOPE 2 -- {1, 2}</span>
+    <span class="k">return</span> <span class="nx">x</span> <span class="o">+</span> <span class="nx">z</span><span class="p">;</span>
+    <span class="c1">// END SCOPE 2</span>
+<span class="p">}</span>
+<span class="kd">function</span> <span class="nx">f</span><span class="p">(</span><span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// BEGIN SCOPE -- {1, 3}</span>
+  <span class="kd">let</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nx">g</span><span class="p">(</span><span class="nx">y</span> <span class="o">*</span> <span class="nx">x</span><span class="p">);</span>
+  <span class="c1">// END SCOPE</span>
+<span class="p">}</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">f</span><span class="p">(</span><span class="mi">3</span><span class="p">));</span>
+<span class="c1">// END SCOPE 1</span>
+</code></pre></div></div>
+
+<p>The nested structure of our program implies that at any line, we have a stack of scopes as annotated in the program above. To resolve a name, we walk the stack and search for the closest declaration of our desired variable. In the example, because scope 3 is not in the stack of scope 2, <code class="highlighter-rouge">x + z</code> resolves to the binding of <code class="highlighter-rouge">x</code> in scope 1, not scope 3.</p>
+
+<p>Again, we call this “lexical” scoping because the scope stack is determined <em>statically</em> from the program source code (i.e. at compile-time, before the program is executed). The alternative approach, the one that resolves to <code class="highlighter-rouge">x = 4</code>, is called <em>dynamic</em> scoping. Recall our call stack above:</p>
+
+<p><img src="/images/assets/names-1.png" alt="" width="300" /></p>
+
+<p>As you may have inferred at this point, dynamic scoping looks at the runtime call stack to find the most recent declaration of <code class="highlighter-rouge">x</code> and uses that value. Here, the binding <code class="highlighter-rouge">x = 4</code> in <code class="highlighter-rouge">f</code> is more recent than the binding <code class="highlighter-rouge">x = 1</code> in the top-level scope.</p>
+
+<p>In both cases, dynamic or lexical, <strong>the core algorithm is the same</strong>: given a stack of scopes, walk up the stack to find the most recent name declaration. The only difference is whether the the scope stack is determined at compile-time or at run-time.</p>
+
+<p>So which scoping method is preferable? Judging by popularity, lexical scoping has won the war. The vast majority of programming languages, Javascript included, use lexical scoping<sup id="fnref:4"><a href="#fn:4" class="footnote">2</a></sup>. Generally, the pro-lexical arguments are:</p>
+<ol>
+  <li>Unbound variable errors can be caught at compile time. If you typo a variable name, then the program can be checked for this issue before execution.</li>
+  <li>“Spooky action at a distance”: with dynamic scoping, name bindings in very different parts of the program can affect your local implementation.</li>
+</ol>
+
+<p>Few languages today make any serious attempt at having dynamic scoping, usually just flavors of Lisp. However, the arguments for dynamic scoping raise important concerns about limitations of lexical scoping. <a href="https://dspace.mit.edu/handle/1721.1/6094">“The Art of the Interpreter”</a> (Steele and Sussman, 1978, p.43-45) and <a href="https://www.gnu.org/software/emacs/emacs-paper.html#SEC17">“EMACS: The Extensible, Customizable Display Editor”</a> (Stallman, 1981) lay out the essential arguments. Quoting Stallman:</p>
+
+<blockquote>
+  <p>Some language designers believe that dynamic binding should be avoided, and explicit argument passing should be used instead. Imagine that function A binds the variable FOO, and calls the function B, which calls the function C, and C uses the value of FOO. Supposedly A should pass the value as an argument to B, which should pass it as an argument to C.</p>
+
+  <p>This cannot be done in an extensible system, however, because the author of the system cannot know what all the parameters will be. Imagine that the functions A and C are part of a user extension, while B is part of the standard system. The variable FOO does not exist in the standard system; it is part of the extension. To use explicit argument passing would require adding a new argument to B, which means rewriting B and everything that calls B. In the most common case, B is the editor command dispatcher loop, which is called from an awful number of places.</p>
+
+  <p>What’s worse, C must also be passed an additional argument. B doesn’t refer to C by name (C did not exist when B was written). It probably finds a pointer to C in the command dispatch table. This means that the same call which sometimes calls C might equally well call any editor command definition. So all the editing commands must be rewritten to accept and ignore the additional argument. By now, none of the original system is left!</p>
+</blockquote>
+
+<p>While lexical scoping proponents argue that their scheme improves modularity by limiting cross-module effects (names can’t be unexpectedly bound outside of their module), Stallman here advocates that dynamic scoping also improves modularity. In the natural course of software design, dynamic scoping improves the separation of concerns by not requiring the creators of middleware to know all the parameters that need to pass down through their interface.</p>
+
+<p>To my knowledge, however, no formal study has ever been done on the impact/usability of lexical vs. dynamic scoping. And since dynamic scoping never really caught on, it’s difficult beyond anecdotal experience to say how true arguments on either side are.</p>
+
+<h2 id="2-control-flow">2. Control flow</h2>
+
+<p>This core idea of walking stacks to find names comes up in a surprising number of places in programming langauge design. You’ve probably seen a language that has labels to allow breaking out of arbitrarily nested loops. Here’s an example in Rust:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">'outer</span><span class="p">:</span> <span class="k">for</span> <span class="n">i</span> <span class="n">in</span> <span class="mi">1</span> <span class="o">..</span> <span class="mi">10</span> <span class="p">{</span>
+  <span class="nv">'inner</span><span class="p">:</span> <span class="k">for</span> <span class="n">j</span> <span class="n">in</span> <span class="mi">1</span> <span class="o">..</span> <span class="mi">10</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span> <span class="p">{</span>
+        <span class="k">break</span> <span class="nv">'outer</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This is an example of a <em>lexically</em> scoped jump—to determine what label <code class="highlighter-rouge">outer</code> refers to, we walk up the “label scope” stack (at compile time) to find the closest definition of <code class="highlighter-rouge">outer</code><sup id="fnref:2"><a href="#fn:2" class="footnote">3</a></sup>. What would a <em>dynamically</em> scoped jump look like? Here’s an imaginary language:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def div(m, n) {
+  if n == 0 {
+    break error("Div by 0");
+  }
+
+  return m / n;
+}
+
+def main() {
+  let x = div(5, 3);
+  let y = div(x, 0);
+  print("Success!", y);
+  return;
+
+  error(s) {
+    print("Error", s);
+  }
+}
+</code></pre></div></div>
+
+<p>Here, the idea is that the <code class="highlighter-rouge">div</code> function uses a dynamically-scoped label <code class="highlighter-rouge">error</code> to jump to if the function fails. That error label could be anywhere on the call stack above the <code class="highlighter-rouge">div</code> function. This might sound familiar, because this is how exceptions work! Here’s an actual example in OCaml:</p>
+
+<div class="language-ocaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">exception</span> <span class="nc">Error</span> <span class="k">of</span> <span class="kt">string</span>
+
+<span class="k">let</span> <span class="n">div</span> <span class="n">m</span> <span class="n">n</span> <span class="o">=</span>
+  <span class="k">if</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span>
+    <span class="k">raise</span> <span class="p">(</span><span class="nc">Error</span> <span class="s2">"Div by 0"</span><span class="p">)</span>
+  <span class="k">else</span>
+    <span class="n">m</span> <span class="o">/</span> <span class="n">n</span>
+
+<span class="k">let</span> <span class="n">main</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="k">try</span>
+    <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="n">div</span> <span class="mi">5</span> <span class="mi">3</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">y</span> <span class="o">=</span> <span class="n">div</span> <span class="n">x</span> <span class="mi">0</span> <span class="k">in</span>
+    <span class="nn">Printf</span><span class="p">.</span><span class="n">printf</span> <span class="s2">"Success: %d"</span> <span class="n">y</span>
+  <span class="k">with</span> <span class="nc">Error</span> <span class="n">s</span> <span class="o">-&gt;</span>
+    <span class="nn">Printf</span><span class="p">.</span><span class="n">printf</span> <span class="s2">"Error: %s"</span> <span class="n">s</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span> <span class="n">main</span> <span class="bp">()</span> <span class="c">(* Prints "Error: Div by 0" *)</span>
+</code></pre></div></div>
+
+<p>A <code class="highlighter-rouge">raise</code> is a control flow mechanism that relies on dynamically-scoped labels, or <code class="highlighter-rouge">try</code> blocks. One point this shows is that both lexical and dynamic jumps seem useful, and some languages do incorporate variants of both. It is possible for lexical/dynamic scoping to co-exist, at least for control flow.</p>
+
+<p>Interestingly, the arguments against dynamic scoping for labels are somewhat the inverse of the arguments against dynamic scope for variables. A library that relies on dynamically scoped variables is concerned with outside modules accidentally modifying its state, while outside modules are concerned with their libraries raising exceptions that leave the library.</p>
+
+<h2 id="3-method-resolution-with-oop">3. Method resolution with OOP</h2>
+
+<p>A common issue in programming is associating functions with data. In languages like C, this is often done via convention in function naming.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+  <span class="kt">int</span><span class="o">*</span> <span class="n">data</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">len</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">stack_t</span><span class="p">;</span>
+
+<span class="n">stack_t</span><span class="o">*</span> <span class="nf">stack_new</span><span class="p">();</span>
+<span class="kt">void</span> <span class="nf">stack_push</span><span class="p">(</span><span class="n">stack_t</span><span class="o">*</span> <span class="n">stack</span><span class="p">,</span> <span class="kt">int</span> <span class="n">value</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">stack_pop</span><span class="p">(</span><span class="n">stack_t</span><span class="o">*</span> <span class="n">stack</span><span class="p">);</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">stack_t</span><span class="o">*</span> <span class="n">stack</span> <span class="o">=</span> <span class="n">stack_new</span><span class="p">();</span>
+  <span class="n">stack_push</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="n">stack_pop</span><span class="p">(</span><span class="n">stack</span><span class="p">));</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Even in more modern languages like OCaml, this is still basically how function/data associations work.</p>
+
+<div class="language-ocaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="k">type</span> <span class="nc">Stack</span> <span class="o">=</span> <span class="k">sig</span>
+  <span class="k">type</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">make</span> <span class="o">:</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">push</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">pop</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">*</span> <span class="n">t</span>
+<span class="k">end</span>
+
+<span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">Stack</span><span class="p">.</span><span class="n">make</span> <span class="bp">()</span> <span class="k">in</span>
+<span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">Stack</span><span class="p">.</span><span class="n">push</span> <span class="n">s</span> <span class="mi">3</span> <span class="k">in</span>
+<span class="k">let</span> <span class="p">(</span><span class="n">n</span><span class="o">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="nn">Stack</span><span class="p">.</span><span class="n">pop</span> <span class="n">s</span> <span class="k">in</span>
+<span class="nn">Printf</span><span class="p">.</span><span class="n">printf</span> <span class="s2">"%d"</span> <span class="n">n</span>
+</code></pre></div></div>
+
+<p>Most other modern languages, particularly object-oriented languages, use <em>type-directed</em> name resolution to use functions associated with data. For example, in Python:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">A</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">A</span><span class="p">()</span>
+<span class="n">a</span><span class="o">.</span><span class="n">save</span><span class="p">()</span> <span class="c1"># Resolves to A.save(a)
+</span></code></pre></div></div>
+
+<p>Here, because <code class="highlighter-rouge">a</code> is of type <code class="highlighter-rouge">A</code>, when we try to call functions on <code class="highlighter-rouge">a</code>, the runtime can determine that the <code class="highlighter-rouge">a.save</code> function should refer to <code class="highlighter-rouge">A.save</code>. Object-oriented languages also support inheritance, which complicates name resolution:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">A</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
+  <span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="n">b</span> <span class="o">=</span> <span class="n">B</span><span class="p">()</span>
+<span class="n">b</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span> <span class="c1"># resolves to B.to_string(b)
+</span><span class="n">b</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>      <span class="c1"># resolves to A.save(b)
+</span></code></pre></div></div>
+
+<p>Conceptually, single-inheritance represents a stack of methods. When asking for a particular method, resolving the method involves walking the stack of methods for the closest declaration<sup id="fnref:3"><a href="#fn:3" class="footnote">4</a></sup> (this should sound familiar). Here, <code class="highlighter-rouge">to_string</code> resolves to the closest declaration in <code class="highlighter-rouge">B</code>, while <code class="highlighter-rouge">save</code> resolves to the closest declaration in <code class="highlighter-rouge">A</code>.</p>
+
+<p>The hard part here is that while single-inheritance represents a stack, which has a clear means of resolving names (walk the stack for the closest name), multiple-inheritance turns this problem into a directed acyclic graph (DAG). Quoting from Guido’s post on the history of <a href="http://python-history.blogspot.com/2010/06/method-resolution-order.html">Method Resolution Order</a> in Python:</p>
+
+<blockquote>
+  <p>Classic classes used a simple MRO scheme: when looking up a method, base classes were searched using a simple depth-first left-to-right scheme. The first matching object found during this search would be returned. For example, consider these classes:</p>
+</blockquote>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">A</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">C</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">D</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span> <span class="k">pass</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>If we created an instance x of class D, the classic method resolution order would order the classes as D, B, A, C. Thus, a search for the method x.save() would produce A.save() (and not C.save()). This scheme works fine for simple cases, but has problems that become apparent when one considers more complicated uses of multiple inheritance. One problem concerns method lookup under “diamond inheritance.” For example:</p>
+</blockquote>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">A</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">C</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">D</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span> <span class="k">pass</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Here, class D inherits from B and C, both of which inherit from class A. Using the classic MRO, methods would be found by searching the classes in the order D, B, A, C, A. Thus, a reference to x.save() will call A.save() as before. However, this is unlikely what you want in this case! Since both B and C inherit from A, one can argue that the redefined method C.save() is actually the method that you want to call, since it can be viewed as being “more specialized” than the method in A (in fact, it probably calls A.save() anyways). For instance, if the save() method is being used to save the state of an object, not calling C.save() would break the program since the state of C would be ignored.</p>
+</blockquote>
+
+<p>So how do we fix this problem? The core idea is that we want to turn this hard problem (name resolution on a DAG of classes) into an easy problem (name resolution on a stack of classes). This process is called “linearization”. The desirable properties of a linearization algorithm, as well as the actual algorithms used, are too much to discuss here. If you want to know more, you should read <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.19.3910&amp;rep=rep1&amp;type=pdf">A Monotonic Superclass Linearization for Dylan</a> (Barrett et al. 1996) which defines both the problem setting and the specific algorithm (“C3”) that Python today uses.</p>
+
+<h2 id="4-method-resolution-with-traits">4. Method resolution with traits</h2>
+
+<p>Traits are an alternative approach to function/data association that have come into vogue in the last decade, most notably in <a href="https://doc.rust-lang.org/book/second-edition/ch10-02-traits.html">Rust</a>. They support the general notion of composition over inheritance, allowing functionality for a given data type to be broken up into multiple small chunks. For example:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">Point</span> <span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="nb">f32</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">f32</span> <span class="p">}</span>
+
+<span class="c">// Methods in this "impl block" are directly associated with the Point</span>
+<span class="c">// data type, no traits involved.</span>
+<span class="k">impl</span> <span class="n">Point</span> <span class="p">{</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">f32</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">f32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Point</span> <span class="p">{</span>
+    <span class="n">Point</span> <span class="p">{</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">print</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"({}, {})"</span><span class="p">,</span> <span class="k">self</span><span class="py">.x</span><span class="p">,</span> <span class="k">self</span><span class="py">.y</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">trait</span> <span class="nb">Add</span> <span class="p">{</span>
+  <span class="c">// Self is a keyword referring to "the type implementing the trait"</span>
+  <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">Self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="nb">Add</span> <span class="k">for</span> <span class="n">Point</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">Point</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Point</span> <span class="p">{</span>
+    <span class="n">Point</span> <span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="k">self</span><span class="py">.x</span> <span class="o">+</span> <span class="n">other</span><span class="py">.x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="k">self</span><span class="py">.y</span> <span class="o">+</span> <span class="n">other</span><span class="py">.y</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>For methods in the initial <code class="highlighter-rouge">impl Point</code> block, method resolution is simple. If a particular value is known to be a <code class="highlighter-rouge">Point</code>, then calling <code class="highlighter-rouge">.print()</code> will always resolve to the <code class="highlighter-rouge">Point::print</code> function (these are called “inherent” methods).</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">point</span><span class="p">::</span><span class="n">Point</span><span class="p">;</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">let</span> <span class="n">p1</span> <span class="o">=</span> <span class="nn">Point</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">);</span>
+  <span class="n">p1</span><span class="nf">.print</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>However, if we then try to use the add method:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">point</span><span class="p">::</span><span class="n">Point</span><span class="p">;</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">let</span> <span class="n">p1</span> <span class="o">=</span> <span class="nn">Point</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">);</span>
+  <span class="k">let</span> <span class="n">p2</span> <span class="o">=</span> <span class="nn">Point</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">);</span>
+  <span class="k">let</span> <span class="n">p3</span> <span class="o">=</span> <span class="n">p1</span><span class="nf">.add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>We will get the error:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>error[E0599]: no method named `add` found for type `point::Point` in the current scope
+  --&gt; test.rs:32:15
+   |
+2  |   pub struct Point { x: f32, y: f32 }
+   |   ---------------- method `add` not found for this
+...
+32 |   let p3 = p1.add(&amp;p2);
+   |               ^^^
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: the following trait is implemented but not in scope, perhaps add a `use` for it:
+   |
+27 | use point::Add;
+   |
+</code></pre></div></div>
+
+<p>Method resolution for traits has two steps: first the trait has to be imported (the <code class="highlighter-rouge">use</code> keyword) into the current scope, and then the type system has to resolve the method name to the implementation of a corresponding trait. In the above example, this will work:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">point</span><span class="p">::{</span><span class="n">Point</span><span class="p">,</span> <span class="nb">Add</span><span class="p">};</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">let</span> <span class="n">p1</span> <span class="o">=</span> <span class="nn">Point</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">);</span>
+  <span class="k">let</span> <span class="n">p2</span> <span class="o">=</span> <span class="nn">Point</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">);</span>
+  <span class="k">let</span> <span class="n">p3</span> <span class="o">=</span> <span class="n">p1</span><span class="nf">.add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Importing the trait is important because multiple traits could provide implementations of methods with the same name. For example, if <code class="highlighter-rouge">add</code> were also part of another trait:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="nb">Add</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">Self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">Arithmetic</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">Self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span><span class="p">;</span>
+  <span class="k">fn</span> <span class="nf">sub</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">Self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="nb">Add</span> <span class="k">for</span> <span class="n">Point</span> <span class="p">{</span> <span class="o">..</span> <span class="p">}</span>
+<span class="k">impl</span> <span class="n">Arithmetic</span> <span class="k">for</span> <span class="n">Point</span> <span class="p">{</span> <span class="o">..</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then in order to know which <code class="highlighter-rouge">add</code> method a <code class="highlighter-rouge">p.add(..)</code> refers to, exactly one of those traits must be imported into the current scope.</p>
+
+<p>The second step, resolving the name to a trait, is simple in the example above. An example algorithm would be to enumerate all implemented traits for <code class="highlighter-rouge">Point</code> in scope, then linear search through each trait for a method that matches the desired name and type signature. However, complications arise around generics. For example:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">Vec2</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">T</span> <span class="p">}</span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nb">Add</span> <span class="k">for</span> <span class="n">Vec2</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="k">where</span> <span class="n">T</span><span class="p">:</span> <span class="nb">Add</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">Vec2</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Vec2</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">Vec2</span> <span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="k">self</span><span class="py">.x</span><span class="nf">.add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">other</span><span class="py">.x</span><span class="p">),</span> <span class="n">y</span><span class="p">:</span> <span class="k">self</span><span class="py">.y</span><span class="nf">.add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">other</span><span class="py">.y</span><span class="p">)</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Above, we have a generic vector of two elements, and we again implement the <code class="highlighter-rouge">Add</code> trait, except this time our implementation is <em>conditional</em>—<code class="highlighter-rouge">Vec2</code> only implements <code class="highlighter-rouge">Add</code> when its element type <code class="highlighter-rouge">T</code> implements <code class="highlighter-rouge">Add</code>. When we use the vector:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">let</span> <span class="n">p1</span><span class="p">:</span> <span class="n">Vec2</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Vec2</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+  <span class="k">let</span> <span class="n">p2</span><span class="p">:</span> <span class="n">Vec2</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Vec2</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+  <span class="k">let</span> <span class="n">p3</span> <span class="o">=</span> <span class="n">p1</span><span class="nf">.add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>In order to resolve <code class="highlighter-rouge">add</code>, the compiler has to prove that <code class="highlighter-rouge">i32: Add</code> (i.e. there exists something that implements <code class="highlighter-rouge">Add</code> for <code class="highlighter-rouge">i32</code>). To solve a name resolution problem this complex, Rust internally has an <a href="http://smallcultfollowing.com/babysteps/blog/2017/01/26/lowering-rust-traits-to-logic/">entire logic programming language</a> dedicated to it.</p>
+
+<p>An important constraint on this problem is that two traits are not allowed to possibly implement the same method for the same data type. <a href="http://smallcultfollowing.com/babysteps/blog/2015/01/14/little-orphan-impls/">Little Orphan Impls</a> covers the gory details here, but the key idea is that Rust wants to ensure that importing a crate or a type doesn’t suddenly cause your program to change because you’re accidentally using a different trait implementation than before.</p>
+
+<p>However, this isn’t ideal because it can be useful to have more “general” implementations of a method for every type, and more “specific” implementations of a method for a few types, e.g. a general vs. customized <code class="highlighter-rouge">to_string</code> method. Hence, a major project in the Rust pipeline is <em>trait specialization</em>, as detailed in <a href="http://aturon.github.io/2018/04/05/sound-specialization/">Sound and ergonomic specialization for Rust</a>. The challenge is to determine what makes a method “specific” vs. “general,” which is still being debated in the community.</p>
+
+<p>Overall, Rust’s approach to method resolution is trying to implement a maximally flexible means of associating functionality to data, and approaching a “do what I mean” algorithm for resolving methods. The trade off is the complexity in the trait resolution algorithm, and the extent to which that complexity is passed on to the user instead of hidden in the compiler.</p>
+
+<h2 id="5-specificity">5. Specificity</h2>
+
+<p>While Rust has yet to settle on a notion of “specificity” for functions, CSS, the web-based style description language, has a first-class notion of specificity baked into its semantics. CSS enables users to define rules that change the visual properties of UI elements. For example, if I have the HTML:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;span</span> <span class="na">id=</span><span class="s">"foo"</span> <span class="na">class=</span><span class="s">"bar"</span><span class="nt">&gt;</span>The text<span class="nt">&lt;/span&gt;</span>
+</code></pre></div></div>
+
+<p>This <code class="highlighter-rouge">span</code> tag has some visual properties, like a text <code class="highlighter-rouge">color</code> and a <code class="highlighter-rouge">font-size</code>. The core algorithm in a CSS engine is to determine, given an HTML element and a set of CSS rules, the values of each visual property. For example, if our CSS is:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* All span tags */</span>
+<span class="nt">span</span> <span class="p">{</span>
+  <span class="nl">font-size</span><span class="p">:</span> <span class="m">10px</span><span class="p">;</span>
+  <span class="nl">color</span><span class="p">:</span> <span class="no">blue</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* All tags with id "foo" */</span>
+<span class="nf">#foo</span> <span class="p">{</span>
+  <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* All span tags with class "bar" */</span>
+<span class="nt">span</span><span class="nc">.bar</span> <span class="p">{</span>
+  <span class="nl">font-size</span><span class="p">:</span> <span class="m">12px</span><span class="p">;</span>
+  <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then what should the value of <code class="highlighter-rouge">font-size</code> and <code class="highlighter-rouge">color</code> be? Intuitively, for each property, we want to pick the “most specific” rule that applies to our tag and provides that property. The specificity rules are surprisingly simple (quoting the <a href="https://www.w3.org/TR/selectors/#specificity">CSS Specification</a>):</p>
+
+<blockquote>
+  <p>A selector’s <strong><em>specificity</em></strong> is calculated for a given element as follows:</p>
+  <ul>
+    <li>count the number of ID selectors in the selector (= A)</li>
+    <li>count the number of class selectors, attributes selectors, and pseudo-classes in the selector (= B)</li>
+    <li>count the number of type selectors and pseudo-elements in the selector (= C)</li>
+    <li>ignore the universal selector</li>
+  </ul>
+
+  <p>Specificities are compared by comparing the three components in order: the specificity with a larger A value is more specific; if the two A values are tied, then the specificity with a larger B value is more specific; if the two B values are also tied, then the specificity with a larger C value is more specific; if all the values are tied, the two specificities are equal.</p>
+</blockquote>
+
+<p>In our example above, we have:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>span     (A=0, B=0, C=1)
+#foo     (A=1, B=0, C=0)
+span.bar (A=0, B=1, C=1)
+</code></pre></div></div>
+
+<p>This means that the precedence order is <code class="highlighter-rouge">#foo &gt; span.bar &gt; span</code>. Correspondingly, our span then will have a <code class="highlighter-rouge">color: red</code> (from <code class="highlighter-rouge">#foo</code>) and a <code class="highlighter-rouge">font-size: 12px</code> (from <code class="highlighter-rouge">span.bar</code>).</p>
+
+<p>In a way, you can think about this as a kind of lexical scoping. Variables use the stack-based syntax of the language to define a stack of lexical scopes, or the runtime stack to define a stack of dynamic scopes. In CSS, for a given UI element, a specificity value can be statically computed for each CSS rule, which forms a “stack” of rules (or ordered scopes). After filtering out rules that don’t apply to the element, the value of each visual property is computed by walking up the rule stack to find the closest binding.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Name resolution is a hard problem that shows up in many aspects of programming languages: variables, jumps, methods, and so on. A core idea is that most naming conflicts can be reduced to a stack of scopes (where “scope” could be a code block, a class definition, a CSS rule, etc.), and name resolution is walking up the scope stack. The hard part is instead what defines your stack: static vs. dynamic scopes for variables, linearization methods for classes, specificity heuristics for CSS rules.</p>
+
+<p>A major tradeoff for name resolution systems is the level of complexity. More complex resolution systems like Rust’s traits or CSS’s rule specificity approach the “do what I mean” ideal where the user has to minimally disambiguate names/scopes. However, debugging naming issues with complex resolution can be difficult—every CSS programmer knows the shame of decorating rules with <code class="highlighter-rouge">!important</code>.</p>
+
+<p>I would love to see a more unified theory of name resolution be applied to uniformly understand and solve the issues raised above. We also need more studies to understand what name resolution systems maximize productivity as a function of intuitiveness, error-proneness, and debuggability.</p>
+
+<p>If you have comments, please send them my way at <a href="mailto:wcrichto@cs.stanford.edu">wcrichto@cs.stanford.edu</a> or leave them on <a href="https://news.ycombinator.com/item?id=18002190">Hacker News</a>.</p>
+
+<p>P.S. A <a href="https://lobste.rs/s/jnesul/do_what_i_mean_name_resolution#c_lwtnxk">few</a> <a href="https://www.reddit.com/r/ProgrammingLanguages/comments/9gfnvv/do_what_i_mean_name_resolution_in_programming/e64qrdq/">folk</a> have pointed out that Perl 6 has a good number of the features above. Also that there’s been recent work on a <a href="http://swerl.tudelft.nl/twiki/pub/Main/TechnicalReports/TUD-SERG-2015-001.pdf">theory of name resolution</a>.</p>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>Example and diagram taken from <a href="https://www.amazon.com/Concepts-Programming-Languages-John-Mitchell/dp/0521780985">Concepts in Programming Languages</a>. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:4">
+      <p>Some languages have more complex scoping mechanisms like Python’s <a href="https://docs.python.org/3/tutorial/classes.html#python-scopes-and-namespaces">LEGB</a> scoping, but usually they’re bastardized variants of lexical scoping. <a href="#fnref:4" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p>This is basically how <a href="https://webassembly.github.io/spec/core/exec/instructions.html#blocks">control flow in WebAssembly</a> works. <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:3">
+      <p>I highly recommend implementing an <a href="https://www.lua.org/pil/16.2.html">inheritance mechanism in Lua</a> to gain an appreciation for how this works concretely. <a href="#fnref:3" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>

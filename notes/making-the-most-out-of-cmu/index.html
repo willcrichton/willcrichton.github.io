@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="Carnegie Mellon is a big investment, so you should make the most out of it. If you don't pay attention, its opportunities can slip right past you. I recommend doing research, taking fewer classes, ignoring your diploma, and trying to TA a class. I also include a few quick tips for better life in Pittsburgh!">
+    
+    
+    <title>
+      
+      Making the Most Out of CMU | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Making the Most Out of CMU
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    May 16, 2016
+  </div>
+  <div class="abstract">Carnegie Mellon is a big investment, so you should make the most out of it. If you don't pay attention, its opportunities can slip right past you. I recommend doing research, taking fewer classes, ignoring your diploma, and trying to TA a class. I also include a few quick tips for better life in Pittsburgh!</div>
+  <div class="figure">
+<img src="https://i.imgur.com/JTKY1mR.jpg" />
+<div class="caption">Figure 1: Graduation or sleep. Pick 1.</div>
+</div>
+
+<p>I’m finally done. Wow. It’s difficult to think that the naïve little freshman who walked into Hamerschlag four years ago became who I am today. I am eternally grateful to the multitude of people who helped me along this journey whom I could not possibly all name in this note. My undergraduate experience has been a transformative one—I have progressed both as an academic and as a person, a friend, someone who can contribute to society. However, much of this change only occurred because I took advantage of the many opportunities that Carnegie Mellon has to offer. In this note, I would like to share with you a few of the things that enriched my time here in the hopes that you or others may follow suit and have a better experience at CMU for it.</p>
+
+<h2 id="1-do-research">1. Do research.</h2>
+
+<p>Carnegie Mellon is one of the best research institutions in the world. As a corollary, its professors are some of the smartest people you will ever meet. I know that as a student, I sometimes discounted the quality of my professors based on their teaching style or how interesting their lectures were, but don’t let that fool you: every single faculty member here is at the forefront of research in their field, and only got there through an enormous amount of hard work and brainpower. You have precisely four years to take advantage of this incredible opportunity, so do it! <em class="hl">If you do not work with a professor, you are wasting a significant portion of CMU’s opportunities.</em></p>
+
+<p>Personally, doing research was the best decision I made here for my academics. Until junior spring, I knew 100% that I was industry-bound, and nothing could convince me otherwise. Then, that semester I started research with <a href="http://cs.cmu.edu/~kayvonf">Kayvon Fatahalian</a>, and my predilections disappeared. Since then, I pivoted to grad school and now am about to start my Ph.D. at Stanford next fall. I’m only a single data point in the research narrative, but I can assure you I am not alone. So please, I implore you—talk to a professor. TA their class. Work with their grad students. It may not work out, but you have a lot to gain and little to lose.</p>
+
+<h2 id="2-take-fewer-classes-over-time">2. Take fewer classes over time.</h2>
+
+<p>This piece of advice stems from a couple important observations:</p>
+
+<ol>
+  <li><em class="hl">The more you learn, the more you realize where all the cool problems are that you can solve.</em> As a freshman, I had no ideas how large CMU’s computer science program was, so if I asked my 18-year-old self what a cool problem would be, he would say, “doing front-end work for a startup!” <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>. Now, I can speak with some confidence on machine learning (didn’t know that existed), computer vision (thought that was basically solved), computer architecture (didn’t care when I started), and so on. However, this perspective took me a long time to gain. Part of the reason I’m going to grad school is because I want more time to work on these cool problems.</li>
+  <li><em class="hl">Cool problems require a lot of time and energy, so you can’t take a lot of courses and work on a cool problem.</em> When I say “work on a cool problem,” I mean really invest your heart in soul. It’s definitely possible to pick up a research project or start a company with 10 hours a week, but you gain far less from the experience. If you invest 30 hours a week on your cool problem of choice, then you can make an impact: at best you’ll produce real value for someone, and at worst you’ll learn immensely about the process of tackling tough problems and you’ll cultivate invaluable connections with your fellow project members or academic advisor.</li>
+</ol>
+<div class="figure">
+<img src="https://i.imgur.com/Jn6jOMX.png" />
+<div class="caption">Figure 2: My number of course units over time. Thesis units are subtracted from the last two semesters. Note the downward trend!</div>
+</div>
+
+<ol>
+  <li><em class="hl">You can’t find the coolest problems in a class.</em> The kind of problems you’ll find on a homework or in a lab can certainly be fun or enlightening, but they are almost inevitably well-trodden ground. If you want to work on problems with a real impact or ones on the <a href="http://matt.might.net/articles/phd-school-in-pictures/">edge of human knowledge</a> (or ideally both!) then you have to free yourself from the shackles of coursework and run headfirst into the unknown, i.e. research or independent study.</li>
+</ol>
+
+<p>In sum, <em class="hl">do yourself a favor and work hard early on to clear out your course requirements</em>. Take some of your free time in junior and senior year to do exploratory work. Also keep watch in freshman/sophomore year for areas you might want to specialize in! I took my first class with my future academic advisor in sophomore spring.</p>
+
+<h2 id="3-ignore-your-diploma">3. Ignore your diploma.</h2>
+
+<p>Diplomas are meaningless. Minors and majors are meaningless. Multiple diplomas times zero is still zero. Nobody (employers, universities, etc.) cares about which specific degree you have, but rather a) what you know, b) who you know, and c) the fact that you came from CMU (not necessarily in that order). The trouble with these pieces of paper is that they impose upon you substantial coursework burdens, and <em class="hl">every major/minor will always have some classes that you do not want to take.</em> Curricula must be one-size-fits-all by nature, so in order to give someone full exposure to computer science, business, theatre, etc. the curriculum designers must require a good number of core courses and electives. <em class="hl">Your job as a student is to wiggle out of as many of these requirements as possible and to think critically about which classes are best for you</em> <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>. Take courses that interest you, as you’ll do far better if you actually like the material—this seems like an truism, but a surprising number of students seem to take courses they don’t like.</p>
+
+<p>However, a number of students take the equally surprising move of not shedding requirements, but instead burdening themselves with more! Many of my fellow classmates had multiple minors, double/triple majors, and dual degrees. This is not to say that taking a greater variety of classes is bad; indeed I have great respect for people who put in the effort to get two diplomas, and for some that is truly the correct path. For most people, though, their time can be better allocated. Anecdotal evidence: my brother graduated from CMU with a dual degree in both Computer Science and Electrical and Computer Engineering. However, he was really only interested in the computer architecture part of ECE, yet he still had to take courses in analog circuit design, signal processing, and so on. Although he graduated with two pieces of paper, in retrospect he wished that he didn’t have to have taken those extra classes unrelated to his true passion.</p>
+
+<p>This also impacts point #2: you won’t have time to explore cool problems if you have to take 18 classes your senior spring to finish up all of your degrees. So again, <em class="hl">do yourself a favor, minimize the course requirements and maximize the courses that interest you.</em></p>
+
+<h2 id="4-ta-a-class">4. TA a class.</h2>
+
+<p>If you really liked one of your classes and did well enough, then consider TAing it. A few reasons for this:</p>
+
+<ol>
+  <li>You’ll improve as an educator and public speaker. I strongly encourage you to TA a class that has a recitation or lab, as this provides you a valuable chance to both interact directly with the course’s students and practice your education/speaking skills. Being able to concisely convey complex ideas to an audience of varying skill levels will come in handy the rest of your life, particularly in technical fields where most people are incapable of this. Also, you really should be comfortable speaking in front of a room. I could write an entirely separate note extolling the virtues of public speaking, but for now just believe me: it’s important. And TAing is one of the few opportunities you’ll get to reliably practice public speaking (unless you join debate! :D).</li>
+  <li><em class="hl">You’ll understand the material far better.</em> Let’s be real—you, like me, probably forget 80% of a course’s content after you’re done with it for the semester. TAing for a class will not only refresh the material in your mind, but help you internalize it. It takes a great deal more of understanding to teach a concept to someone else than to pass an exam.</li>
+  <li><em class="hl">You get closer to the professor.</em> If you’re interested in research (see points #1 and #2), there’s no better way to get close to a professor than to TA his/her class. I started doing research with my advisor, Kayvon, during the same semester I was TAing his class, 15-418.</li>
+  <li><em class="hl">You’ll make some great friends.</em> Like other extracurriculars, if you spend 10 hours a week in the same room with the same set of people, you’ll inevitably become friends. In my experience, your fellow TAs are almost always fun, smart, and motivated individuals and a great crowd to hang around.</li>
+  <li><em class="hl">You should give back to the campus community.</em> At least in computer science at CMU, undergraduate TAs are the backbone of most classes. I received an enormous amount of help from TAs over my four years, and they do a great service for the campus for relatively little reward (the pay is not great, but at least you can eat at Rose Tea every day). You should reciprocate this good will by serving as a TA in turn.</li>
+</ol>
+
+<h2 id="addendum-quick-tips">Addendum: Quick tips</h2>
+
+<p>Here’s a couple short pieces of advice for making the most of Pittsburgh and CMU campus.</p>
+
+<ol>
+  <li><strong>Pittsburgh Airport:</strong> always go to the alternate security checkpoint on the floor with the check-in counters. It has shorter lines.</li>
+  <li><strong>Haircuts:</strong> I’ve had a good experience at Puccini’s in Oakland. Close, good quality, relatively cheap, and not SuperCuts.</li>
+  <li><strong>Food:</strong>
+    <ol>
+      <li><em>On campus:</em> Exchange for decent lunch sandwiches. Food trucks if you’re not on a block. Don’t forget Fancy Resnik on Tuesdays.</li>
+      <li><em>Close to campus:</em> Craig St., generally Eat Unique or Rose Tea (or Sushi Fuku if you’re in to that kind of thing).</li>
+      <li><em>Off campus:</em> Mallorca [South Side], Casbah [Squirrel Hill], Sichuan Gourmet [Murray Ave] are all good.</li>
+    </ol>
+  </li>
+  <li><strong>Leisure:</strong> go to Phipps Conservatory, Three Rivers Park, or the Climbing Wall.</li>
+  <li><strong>Gates:</strong>
+    <ol>
+      <li>Never take the Helix (unless you have  a class there).</li>
+      <li>Actually, take the Helix once, just so you realize how bad of a mistake it is.</li>
+      <li><em>Good meeting rooms:</em> 9th floor corner, 8th floor corner, 7th floor near the commons, 6th floor by the bridge, 4th floor across from Rashid.</li>
+    </ol>
+  </li>
+  <li><strong>Freshman dorms:</strong> you want, in order: Stever, Mudge, Morewood, Donner, Rez.</li>
+  <li><strong>Classes:</strong>
+    <ol>
+      <li>Check out the Student Taught Courses (StuCo). Lot of cool stuff there.</li>
+      <li>If you’re CS, please consider a minor that’s not math.</li>
+    </ol>
+  </li>
+  <li><strong>Text editors:</strong> Emacs rules supreme (sorry, just had to throw that in there).</li>
+</ol>
+
+<h2 id="references">References</h2>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>That’s not to diminish front-end work—UI/UX and HCI in general have a lot of cool problems, but that’s the entire set of CS-related things I knew about coming in to CMU. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p>The people who design these curricula are the same incredibly intelligent professors mentioned in point #1. CMU curricula were designed for a reason, and you should strongly consider those reasons when deciding what courses to take for yourself. I’m not advocating that you throw caution to the wind and take whatever courses sound the most fun, but instead to just meaningfully engage with the course decision process instead of going to either extreme (taking only default courses vs. ignoring all the requirements). <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>

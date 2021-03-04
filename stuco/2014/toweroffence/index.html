@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="js/paper-full.min.js"></script>
+
+<script type="text/javascript">
+paper.install(window);
+	window.onload = function() {
+		var canvas = document.getElementById('myCanvas');
+		paper.setup('myCanvas');
+		
+		var gridBoarder = new Path.Rectangle(10, 10, 810, 510);
+		gridBoarder.fillColor = '#20EE20';
+		gridBoarder.strokeColor = 'black';
+		gridBoarder.strokeWidth = 5;
+		
+		var gridBoarder2 = new Path.Rectangle(10, 560, 810, 110);
+		gridBoarder2.fillColor = '#A0A0A0';
+		gridBoarder2.strokeColor = 'black';
+		gridBoarder2.strokeWidth = 5;
+		
+		var startGame = new Path.Rectangle(600, 600, 100, 50);
+		startGame.fillColor = '#CACACA';
+		startGame.strokeColor = 'black';
+		startGame.strokeWidth = 5;
+		
+		var select1Red = new Path.Rectangle(50, 600, 20, 50);
+		select1Red.fillColor = 'red';
+		select1Red.strokeColor = 'black';
+		select1Red.strokeWidth = 2;
+		
+		var select1Green = new Path.Rectangle(70, 600, 20, 50);
+		select1Green.fillColor = 'green';
+		select1Green.strokeColor = 'black';
+		select1Green.strokeWidth = 2;
+		
+		var select1Blue = new Path.Rectangle(90, 600, 20, 50);
+		select1Blue.fillColor = 'blue';
+		select1Blue.strokeColor = 'black';
+		select1Blue.strokeWidth = 2;
+		
+		
+		var select2Red = new Path.Rectangle(250, 600, 20, 50);
+		select2Red.fillColor = 'red';
+		select2Red.strokeColor = 'black';
+		select2Red.strokeWidth = 2;
+		
+		var select2Green = new Path.Rectangle(270, 600, 20, 50);
+		select2Green.fillColor = 'green';
+		select2Green.strokeColor = 'black';
+		select2Green.strokeWidth = 2;
+		
+		var select2Blue = new Path.Rectangle(290, 600, 20, 50);
+		select2Blue.fillColor = 'blue';
+		select2Blue.strokeColor = 'black';
+		select2Blue.strokeWidth = 2;
+		
+	var gridBlock = new Path.Rectangle(10, 10, 30, 30);
+	gridBlock.strokeColor = 'black';
+	var pathColor = '#CDB49B';
+	for (var i = 0; i < 27; i++) {
+		for (var j = 0; j < 17; j++) {
+			var copy = gridBlock.clone();
+			copy.position.x = i*30 + 25;
+			copy.position.y = j*30 + 25;
+			
+			//paths
+			if((i==2 || ((i==7 || i==18)&& j < 15)) && j > 1){
+				copy.fillColor = pathColor;
+				}
+			else if(j == 2 && ((i > 2 && i < 7)||(i > 18 && i < 27))){
+				copy.fillColor = pathColor;
+				}
+			else if(j == 14 && i > 7 && i < 19){
+				copy.fillColor = pathColor;
+				}
+			else{
+				copy.fillColor = '#20EE20';
+				}
+				
+			//other objects
+			if((i == 6 && j == 10)||(i == 17 && j == 8)||(i == 1 && j == 1)){
+				var copy2 = new tower(i, j, 1);
+				}
+			else if(((i == 4 || i == 5) && j > 3)||(i > 8 && i < 17 && j < 13)||(i > 19 && j > 3)||(i==0)||(j==16 && i != 2)||(j==0)||(i==26 && j != 2)){
+				var copy2 = new tower(i, j, 2);
+				}
+			else if((i == 19) && j > 3 && j < 14 && j % 4 == 1){
+				var copy2 = new tower(i, j, 2);
+				}
+			}
+	}
+
+	function tower(posx, posy, tType) {
+
+
+        var start = new Point(posx*30 + 34, posy*30 + 28);
+		if(tType == 1){
+        var segments = [start,
+                        start.add([-6, 6]),
+                        start.add([-12, 6]),
+						start.add([-18, 0]),
+						start.add([-18, -6]),
+						start.add([-12, -12]),
+						start.add([-6, -12]),
+						start.add([0, -6])];
+
+        var outline = new Path(segments);
+        outline.strokeColor = 'black';
+        outline.fillColor = '#a00';
+	
+        outline.closed = true;
+		}
+		else if(tType == 2){
+        var segments = [start,
+						start.add([-18, 0]),
+						start.add([-18, -6]),
+						start.add([-12, -12]),
+						start.add([-6, -12]),
+						start.add([0, -6]),
+						start];
+		var segments2 = [start.add([-6, 0]),
+                        start.add([-6, 6]),
+                        start.add([-12, 6]),
+						start.add([-12, 0])];
+						
+		var outline2 = new Path(segments2);
+		outline2.strokeColor = 'black';
+        outline2.fillColor = '#996633';
+        outline2.closed = true;
+        var outline = new Path(segments);
+        outline.strokeColor = 'black';
+        outline.fillColor = 'green';
+		outline.smooth();
+        outline.closed = true;
+		
+		}
+		else if(tType == 3){
+        var segments = [start,
+						start.add([-6, 0]),
+                        start.add([-6, 6]),
+                        start.add([-12, 6]),
+						start.add([-12, 0]),
+						start.add([-18, 0]),
+						start.add([-18, -6]),
+						start.add([-12, -6]),
+						start.add([-12, -12]),
+						start.add([-6, -12]),
+						start.add([-6, -6]),
+						start.add([0, -6])];
+
+        var outline = new Path(segments);
+        outline.strokeColor = 'black';
+        outline.fillColor = '#a00';
+	
+        outline.closed = true;
+		}
+
+   }
+   
+
+
+		var gamePause = 1;
+		var win = 0;
+		var tool = new Tool();
+		var mPos = new Point(1, 1);
+
+		// Define a mousedown and mousedrag handler
+		tool.onMouseDown = function(event) {
+			mPos = event.point;
+			if(mPos.y > 600 && mPos.y < 650 && gamePause == 1){
+				if (50 < mPos.x &&mPos.x < 70){
+				select1Red.fillColor = '#770000';
+				select1Green.fillColor = 'green';
+				select1Blue.fillColor = 'blue';
+				mob1.fillColor = 'red';
+				mob1.speed = 5;
+				}
+				if (70 < mPos.x && mPos.x < 90){
+				select1Red.fillColor = 'red';
+				select1Green.fillColor = '#003300';
+				select1Blue.fillColor = 'blue';	
+				mob1.fillColor = 'green';
+				mob1.speed = 10;
+				}
+				if (90 < mPos.x && mPos.x < 110){
+				select1Red.fillColor = 'red';
+				select1Green.fillColor = 'green';
+				select1Blue.fillColor = '#000077';
+				mob1.fillColor = 'blue';
+				mob1.speed = 15;				
+				}
+				
+				if (250 < mPos.x &&mPos.x < 270){
+				select2Red.fillColor = '#770000';
+				select2Green.fillColor = 'green';
+				select2Blue.fillColor = 'blue';
+				mob2.fillColor = 'red';
+				mob2.speed = 5;
+				}
+				if (270 < mPos.x && mPos.x < 290){
+				select2Red.fillColor = 'red';
+				select2Green.fillColor = '#003300';
+				select2Blue.fillColor = 'blue';	
+				mob2.fillColor = 'green';
+				mob2.speed = 10;
+				}
+				if (290 < mPos.x && mPos.x < 310){
+				select2Red.fillColor = 'red';
+				select2Green.fillColor = 'green';
+				select2Blue.fillColor = '#000077';
+				mob2.fillColor = 'blue';
+				mob2.speed = 15;				
+				}
+				if (600 < mPos.x && mPos.x < 700){
+				startGame.fillColor = '#AAAAAA';
+				gridBoarder2.fillColor = '#A0A0A0';
+				gamePause = 0;
+				}
+			}
+		}
+		tool.onMouseUp = function(event) {
+			mPos = (1, 1);
+		}
+		
+
+
+		
+		
+		//Mob logic
+		function spawnMob(mType) {
+		var posx = 93;
+		var posy = 510;
+        var start = new Point(posx, posy);
+		if(mType == 1){
+        var segments = [start,
+                        start.add([-6, 6]),
+                        start.add([-12, 6]),
+						start.add([-18, 0]),
+						start.add([-18, -6]),
+						start.add([-12, -12]),
+						start.add([-6, -12]),
+						start.add([0, -6])];
+
+        var outline = new Path(segments);
+        outline.strokeColor = 'black';
+        outline.fillColor = '#a00';
+	
+        outline.closed = true;
+		}
+	}
+		
+
+
+	
+	var mob1 = new Path.Rectangle({ x: 80, y: 501, width: 12, height: 12});
+	mob1.fillColor = 'red';
+	mob1.speed = 2;
+	mob1.hit = 0;
+	
+	var mob2 = new Path.Rectangle({ x: 80, y: 501, width: 12, height: 12});
+	mob2.fillColor = 'red';
+	mob2.speed = 10;
+	mob2.hit = 0;
+	
+	var bullet = new Path.Circle(new Point(50, 50), 5);
+		bullet.strokeColor = 'black';
+		bullet.fillColor = 'red';
+	var bullet2 = new Path.Circle(new Point(210, 325), 5);
+		bullet2.strokeColor = 'black';
+		bullet2.fillColor = 'red';
+	var bullet3 = new Path.Circle(new Point(540, 265), 5);
+		bullet3.strokeColor = 'black';
+		bullet3.fillColor = 'red';
+		
+	
+	
+	
+	view.onFrame = function(event) {
+		if(gamePause == 0){
+		//mob animations
+		if(mob1.hit == 1){
+			win = -1;
+			mob1.fillColor = '#CDB49B';
+		}
+		else if(mob1.hit == 0 && win == 0){
+		
+		if(mob1.position.y > 91 & mob1.position.x < 90){
+		mob1.position.y -= mob1.speed;
+		}
+		else if(mob1.position.x < 230 & mob1.position.y < 100){
+		mob1.position.x += mob1.speed;
+		}
+		else if(mob1.position.x < 240 & mob1.position.y < 445){
+		mob1.position.y += mob1.speed;
+		}
+		else if(mob1.position.x < 560 & mob1.position.y < 460){
+		mob1.position.x += mob1.speed;
+		}
+		else if(mob1.position.y > 91 & mob1.position.x < 570){
+		mob1.position.y -= mob1.speed;
+		}
+		else if(mob1.position.x < 800 & mob1.position.y < 200){
+		mob1.position.x += mob1.speed;
+		}
+		else {
+		win = 1;
+		}
+		}
+		else if (win == 1){
+		gridBoarder2.fillColor = 'green';
+		gamePause = 1;
+		mob1.position.x = 80;
+		mob1.position.y = 501;
+		mob2.position.x = 80;
+		mob2.position.y = 501;	
+		mob1.fillColor = 'red';
+		mob2.fillColor = 'red';
+		startGame.fillColor = '#CACACA';
+		mob1.hit = 0;
+		mob2.hit = 0;
+		win = 0;
+		}
+		else{
+		gridBoarder2.fillColor = 'red';
+		gamePause = 1;
+		mob1.position.x = 80;
+		mob1.position.y = 501;
+		mob2.position.x = 80;
+		mob2.position.y = 501;	
+		mob1.fillColor = 'red';
+		mob2.fillColor = 'red';
+		startGame.fillColor = '#CACACA';
+		mob1.hit = 0;
+		mob2.hit = 0;
+		win = 0;
+		}
+		
+		
+		//mob2 animations
+		if(mob2.hit == 1 ){
+			mob2.fillColor = '#CDB49B';
+			win = -1;
+		}
+		else if(mob2.hit == 0 && win == 0){
+		
+		if(mob1.position.y < 450){
+		if(mob2.position.y > 91 & mob2.position.x < 90){
+		mob2.position.y -= mob2.speed;
+		}
+		else if(mob2.position.x < 230 & mob2.position.y < 100){
+		mob2.position.x += mob2.speed;
+		}
+		else if(mob2.position.x < 240 & mob2.position.y < 445){
+		mob2.position.y += mob2.speed;
+		}
+		else if(mob2.position.x < 560 & mob2.position.y < 460){
+		mob2.position.x += mob2.speed;
+		}
+		else if(mob2.position.y > 91 & mob2.position.x < 570){
+		mob2.position.y -= mob2.speed;
+		}
+		else if(mob2.position.x < 800 & mob2.position.y < 200){
+		mob2.position.x += mob2.speed;
+		}
+		else {
+		win = 1;
+		}
+		}
+		}
+		else if (win == 1){
+		gridBoarder2.fillColor = 'green';
+		gamePause = 1;
+		mob1.position.x = 80;
+		mob1.position.y = 501;
+		mob2.position.x = 80;
+		mob2.position.y = 501;	
+		mob1.fillColor = 'red';
+		mob2.fillColor = 'red';
+		startGame.fillColor = '#CACACA';
+		mob1.hit = 0;
+		mob2.hit = 0;
+		win = 0;
+		}
+		else{
+		gridBoarder2.fillColor = 'red';
+		gamePause = 1;
+		mob1.position.x = 80;
+		mob1.position.y = 501;
+		mob2.position.x = 80;
+		mob2.position.y = 501;	
+		mob1.fillColor = 'red';
+		mob2.fillColor = 'red';
+		startGame.fillColor = '#CACACA';
+		mob1.hit = 0;
+		mob2.hit = 0;
+		win = 0;
+		}
+		if(event.count % 12 == 0){
+		bullet.position.x = 60;
+		bullet.position.y = 60;
+		}
+		else {
+		bullet.position.x += 5;
+		bullet.position.y += 5;
+		}
+		if(bullet.position.x - 8 < mob1.position.x && mob1.position.x < bullet.position.x + 8 && bullet.position.y - 8 < mob1.position.y && mob1.position.y < bullet.position.y + 8) {
+			mob1.hit = 1;
+		}
+		if(bullet.position.x - 8 < mob2.position.x && mob2.position.x < bullet.position.x + 8 && bullet.position.y - 8 < mob2.position.y && mob2.position.y < bullet.position.y + 8) {
+			mob2.hit = 1;
+		}
+		if(event.count % 12 == 0){
+		bullet2.position.x = 210;
+		}
+		else {
+		bullet2.position.x += 5;
+		}
+		if(bullet2.position.x - 8 < mob1.position.x && mob1.position.x < bullet2.position.x + 8 && bullet2.position.y - 8 < mob1.position.y && mob1.position.y < bullet2.position.y + 8) {
+			mob1.hit = 1;
+		}
+		if(bullet2.position.x - 8 < mob2.position.x && mob2.position.x < bullet2.position.x + 8 && bullet2.position.y - 8 < mob2.position.y && mob2.position.y < bullet2.position.y + 8) {
+			mob2.hit = 1;
+		}
+		if(event.count % 12 == 0){
+		bullet3.position.x = 540;
+		}
+		else {
+		bullet3.position.x += 5;
+		}
+		if(bullet3.position.x - 8 < mob1.position.x && mob1.position.x < bullet3.position.x + 8 && bullet3.position.y - 8 < mob1.position.y && mob1.position.y < bullet3.position.y + 8) {
+			mob1.hit = 1;
+		}
+		if(bullet3.position.x - 8 < mob2.position.x && mob2.position.x < bullet3.position.x + 8 && bullet3.position.y - 8 < mob2.position.y && mob2.position.y < bullet3.position.y + 8) {
+			mob2.hit = 1;
+		}
+		
+	}
+		
+}
+}
+
+</script>
+</head>
+<body>
+	<canvas id="myCanvas" resize></canvas>
+	<h2>Tower Offence</h2><br>
+	<h3>How To Play</h3><br><p>Select a color for your two mobs to determine their speed. <br> 
+	Press the large grey button to start the game. If any of your mobs reach the end then you win <br>
+	but if any of them gets hit you will lose. Good Luck.</p>
+</body>
+</html>

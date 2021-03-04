@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="Programming is a fundamentally incremental (or gradual) process, and our programming languages should reflect that. I show several ways in which program models transition over time and discuss how future research can further a human-centric vision for programming languages.">
+    
+    
+    <title>
+      
+      Gradual Programming | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Gradual Programming
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    March 30, 2018
+  </div>
+  <div class="abstract">Programming is a fundamentally incremental (or gradual) process, and our programming languages should reflect that. I show several ways in which program models transition over time and discuss how future research can further a human-centric vision for programming languages.</div>
+  <h2 id="picking-the-right-problem">Picking the right problem</h2>
+
+<p>What are the big problems in programming languages in 2018? The ones which, if we solve them, will have the greatest impact on the next generation of programmers? <sup id="fnref:0"><a href="#fn:0" class="footnote">1</a></sup> This question, to me, is the allure of programming language research, that the tools and theories we develop don’t affect just a single domain, but potentially <em>everybody</em> who programs. But therein lies another problem: how on earth are we supposed to know the needs of every single programmer? It’s easy enough to work on a language for X new type theory or Y new language feature that I personally think is interesting, but what about everyone else?</p>
+
+<p>This is one of the great failings of programming languages as a modern research field. A lot of the research is driven by the intuitions of the researchers, which are in turn shaped by their specific experiences with programming tools, languages, environments, and so on. An intuitionist approach has clearly taken us quite far to our current standing—smart people tend to have good intuitions—but I have to speculate that the apparent stagnation in widespread adoption of modern PL research is due in part to a lack of focus on the end user. A sentiment I’ve seen repeated is that there have been <a href="https://youtu.be/-I_jE0l7sYQ?t=10m49s">no new big ideas since Prolog</a>.</p>
+
+<p>I believe, then, that viewing programming languages (PL) through a lens of human-computer interaction (HCI) is the most critical meta-problem in the field today. More than ever, we need surveys, interviews, user studies, sociologists, psychologists, and so on to provide data-driven hypotheses about the hard parts of programming. Not just for learners, but for everyone, from the grizzled low-level systems developers to the rising tide of web developers. We’re starting to see this in the <a href="https://docs.google.com/document/d/1-GUt5oVPpi7rlObbU1WbA5V1OQBX1iaghryLJ6-ND9o/edit">Usability of Programming Languages Special Interest Group</a> at CHI (HCI conference), in papers like an <a href="http://lmeyerov.github.io/projects/socioplt/papers/oopsla2013.pdf">Empirical Analysis of Programming Language Adoption</a>, and in emerging <a href="https://medium.com/bits-and-behavior/designing-learnable-teachable-and-productive-programming-languages-dagstuhl-trip-report-81e41bde84bd">working groups for language usability</a>.</p>
+
+<p>However, in the meantime, we can still make progress on core PL problems that we believe to be impactful. The manifesto presented in the remainder of this note stems mostly from my personal experience—I’ve been programming for just over a decade now in games (Lua, C), websites (PHP, JS), high-performance/distributed systems (C++, Go, Rust), compilers (Standard ML, OCaml), and data science (Python, R). In the course of these experiences, I’ve worked on small scripts, personal projects, open-source software, products at tiny (2 people), small (15), medium (500), and big (2000+) companies, and nowadays on academic research. I studied programming language theory at Carnegie Mellon, and these days I teach the <a href="http://cs242.stanford.edu/">programming language course</a> at Stanford.</p>
+
+<p>All of which is to say, although we need more data, I have done my best to form an educated opinion on problems in programming languages that matter across many domains and actually occur in the real world. Yet still there is much I do not know, and as always, I encourage you to read on with a critical eye.</p>
+
+<h2 id="thinking-gradually">Thinking gradually</h2>
+
+<p>I hold this fundamental belief: <strong>programming languages should be designed to match the human programming process.</strong><sup id="fnref:1"><a href="#fn:1" class="footnote">2</a></sup> We should seek to understand how people think about programs and determine what programming processes come intuitively to the human mind. There are all sorts of fascinating questions here, like:</p>
+<ul>
+  <li>Is imperative programming more intuitive to people than functional programming? If so, is it because it matches the way our brains are configured, or because it’s simply the most common form of programming?</li>
+  <li>How far should we go to match people’s natural processes versus trying to change the way people think about programming?</li>
+  <li>How impactful are comments in understanding a program? Variable names? Types? Control flow?</li>
+</ul>
+
+<p>A basic observation about the human programming process is that it is incremental. No one writes the entirety of their program in a single go, clicks compile + publish, and never looks at the code again. Programming is a long slog of trial and error, where the length of the trial and the severity of the error depend heavily on the domain and the tooling. This is why inspectable output and fast compile times matter, e.g. changing an HTML document and refreshing the page shows you instantly what happened. Bret Victor’s <a href="http://worrydream.com/#!/LearnableProgramming">Learnable Programming</a> discusses this idea in detail.</p>
+
+<p>I call this process <strong>“gradual programming”</strong> <sup id="fnref:2"><a href="#fn:2" class="footnote">3</a></sup> <sup id="fnref:3"><a href="#fn:3" class="footnote">4</a></sup>. While paradigms like imperative or functional programming characterize certain underlying aspects of our mental model of program, gradual programming describes a process by which a mental model is formed. In that sense, gradual programming is just… programming, but I think a new name is helpful in having a clear discussion.</p>
+
+<p>Gradual programming is the programmer tracking the co-evolution of two things: 1) the syntactic representation of the program, as expressed to the computer via a programming language, and 2) a conceptual representation of the program, inside the mind. In the beginning of the process, the programmer starts with no syntax (an empty file) and usually a fuzzy idea of how the final program should work. From this point, she takes small steps in building components of the program until the final version is complete.</p>
+
+<p>If you do programming, you have most certainly gone through this process before and can likely relate, but usually most of the thought process occurs implicitly (i.e. inside your head) and is never reified into a communicable form. To be concrete about this gradual process, let’s walk through an example in detail. Let’s say I want to write a program to append a line of text to a file. In my head, I have a model of the program that looks like this:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>input file = some other input
+input line = some input
+write input line to the end of input file
+</code></pre></div></div>
+
+<p>Then I pick a language to work with, in this case Python. To start, rather than try to implement the whole program, I pick just the first line, and attempt to concretely encode it in Python.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat append.py
+input_file = input()
+print(input_file)
+</code></pre></div></div>
+
+<p>Here, I made a number of decisions. First, I decided the input was going to come from stdin (for simplicity), and used Python’s <code class="highlighter-rouge">input()</code> standard library function. I had to come up with a name for that value, <code class="highlighter-rouge">input_file</code>, and that name had to conform to Python’s syntactic conventions. I also added a <code class="highlighter-rouge">print</code> statement not part of my original program model, but instead part of a temporary program model intended to debug my small program. Then if I try to run it:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ echo "test.txt" | python append.py
+Traceback (most recent call last):
+  File "append.py", line 1, in &lt;module&gt;
+    input_file = input()
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+NameError: name 'test' is not defined
+</code></pre></div></div>
+
+<p>Whoops, I mixed up <code class="highlighter-rouge">input()</code> and <code class="highlighter-rouge">raw_input()</code>. This wasn’t an issue with my programming model—I’m still thinking about the program the same way—just with my encoding in Python. Fixing my mistake:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat append.py
+input_file = raw_input()
+input_line = raw_input()
+print(input_file, input_line)
+
+$ echo "test.txt\ntest" | python append.py
+('test.txt', 'test')
+</code></pre></div></div>
+
+<p>Next, I need to figure out how to append the line to the file. In my initial mental model, this was all encapsulated with “write input line to the end of input file,” but now I need to turn that fuzzy idea into more concrete steps that I can easily encode in Python. Specifically, if I understand how a file system works, then I know I need to first open the file in append mode, write the string, and then close the file. After thinking about these details, my new mental model is:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>input file = some other input
+input line = some input
+file = open the input file for appending
+write input line to the end of input file
+close file
+</code></pre></div></div>
+
+<p>This then translates into Python:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat append.py
+input_file = raw_input()
+input_line = raw_input()
+file = open(input_file, 'a')
+file.write(input_line)
+file.close()
+
+$ echo "test.txt\ntest" | python append.py
+
+$ cat test.txt
+test
+</code></pre></div></div>
+
+<p>Success! Again, the purpose of this is to demonstrate the co-evolution of the syntactic and conceptual model of a program over time. Based on my experience programming as well as teaching others to program, I believe it exemplifies a common process underlying the way many people program.</p>
+
+<h2 id="axes-of-evolution">Axes of evolution</h2>
+
+<p>The example above demonstrates the gradual nature of the programming process, but it’s not clear yet how we should be creating tools to match that process. To simplify the problem, we want to break down the evolution of a program along many smaller axes of evolution. Essentially, we ask: what kinds of information do people gradually learn and/or write down about their program? Then we can consider how programming languages can help optimize each axis individually.</p>
+
+<p><strong>1. Concrete / abstract</strong><br />
+In building programs, it’s commonplace to start with an example of what you’re trying to make, and then generalize (or “abstract”) that example to cover a wider range of use cases. Abstraction is the backbone of programming languages, usually provided through functions and interfaces. For example, we can abstract our script above into a function:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">append_line</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">input_line</span><span class="p">):</span>
+   <span class="c1"># our code above
+</span>
+<span class="n">append_line</span><span class="p">(</span><span class="s">'test.txt'</span><span class="p">,</span> <span class="s">'test'</span><span class="p">)</span>
+<span class="n">append_line</span><span class="p">(</span><span class="s">'test.txt'</span><span class="p">,</span> <span class="s">'test again'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>However, the fuzzier your program model is initially, the harder it is to immediately jump to an abstract solution, so this evolution from concrete to abstract occurs frequently in today’s programming languages (again, see “Create by Abstracting” in <a href="http://worrydream.com/#!/LearnableProgramming">Learnable Programming</a>).</p>
+
+<p><strong>2. Anonymous / named</strong><br />
+In the beginning of the programming process during iteration/experimentation, we as programmers naturally want to optimize for the speed of writing code, not <a href="https://talks.golang.org/2014/names.slide">reading code</a>. One form of write-optimized code is short-named and anonymous values. For example, a shortened first pass at our script above might look like:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">()</span>
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s">'a'</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">raw_input</span><span class="p">())</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Here, the variable names are less informative: <code class="highlighter-rouge">s</code> instead of <code class="highlighter-rouge">input_file</code>, <code class="highlighter-rouge">f</code> instead of <code class="highlighter-rouge">file</code>, and no name provided to the <code class="highlighter-rouge">input_line</code>. However, it takes less time to write, and if the script will never be read again, then why not? If we intend to use the script in a bigger codebase, then we might decide to incrementally change the names to be more informative for the sake of our code reviewers. This is another good example of gradual change that’s easy and commonplace in today’s programming languages.</p>
+
+<p><strong>3. Imperative / declarative</strong><br />
+For a multitude of reasons, straight-line, sequential imperative code appears to come more naturally to programmers than functional/declarative code in their conceptual program model. For example, a simple list transformation will likely use for loops:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">in_l</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">out_l</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">in_l</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">out_l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Whereas a more declarative version will abstract away the control flow into domain-specific primitives:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">in_l</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">out_l</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">in_l</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>The distinction between the two is not just stylistic—declarative code is usually much more easily analyzed for structure, e.g. a <code class="highlighter-rouge">map</code> is trivially parallelizable whereas a general <code class="highlighter-rouge">for</code> loop less so. This transformation occurs most often in languages which support mixed imperative/functional code (at the very least closures).</p>
+
+<p><strong>4. Dynamically typed / statically typed</strong><br />
+The rise of dynamically typed languages in the last two decades (Python, Javascript, R, Lua, …) should suffice as evidence that people find dynamic typing useful, regardless of <a href="http://danluu.com/empirical-pl/">which side of the debate</a> you take. While there are many advantages of dynamic typing (heterogeneous data structures, free duck typing, …), the simplest one is that of productivity by omission: the types of variables aren’t required to be known at compile time, so the programmer doesn’t have to expend mental energy to write them down.</p>
+
+<p>However, types are still immensely useful tools for ensuring correctness and performance, so a programmer may well want to gradually add type annotations to an untyped program as she becomes convinced that a variable should be of a certain type. This is a relatively nascent idea called gradual typing that’s caught on in <a href="https://docs.python.org/3/library/typing.html">Python</a>, <a href="http://www.typescriptlang.org/">Javascript</a>,
+<a href="https://docs.julialang.org/en/stable/manual/types/#man-types-1">Julia</a>, <a href="https://clojure.github.io/core.typed/">Clojure</a>, <a href="https://docs.racket-lang.org/ts-guide/">Racket</a>,
+<a href="https://github.com/soutaro/steep">Ruby</a>, <a href="http://hacklang.org/">Hack</a>, and others. For example, our program above could look like:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">input_file</span><span class="p">:</span> <span class="n">String</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">()</span>
+<span class="n">input_line</span><span class="p">:</span> <span class="n">String</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">()</span>
+<span class="nb">file</span><span class="p">:</span> <span class="n">File</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="s">'a'</span><span class="p">)</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">input_line</span><span class="p">)</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><strong>5. Dynamically deallocated / statically deallocated</strong><br />
+You can view memory management, or lifetimes, through a similar lens as types. In 2018, all programming languages should be <a href="http://willcrichton.net/notes/rust-memory-safety/">memory safe</a>, with the only question being whether memory deallocation is determined at compile time (i.e. like Rust, with a borrow checker) or at run time (i.e. like every other language, with a garbage collector). Garbage collection is unquestionably a productivity boost for programmers, as it’s natural that our initial program model shouldn’t have to consider exactly how long each value should live before deallocation.</p>
+
+<p>However, as before, having fine-grained control over value lifetimes is still useful both for correctness and performance. Ownership and borrowing like in Rust can help structure a system to <a href="https://blog.rust-lang.org/2015/04/10/Fearless-Concurrency.html">avoid data races</a> in concurrent programming, as well as avoid the use of a costly garbage collector at runtime. Deterministic destruction can be useful for avoiding mistakes with things like mutexes. Continuing our typed example, it could look like:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">input_file</span><span class="p">:</span> <span class="n">String</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">()</span>
+<span class="n">input_line</span><span class="p">:</span> <span class="n">String</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">()</span>
+<span class="nb">file</span><span class="p">:</span> <span class="n">mut</span> <span class="n">File</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_file</span><span class="p">,</span> <span class="s">'a'</span><span class="p">)</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_line</span><span class="p">)</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Unlike gradual typing, to my knowledge, there is little work on gradual memory management (except <a href="https://drive.google.com/file/d/0B_4wx_3dTGICWG1Ddk81Rnh0YzA/view">this whitepaper</a>).</p>
+
+<p><strong>6. General-purpose / domain-specific</strong><br />
+When beginning to write a program, the programmer wants to have every feature in her language of choice available for use in the implementation in order to maximize the speed of prototyping and the productivity of the creative process. This is not usually on the minds of most as they develop software, except perhaps from a code style perspective (“what subset of Python should I be using?”).</p>
+
+<p>However, the emerging wave of high-performance domain-specific languages like <a href="https://www.tensorflow.org/">TensorFlow</a>, <a href="http://halide-lang.org/">Halide</a>, <a href="http://ebblang.org/">Ebb</a>, and <a href="https://www.weld.rs/">Weld</a>, have identified that if the programmer only uses a small subset of general-purpose programs, e.g. differentiable pure functions on tensors, then an optimizer can produce substantially more efficient code or automatically perform backpropagation. From a gradual perspective, this suggests a possible future workflow where as the programmer gradually shrinks the subset of the language she uses in a particular part of her program, the compiler is able to provide more features or more optimized generated code.</p>
+
+<h2 id="a-vision-for-gradual-programming">A vision for gradual programming</h2>
+
+<p>The axes identified are not novel in the sense that, for example, static vs. dynamic typing is a well-worn trade-off. However, what I am demonstrating is that these are not one-time decisions that never change over the course of a program. Instead, all of these axes likely a) change over the evolution of an individual program, and b) change in a fine-grained manner, e.g. typed and untyped code should be mixed in the same system. This is anathema to the all-or-nothing approach that most languages take today: everything should be typed, or nothing should be typed. Everything is garbage collected, or nothing is garbage collected. That requires programmers to face absurd tradeoffs, like changing entire language ecosystems just to get the benefits of static typing.</p>
+
+<p>In that light, advancing gradual programming entails the following research process:</p>
+<ol>
+  <li>Identify parts of the programming process that change gradually over time, but currently require undue overhead or switching languages to adapt.</li>
+  <li>Develop language mechanisms that enable programmers to gradually move along a particular axis within a homogeneous programming environment.</li>
+  <li>Empirically validate against real programmers whether the proposed mechanisms match the hypothesized programming process in practice.</li>
+</ol>
+
+<p>Each of these steps needs further investigation. I have provided an initial breakdown of my perspective on the important incremental parts of the programming process, but I have inevitably omitted many others. Several of the axes mentioned (memory management, language specialization) lack any documented attempts to systematize their treatment at the language level. I think that work on <a href="http://willcrichton.net/notes/extensible-compilation/">extensible compilation</a> will help speed development of language extensions on these fronts.</p>
+
+<p>Even for more well-trodden frontiers like gradual typing, papers as recent as 2016 were asking <a href="https://www2.ccs.neu.edu/racket/pubs/popl16-tfgnvf.pdf">“is sound gradual typing dead?”</a> (it’s <a href="http://www.cs.cornell.edu/~ross/publications/nomalive/nomalive-oopsla17.pdf">alive and well</a>, thank you very much). CircleCI <a href="https://circleci.com/blog/why-were-no-longer-using-core-typed/">dropped Clojure’s gradual typing</a> after two years of use, while TypeScript is <a href="https://insights.stackoverflow.com/survey/2018#most-loved-dreaded-and-wanted">beloved by many</a>. Although the theory is well understood and the performance increasingly so, little advice or knowledge exists on how programmers interact with gradual types. Are they easy to program? Is a partially typed program more confusing than fully typed/untyped? Can IDEs solve any such issues? And so on.</p>
+
+<p>Another big question in gradual programming is inference vs. annotation. As our compilers get smarter, it becomes easier for information like types, lifetimes, and so on to be inferred by the compiler if not explicitly annotated by the programmer. However, inference engines are rarely perfect, and when they don’t work, every inference-based language feature (to my knowledge) will require an explicit annotation from the user, as opposed to inserting the appropriate dynamic checks. In the limit, I envision gradual systems have three modes of operation: for any particular kind of program information, e.g. a type, it is either explicitly annotated, inferred, or deferred to runtime. This is in itself an interesting HCI question–how can people most effectively program in a system where an omitted annotation may or may not be inferred? How does that impact usability, performance, and correctness? This will likely be another important avenue of research for gradual programming.</p>
+
+<p>Overall, I’m very excited by the promise of gradual programming techniques. As they catch on, I believe programmers of all skill levels will benefit from languages which better match the way they think.</p>
+
+<p>Please direct comments and criqitues to my <a href="mailto:wcrichto@cs.stanford.edu">inbox</a> or <a href="https://news.ycombinator.com/item?id=16725577">Hacker News</a>.</p>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:0">
+      <p>See Graydon Hoare’s <a href="https://graydon2.dreamwidth.org/253769.html">“What’s next?”</a> and Stephen Diehl’s <a href="http://dev.stephendiehl.com/nearfuture.pdf">“Near Future of Programming Languages”</a> for further discussion on this topic. <a href="#fnref:0" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:1">
+      <p>The “human” part of this may seem obvious, but there is a tradeoff in designing a language intended for consumption by computers vs. by people. Languages written by humans have the problem of being in both camps, although there are languages (e.g. LLVM) which are, for the most part, exclusively for machines. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p>I would prefer “incremental” programming, but <a href="https://en.wikipedia.org/wiki/Incremental_computing">incremental computation</a> already has a different, well-defined meaning, and the PL community has coalesced on “gradual” as the appropriate term. <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:3">
+      <p>To my knowledge, the only prior use of the term “gradual programming” is in <a href="https://pdfs.semanticscholar.org/c4cc/7f05e105d188433b1a72ec4507a3b1b5273b.pdf">this position paper</a>, and they have a somewhat similar motivation but substantively different perspective on the solution. Also note the last author, Jeremy Siek, is one of the inventors of gradual typing. <a href="#fnref:3" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>

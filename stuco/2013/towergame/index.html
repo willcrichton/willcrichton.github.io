@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!-- made by rvalle, this is a comment -->
+<html>
+  <head>
+    <title>the big game</title>
+    <style type="text/css">
+      canvas {
+        background: transparent;
+        display:block;
+        margin: 0 auto;
+        position: absolute;
+        font-family: 'Economica', sans-serif;
+      }
+      #structure {
+        z-index: -2;
+      }
+      #enemies {
+        z-index: -1;
+      }
+      #player {
+        z-index: 0;
+      }
+      #foreground {
+        z-index: 1;
+      }
+    </style>
+    <body onload="init();">
+      <!--
+      <script src="./box2d.js"></script>
+      -->
+      <link href='http://fonts.googleapis.com/css?family=Economica' rel='stylesheet' type='text/css'>
+      <canvas id="structure" width="1330" height="650" style="background-color:#00ddff;"></canvas>
+      <canvas id="enemies" width="1330" height="650"></canvas>
+      <canvas id="player" width="1330" height="650"></canvas>
+      <canvas id="foreground" width="1330" height="650"></canvas>
+      <script src="./gamegen.js"></script>
+      <!-- <p>i'm below the game :o</p> -->
+    </body>
+  </head>
+</html>

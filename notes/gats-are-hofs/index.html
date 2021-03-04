@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="GATs allow type parameters to associated types in traits. This feature enables total type-level functions to be associated to structs. I show how to use this pattern to implement higher-order type-level functions, and how to use specialization to make partial functions into total functions.">
+    
+    
+    <title>
+      
+      Generic associated types encode higher-order functions on types | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Generic associated types encode higher-order functions on types
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    January 4, 2021
+  </div>
+  <div class="abstract">GATs allow type parameters to associated types in traits. This feature enables total type-level functions to be associated to structs. I show how to use this pattern to implement higher-order type-level functions, and how to use specialization to make partial functions into total functions.</div>
+  <p><em>Part of an ongoing series about type-level programming in Rust. Read <a href="http://willcrichton.net/notes/type-level-programming/">part one</a> first!<br /></em></p>
+
+<p>With <a href="https://github.com/rust-lang/rfcs/blob/master/text/1598-generic_associated_types.md">generic associated types</a> landing recently in Rust nightly, I’ve been wondering: what expressive power does this feature add to type-level programming? The answer is <strong>higher-order functions on types</strong>, and in this post I’ll explain what that means and how it works.</p>
+
+<h2 id="a-refresher-on-type-level-programming">A refresher on type-level programming</h2>
+
+<p>Using a pure functional programming style, we can define objects like a list of types. For example, using <a href="https://github.com/willcrichton/tyrade">tyrade</a>, my type-level programming language:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">tyrade!</span> <span class="p">{</span>
+  <span class="k">enum</span> <span class="n">TList</span> <span class="p">{</span>
+    <span class="n">TNil</span><span class="p">,</span>
+    <span class="nf">TCons</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="n">TList</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="k">enum</span> <span class="n">TOption</span> <span class="p">{</span>
+    <span class="n">TNone</span><span class="p">,</span>
+    <span class="nf">TSome</span><span class="p">(</span><span class="n">Type</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c">// Get the Nth item from the list, where Index is either Z or S&lt;N&gt;</span>
+  <span class="k">fn</span> <span class="n">Nth</span><span class="o">&lt;</span><span class="n">List</span><span class="p">,</span> <span class="nb">Index</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">match</span> <span class="n">List</span> <span class="p">{</span>
+      <span class="n">TNil</span> <span class="k">=&gt;</span> <span class="n">TNone</span><span class="p">,</span>
+      <span class="nf">TCons</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="k">match</span> <span class="nb">Index</span> <span class="p">{</span>
+        <span class="n">Z</span> <span class="k">=&gt;</span> <span class="nf">TSome</span><span class="p">(</span><span class="n">X</span><span class="p">),</span>
+        <span class="nf">S</span><span class="p">(</span><span class="n">IMinusOne</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="nf">Nth</span><span class="p">(</span><span class="n">XS</span><span class="p">,</span> <span class="n">IMinusOne</span><span class="p">)</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c">// checks that Nth([i32, f32], 1) == Some(f32)</span>
+  <span class="nn">assert_type_eq</span><span class="p">::</span><span class="o">&lt;</span>
+    <span class="n">Nth</span><span class="o">&lt;</span><span class="n">TCons</span><span class="o">&lt;</span><span class="nb">i32</span><span class="p">,</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="nb">f32</span><span class="p">,</span> <span class="n">TNil</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">S</span><span class="o">&lt;</span><span class="n">Z</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+    <span class="n">TSome</span><span class="o">&lt;</span><span class="nb">f32</span><span class="o">&gt;</span>
+  <span class="o">&gt;</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The <code class="highlighter-rouge">tyrade!</code> procedural macro compiles the pseudo-Rust notation into a series of structs, traits, and impls. For example:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">TNil</span><span class="p">;</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">T0</span><span class="p">,</span> <span class="n">T1</span><span class="o">&gt;</span><span class="p">(</span><span class="o">...</span><span class="p">);</span>
+
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">ComputeNth</span><span class="o">&lt;</span><span class="nb">Index</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">pub</span> <span class="k">type</span> <span class="n">Nth</span><span class="o">&lt;</span><span class="n">List</span><span class="p">,</span> <span class="nb">Index</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">List</span> <span class="k">as</span> <span class="n">ComputeNth</span><span class="o">&lt;</span><span class="nb">Index</span><span class="o">&gt;&gt;</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="nb">Index</span><span class="o">&gt;</span> <span class="n">ComputeNth</span><span class="o">&lt;</span><span class="nb">Index</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">TNil</span> <span class="p">{</span>
+    <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">TNone</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="o">&gt;</span> <span class="n">ComputeNth</span><span class="o">&lt;</span><span class="n">Z</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="o">&gt;</span>
+<span class="k">where</span> <span class="n">X</span><span class="p">:</span> <span class="n">ComputeTSome</span> <span class="p">{</span>
+    <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">TSome</span><span class="o">&lt;</span><span class="n">X</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">IMinusOne</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="o">&gt;</span> <span class="n">ComputeNth</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&lt;</span><span class="n">IMinusOne</span><span class="o">&gt;&gt;</span> <span class="k">for</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="o">&gt;</span>
+<span class="k">where</span> <span class="n">XS</span><span class="p">:</span> <span class="n">ComputeNth</span><span class="o">&lt;</span><span class="n">IMinusOne</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">Nth</span><span class="o">&lt;</span><span class="n">XS</span><span class="p">,</span> <span class="n">IMinusOne</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>See my explainer on <a href="https://willcrichton.net/notes/type-level-programming/">type-level programming</a> if you are confused about the correspondence between these programs.</p>
+</blockquote>
+
+<h2 id="higher-order-functions-on-types">Higher-order functions on types</h2>
+
+<p>For me, Tyrade is a explicit representation of my mental model for type-level programming. Once I conceptually understood the correspondences between type-level enums and structs, or between type-level functions and traits, then I reified that understanding into the Tyrade compiler.</p>
+
+<p>However, trait/function correspondence only worked when the arguments to type-level functions were types. To explain, we’ll use the running example of a list map function. The goal is to write it in Tyrade like this:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">tyrade!</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">List</span><span class="p">,</span> <span class="n">Func</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">match</span> <span class="n">List</span> <span class="p">{</span>
+      <span class="n">TNil</span> <span class="k">=&gt;</span> <span class="n">TNil</span><span class="p">,</span>
+      <span class="nf">TCons</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="nf">TCons</span><span class="p">(</span><span class="nf">Func</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="nf">Map</span><span class="p">(</span><span class="n">XS</span><span class="p">,</span> <span class="n">Func</span><span class="p">))</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then we could use the <code class="highlighter-rouge">Map</code> type function like this:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">tyrade!</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="n">TIsZero</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">match</span> <span class="n">N</span> <span class="p">{</span>
+      <span class="n">Z</span> <span class="k">=&gt;</span> <span class="n">TTrue</span><span class="p">,</span>
+      <span class="nf">S</span><span class="p">(</span><span class="n">N1</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="n">TFalse</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nn">assert_type_eq</span><span class="p">::</span><span class="o">&lt;</span>
+    <span class="n">Map</span><span class="o">&lt;</span>
+      <span class="n">TCons</span><span class="o">&lt;</span><span class="n">Z</span><span class="p">,</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&lt;</span><span class="n">Z</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">TNil</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+      <span class="n">TIsZero</span>
+    <span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">TCons</span><span class="o">&lt;</span><span class="n">TTrue</span><span class="p">,</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">TFalse</span><span class="p">,</span> <span class="n">TNil</span><span class="o">&gt;&gt;</span>
+  <span class="o">&gt;</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>However, the existing translation of <code class="highlighter-rouge">Map</code> doesn’t work. It would become:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">ComputeMap</span><span class="o">&lt;</span><span class="n">Func</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">pub</span> <span class="k">type</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">List</span><span class="p">,</span> <span class="n">Func</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">List</span> <span class="k">as</span> <span class="n">ComputeMap</span><span class="o">&lt;</span><span class="n">Func</span><span class="o">&gt;&gt;</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">Func</span><span class="o">&gt;</span> <span class="n">ComputeMap</span><span class="o">&lt;</span><span class="n">Func</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">TNil</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">TNil</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="p">,</span> <span class="n">Func</span><span class="o">&gt;</span> <span class="n">ComputeMap</span><span class="o">&lt;</span><span class="n">Func</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="o">&gt;</span>
+<span class="k">where</span> <span class="n">XS</span><span class="p">:</span> <span class="n">ComputeMap</span><span class="o">&lt;</span><span class="n">Func</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">Func</span><span class="o">&lt;</span><span class="n">X</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">XS</span><span class="p">,</span> <span class="n">Func</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And this code fails to compile because <code class="highlighter-rouge">Func</code> can’t be invoked with a parameter:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>error[E0109]: type arguments are not allowed for this type
+    |
+    |     type Output = TCons&lt;Func&lt;X&gt;, Map&lt;XS, Func&gt;&gt;;
+    |                              ^ type argument not allowed
+</code></pre></div></div>
+
+<p>Herein lies the crux of the issue: type variables (i.e. impl quantifiers) are only allowed to be of kind <code class="highlighter-rouge">type</code>, and not of kind <code class="highlighter-rouge">type -&gt; type</code>. To get higher-order type functions, we need Rust to support higher-kinded types (HKT). While Rust doesn’t support HKT directly, the addition of generic associated types (GATs) enables a pseudo-HKT pattern. See <a href="http://smallcultfollowing.com/babysteps/blog/2016/11/03/associated-type-constructors-part-2-family-traits/">Niko’s extended discussion</a> for the gory details.</p>
+
+<h2 id="implementing-hofs-with-hkts-with-gats">Implementing HOFs with HKTs with GATs</h2>
+
+<p><code class="highlighter-rouge">TIsZero</code> cannot be passed directly into <code class="highlighter-rouge">ComputeMap</code>, so the key idea is to create a proxy object <code class="highlighter-rouge">TIsZeroProxy</code> which can be passed in. Using GATs, we associate the <code class="highlighter-rouge">TIsZeroProxy</code> back to <code class="highlighter-rouge">TIsZero</code> in a way that can be referenced within <code class="highlighter-rouge">ComputeMap</code>. First, the proxy:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">FuncProxy</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Func</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">TIsZeroProxy</span><span class="p">;</span>
+<span class="k">impl</span> <span class="n">FuncProxy</span> <span class="k">for</span> <span class="n">TIsZeroProxy</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Func</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">TIsZero</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then the implementation of <code class="highlighter-rouge">ComputeMap</code> can be parameterized by any type implementing <code class="highlighter-rouge">FuncProxy</code>:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span><span class="o">&lt;</span><span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="p">,</span> <span class="n">Proxy</span><span class="o">&gt;</span> <span class="n">ComputeMap</span><span class="o">&lt;</span><span class="n">Proxy</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="o">&gt;</span>
+<span class="k">where</span>
+  <span class="n">Proxy</span><span class="p">:</span> <span class="n">FuncProxy</span><span class="p">,</span>
+  <span class="n">XS</span><span class="p">:</span> <span class="n">ComputeMap</span><span class="o">&lt;</span><span class="n">Proxy</span><span class="o">&gt;</span>
+<span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="nn">Proxy</span><span class="p">::</span><span class="n">Func</span><span class="o">&lt;</span><span class="n">X</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">XS</span><span class="p">,</span> <span class="n">Proxy</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>However, this attempt still doesn’t quite work. We get an error in the implementation of <code class="highlighter-rouge">FuncProxy</code> for <code class="highlighter-rouge">TIsZeroProxy</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>error[E0277]: the trait bound `T: ComputeTIsZero` is not satisfied
+    |
+    |   type Func&lt;T&gt; = TIsZero&lt;T&gt;;
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ComputeTIsZero` is not implemented for `T`
+    |
+</code></pre></div></div>
+
+<p>Why do we get this? Recall that <code class="highlighter-rouge">TIsZero&lt;T&gt;</code> is an alias for <code class="highlighter-rouge">&lt;T as ComputeTIsZero&gt;::Output</code>. This means that <code class="highlighter-rouge">T</code> must implement the <code class="highlighter-rouge">ComputeTIsZero</code> trait, which isn’t guaranteed by our general <code class="highlighter-rouge">FuncProxy</code> trait definition. We could theoretically change <code class="highlighter-rouge">FuncProxy</code> to include this bound, something like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">FuncProxy</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Func</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">ComputeTIsZero</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>However, our goal is for <code class="highlighter-rouge">Map</code> to take as input any type-level function. This definition of <code class="highlighter-rouge">FuncProxy</code> would restrict the implement to only functions mentioned in the trait bounds.</p>
+
+<h2 id="dealing-with-partial-functions">Dealing with partial functions</h2>
+
+<p>Let’s back up to understand the conceptual issue. In Rust, type-level functions are partial functions, meaning they may not be implemented for all types. For example, <code class="highlighter-rouge">TIsZero</code> is only implemented for the types <code class="highlighter-rouge">Z</code> and <code class="highlighter-rouge">S&lt;N&gt;</code>, but not e.g. for the type <code class="highlighter-rouge">String</code>. However, to define <code class="highlighter-rouge">Map</code>, we have to ensure that <code class="highlighter-rouge">Proxy::Func&lt;X&gt;</code> is defined for all <code class="highlighter-rouge">X</code> in a type list.</p>
+
+<p>Previously, we could ensure this condition via a trait bound. For example, if <code class="highlighter-rouge">Proxy::Func</code> was <code class="highlighter-rouge">ComputeTIsZero</code>, then we could add <code class="highlighter-rouge">X: ComputeTIsZero</code> to the implementation. But for any generic <code class="highlighter-rouge">Proxy::Func</code>, there is no way to say <code class="highlighter-rouge">X: Proxy::Func</code> because <code class="highlighter-rouge">Proxy::Func</code> is a type, not a trait. Hypothetically, if Rust supported <a href="https://github.com/rust-lang/rfcs/issues/2190">associated traits</a>, we could do something like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">FuncProxy</span> <span class="p">{</span>
+  <span class="k">trait</span> <span class="n">Func</span> <span class="p">{</span> <span class="k">type</span> <span class="n">Output</span><span class="p">;</span> <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">FuncProxy</span> <span class="k">for</span> <span class="n">TIsZeroProxy</span> <span class="p">{</span>
+  <span class="k">trait</span> <span class="n">Func</span> <span class="o">=</span> <span class="n">ComputeTIsZero</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">type</span> <span class="n">CallProxy</span><span class="o">&lt;</span><span class="n">Proxy</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">T</span> <span class="k">as</span> <span class="nn">Proxy</span><span class="p">::</span><span class="n">Func</span><span class="o">&gt;</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="p">,</span> <span class="n">Proxy</span><span class="o">&gt;</span> <span class="n">ComputeMap</span><span class="o">&lt;</span><span class="n">Proxy</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">X</span><span class="p">,</span> <span class="n">XS</span><span class="o">&gt;</span>
+<span class="k">where</span>
+  <span class="n">Proxy</span><span class="p">:</span> <span class="n">FuncProxy</span><span class="p">,</span>
+  <span class="n">XS</span><span class="p">:</span> <span class="n">ComputeMap</span><span class="o">&lt;</span><span class="n">Proxy</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="n">X</span><span class="p">:</span> <span class="nn">Proxy</span><span class="p">::</span><span class="n">Func</span>
+<span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">CallProxy</span><span class="o">&lt;</span><span class="n">Proxy</span><span class="p">,</span> <span class="n">X</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">XS</span><span class="p">,</span> <span class="n">Proxy</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>However, Rust doesn’t have such a feature. Instead, we can use <a href="https://github.com/rust-lang/rust/issues/31844">specialization</a> to make all type functions total. We can define a base case where a type function returns an error if it’s not implemented, but as a type rather than a compiler error. To compile <code class="highlighter-rouge">TIsZero</code>, this solution looks like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">Error</span><span class="p">;</span>
+
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">FuncProxy</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Func</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">ComputeTIsZero</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">type</span> <span class="n">TIsZero</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">T</span> <span class="k">as</span> <span class="n">ComputeTIsZero</span><span class="o">&gt;</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+
+<span class="k">impl</span> <span class="n">ComputeTIsZero</span> <span class="k">for</span> <span class="n">Z</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">TTrue</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span> <span class="n">ComputeTIsZero</span> <span class="k">for</span> <span class="n">S</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">TFalse</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cm">/* key addition */</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">ComputeTIsZero</span> <span class="k">for</span> <span class="n">T</span> <span class="p">{</span>
+  <span class="n">default</span> <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">TIsZeroProxy</span><span class="p">;</span>
+<span class="k">impl</span> <span class="n">FuncProxy</span> <span class="k">for</span> <span class="n">TIsZeroProxy</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Func</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">TIsZero</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>With this addition, the <code class="highlighter-rouge">TIsZeroProxy</code> implementation no longer errors, because <code class="highlighter-rouge">ComputeTIsZero</code> is guaranteed to be implemented for all types <code class="highlighter-rouge">T</code>. And now, at long last, our <code class="highlighter-rouge">Map</code> program will execute correctly if we replace <code class="highlighter-rouge">TIsZero</code> with <code class="highlighter-rouge">TIsZeroProxy</code>:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nn">assert_type_eq</span><span class="p">::</span><span class="o">&lt;</span>
+    <span class="n">Map</span><span class="o">&lt;</span>
+      <span class="n">TCons</span><span class="o">&lt;</span><span class="n">Z</span><span class="p">,</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&lt;</span><span class="n">Z</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">TNil</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+      <span class="n">TIsZeroProxy</span>
+    <span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">TCons</span><span class="o">&lt;</span><span class="n">TTrue</span><span class="p">,</span> <span class="n">TCons</span><span class="o">&lt;</span><span class="n">TFalse</span><span class="p">,</span> <span class="n">TNil</span><span class="o">&gt;&gt;</span>
+  <span class="o">&gt;</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Note: as of January 2021, this pattern is theoretically sound, but seems to have ongoing performance or correctness issues in the compiler. Specialization combined with recursive trait bounds will occassionally cause the compiler to stack overflow  — see my <a href="https://github.com/rust-lang/rust/issues/80700">Github issue</a>.</p>
+</blockquote>
+
+<h2 id="dynamically-kinded-type-level-programming">Dynamically-kinded type-level programming</h2>
+
+<p>To add support for higher-order type functions, I had to remove support for type annotations (actually kind annotations) from Tyrade. Previously, you could write functions like this:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">tyrade!</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">TIsZero</span><span class="p">(</span><span class="n">N</span><span class="p">:</span> <span class="n">TNum</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">TBool</span> <span class="p">{</span>
+    <span class="k">match</span> <span class="n">N</span> <span class="p">{</span>
+      <span class="n">Z</span> <span class="k">=&gt;</span> <span class="n">TTrue</span><span class="p">,</span>
+      <span class="nf">S</span><span class="p">(</span><span class="n">N1</span> <span class="o">@</span> <span class="n">TNum</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="n">TFalse</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This program would compile into the trait definition:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">ComputeTIsZero</span><span class="p">:</span> <span class="n">TNum</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span><span class="p">:</span> <span class="n">TBool</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This ensures, for example, that a function’s return value matches its return kind. If you wrote a function with a mismatch:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">tyrade!</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">TIsZero</span><span class="p">(</span><span class="n">N</span><span class="p">:</span> <span class="n">TNum</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">TBool</span> <span class="p">{</span>
+    <span class="n">Z</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then the compiler raises an error at the point of <em>definition</em> for <code class="highlighter-rouge">TIsZero</code> rather than the point of <em>use</em>. Hence, this language is statically-kinded. However, to kind-check a higher-order function like <code class="highlighter-rouge">Map</code>, we need a polymorphic kind system. Ideally, we could write in Tyrade:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">tyrade!</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="o">&gt;</span><span class="p">(</span><span class="n">L</span><span class="p">:</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">F</span><span class="p">:</span> <span class="n">A</span> <span class="k">-&gt;</span> <span class="n">B</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">B</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="o">...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>I don’t believe it’s possible to encode this concept into Rust’s trait system. So to add higher-order functions, our type-level programming language had to become dynamically-kinded. A sad trade-off, but perhaps more acceptable for type-level programming than value-level. Although errors are caught by the users and not the definers, at least they’re still caught at compile-time!</p>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>
