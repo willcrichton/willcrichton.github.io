@@ -1,0 +1,10 @@
+git pull <-- updates stuff
+
+be sure to pull before pushing!
+
+git add .    <-- adds everything
+git add filename.js
+
+git commit -m "whatever you just updated"
+
+git push
