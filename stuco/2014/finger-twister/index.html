@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fingah Twistah</title>
+    <link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="reset.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <script src="jquery-2.1.1.min.js"></script>
+    <script src="jquery-ui.min.js"></script>
+    <script src="gui.js"></script>
+    <script src="timer.js"></script>
+    <script src="hands.js"></script>
+    <script src="game.js"></script>
+    <script>
+    /* TODO:
+     * timer loss animation
+     * start screen
+     * better starting tooltip
+     */
+
+    // global constants
+    var FINGERS =  2;
+    var COLORS = 4;
+
+    var KEYS = [
+      ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+      ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+      ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';'],
+      ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/']
+    ];
+
+    var KEY_COLORS = [
+      [0, 1, 2, 3, 0, 1, 2, 3, 0, 1],
+      [2, 3, 0, 1, 2, 3, 0, 1, 2, 3],
+      [0, 1, 2, 3, 0, 1, 2, 3, 0, 1],
+      [2, 3, 0, 1, 2, 3, 0, 1, 2, 3]
+    ]
+
+    // global helper functions
+    function getChar(which) {
+      var c = String.fromCharCode(which);
+      if (which == 186) {
+        c = ";";
+      } else if (which == 188) {
+        c = ",";
+      } else if (which == 190) {
+        c = ".";
+      } else if (which == 191) {
+        c = "/";
+      }
+      return c;
+    }
+
+    var lastKeyCode;
+    function debounceCharDown(fun) {
+      return function(e) {
+        if (e.which != lastKeyCode) {
+          lastKeyCode = e.which;
+          fun(e);
+        }
+      };
+    }
+
+    function debounceCharUp(fun) {
+      return function(e) {
+          fun(e);
+          lastKeyCode = null;
+      };
+    }
+
+    var game;
+
+    $(document).ready(function() {
+
+      game = new GAME();
+      game.startGame();
+
+    });
+
+    </script>
+
+
+    <div class='main'>
+      <div class='top'>
+        <div class='top-left'>
+          <div class ='requirements-container'>
+            <div class='requirements-title'>
+              Current Requirements:
+            </div>
+            <div id="requirements">
+            </div>
+          </div>
+          <div class="text-container">
+            <div id='text-output'>
+
+            </div>
+          </div>
+        </div>
+        <div class='top-right'>
+          <div id='timer'>
+            <div class='timer-title'>
+              Time Remaining:
+            </div>
+            <div class='timer-count'>
+              <span class='time'></span> s
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='bottom'>
+        <div id='keyboard'>
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

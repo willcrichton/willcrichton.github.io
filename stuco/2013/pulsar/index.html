@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PULSAR</title>
+    <link href="style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="dialogue">
+      <br /><br /><br />
+      <h1>REFRESH THE PAGE</h1>
+      <br /><br />
+      music/<input value="default2.mp3">
+      <br /><br />
+      <button id="play" onclick="var input=document.querySelector('input');
+                                 var sample=new AudioTagSample();
+                                 sample.play('music/' + input.value);">
+        play
+      </button>
+      <!--<button id="chill" onclick="location.href='chill/index.html'">chill mode</button>-->
+      <div id="score"></div>
+      <br /><br /><br />
+      "Chill mode" means that you don't die.<br />Don't change the default song, please.<br />Refresh the page each time you play.<br />Use Chrome.
+      <br /><br />
+      WASD moves. Arrows move the crosshairs. Spacebar fires. Fire on the beat to win.
+    </div>
+    <canvas id="fishies" resize></canvas>
+    <script src="js/sound/shared.js"></script>
+    <script src="js/sound/audio-tag-sample.js"></script>
+    <script src="js/vendor/underscore-min.js"></script>
+    <script src="js/vendor/paper.js"></script>
+    <script src="js/vendor/require.js" data-main="js/main"></script>
+  </body>
+</html>

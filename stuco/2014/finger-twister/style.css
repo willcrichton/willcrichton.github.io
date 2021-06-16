@@ -1,0 +1,282 @@
+body, html {
+	background: #000;
+	width: 100%;
+	height: 100%;
+	min-height: 500px;
+
+	font-family: 'Montserrat';
+	font-weight: 700;
+}
+
+/* Colors */
+
+.color-0 {
+	background: #F44E24; /* red */
+}
+
+.color-1 {
+	background: #01A4EF; /* blue */
+}
+
+.color-2 {
+	background: #81B900; /* green */
+}
+
+.color-3 {
+	background: #FFC300; /* yellow */
+}
+
+.text-color-0 {
+	color: #F44E24; /* red */
+}
+
+.text-color-1 {
+	color: #01A4EF; /* blue */
+}
+
+.text-color-2 {
+	color: #81B900; /* green */
+}
+
+.text-color-3 {
+	color: #FFC300; /* yellow */
+}
+
+/* General Styles */
+
+.main {
+	width: 900px;
+	height: 550px;
+	background: white;
+	margin: 0 auto;
+	border: 1px solid black;
+	border-radius: 5px;
+}
+
+.top {
+	width: 100%;
+	height: 40%;
+	padding-top: 2%;
+}
+
+.bottom {
+	width: 100%;
+	border-top: 2px solid black;
+	border-radius: 0 0 5px 5px;
+}
+
+
+/* Keyboard styles */
+
+#keyboard {
+	padding: 30px 0;
+	background: white;
+	width: 100%;
+	border-radius: 0 0 5px 5px;
+}
+
+.keyboard-row {
+	padding-top: 9px;
+	padding-bottom: 9px;
+	height: 60px;
+	width: 90%;
+}
+
+.keyboard-row.row-0 {
+	padding-left: 7%;
+}
+
+.keyboard-row.row-1 {
+	padding-left: 9%;
+}
+
+.keyboard-row.row-2 {
+	padding-left: 11%;
+}
+
+.keyboard-row.row-3 {
+	padding-left: 13%;
+}
+
+.keyboard-button {
+	
+	text-transform: capitalize;
+	font-size: 14pt;
+	display: inline-block;
+	width: 8%;
+	margin: 0 .5%;
+	height: 60px;
+	line-height: 60px;
+	text-align: center;
+	border: 1px solid gray;
+	border-radius: 12.5px;
+	position: relative;
+
+	box-shadow: inset -2px -3px 1px rgba(0, 0, 0, 0.45), 2px 3px 1px rgba(0, 0, 0, 0.25);
+}
+
+.keyboard-button.pressed {
+	top: 2px;
+	box-shadow: inset -2px -2px 3px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(0, 0, 0, 0.9)
+}
+
+#keyboard svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+
+  border-radius: 12.5px;
+}
+
+#keyboard circle {
+  fill: rgba(255,255,255, .3);
+}
+
+
+/* HUD styles */
+
+.top-left {
+	width: 75%;
+	height: 100%;
+	display: inline-block;
+}
+
+.top-right {
+	width: 25%;
+	height: 100%;
+	display: inline-block;
+	float: right;
+}
+
+.requirements-container {
+	height: 50%;
+	text-align: center;
+	padding-left: 15%;
+}
+
+.requirements-title {
+	font-size: 14pt;
+}
+
+#requirements {
+	padding-top: 2%;
+}
+
+#requirements > .finger-req {
+	display: inline-block;
+	height: 50px;
+	width: 75px;
+	position: relative;
+	margin: 0 3px;
+}
+
+.finger-req > .finger-name {
+	text-transform: uppercase;
+	font-size: 8pt;
+	position: absolute;
+	top: 5px;
+	width: 100%;
+	z-index: 5;
+}
+
+.finger-req-button > .initial-req-key {
+	position: absolute;
+	bottom: 8px;
+	text-align: center;
+	width: 100%;
+}
+
+.finger-req > .finger-req-button {
+	height: 100%;
+	border-radius: 5px;
+	position: relative;
+}
+
+.finger-req.active > .finger-req-button{
+	left: -2px;
+	top: -2px;
+	box-shadow: 2px 2px 2px black;
+}
+
+.finger-req.active:before {
+	content: "";
+	position: absolute;
+	top: -2px;
+	left: -2px;
+	width: 100%;
+	height: 100%;
+	border-radius: inherit;
+	background: white;
+	opacity: 0;
+	z-index: 6;
+
+	-webkit-animation-name: activeGlow;
+    -webkit-animation-duration: 1.5s;
+    -webkit-animation-timing-function: linear;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-play-state: running;
+}
+
+
+@-webkit-keyframes activeGlow {
+    0%   {opacity: 0;}
+    40%  {opacity: .75;}
+    65%  {opacity: 0;}
+    100% {0}
+}
+
+
+.text-container {
+	padding-left: 15%;
+	text-align: center;
+}
+
+#text-output.instr-text {
+	font-size: 16pt;
+}
+
+#text-output > .instr {
+	text-decoration: underline;
+}
+
+#text-output > .finger-name {
+	text-transform: uppercase;
+	font-weight: 900;
+}
+
+#text-output > .color-name {
+	text-transform: uppercase;
+	font-weight: 900
+}
+
+
+/* Timer styles */
+
+#timer {
+	padding-top: 11%;
+}
+
+#timer > .timer-title {
+	font-size: 12pt;
+}
+
+#timer > .timer-count {
+	margin-top: 3%;
+	font-size: 20pt;
+}
+
+#timer.orange > .timer-count {
+	color: orange;
+}
+
+#timer.red > .timer-count {
+	color: red;
+}
+
+
+
+
+

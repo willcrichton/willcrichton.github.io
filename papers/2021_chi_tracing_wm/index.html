@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="">
+    
+    
+    <title>
+      
+      The Role of Working Memory in Program Tracing | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="publication">
+  <h1 class="title">The Role of Working Memory in Program Tracing</h1>
+  <div class="authors">
+    
+    <div class="author"><p>Will Crichton, Stanford University</p>
+</div>
+    
+    <div class="author"><p>Maneesh Agrawala, Stanford University</p>
+</div>
+    
+    <div class="author"><p>Pat Hanrahan, Stanford University</p>
+</div>
+    
+  </div>
+  <div class="venue">ACM Conference on Human Factors in Computing Systems, May 2021<br />
+Proceedings of SIGCHI 2021<br />
+</div>
+  <hr />
+  <div class="body">
+    <p><img src="/papers/assets/2021_chi_banner.svg" alt="" class="banner" height="400px" /></p>
+
+<h2 id="abstract">Abstract</h2>
+
+<p>Program tracing, or mentally simulating a program on concrete inputs, is an important part of general program comprehension. Programs involve many kinds of virtual state that must be held in memory, such as variable/value pairs and a call stack. In this work, we examine the influence of short-term working memory (WM) on a person’s ability to remember program state during tracing. We first confirm that previous findings in cognitive psychology transfer to the programming domain: people can keep about 7 variable/value pairs in WM, and people will accidentally swap associations between variables due to WM load. We use a restricted focus viewing interface to further analyze the strategies people use to trace through programs, and the relationship of tracing strategy to WM. Given a straight-line program, we find half of our participants traced a program from the top-down line-by-line (linearly), and the other half start at the bottom and trace upward based on data dependencies (on-demand). Participants with an on-demand strategy made more WM errors while tracing straight-line code than with a linear strategy, but the two strategies contained an equal number of WM errors when tracing code with functions. We conclude with the implications of these findings for the design of programming tools: first, programs should be analyzed to identify and refactor human-memory-intensive sections of code. Second, programming environments should interactively visualize variable metadata to reduce WM load in accordance with a person’s tracing strategy. Third, tools for program comprehension should enable externalizing program state while tracing.</p>
+
+<h2 id="paper">Paper</h2>
+
+<p><a href="">Download Paper</a> (XX MB)</p>
+
+  </div>
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>
