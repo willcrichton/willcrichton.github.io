@@ -321,7 +321,7 @@ trace(sleep_guide).get_trace().nodes['feeling_lazy']['value'] # 1.
 
 > The delta distribution assigns all probability to a single value, so the above guide has $$P(fl = 1, ia = 0) = 1.0$$ and all other assignments have zero probability.
 
-Although this is a valid guide, it's a bad one because it's probability distribution is very different from the `underslept` model. (Although if we conditioned `amount_slept = 8`, it would be a decent guide!) How bad is this guide? In probability theory, it's common to quantify the difference between two probability distributions through the [KL divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence).
+Although this is a valid guide, it's a bad one because its probability distribution is very different from the `underslept` model. (Although if we conditioned `amount_slept = 8`, it would be a decent guide!) How bad is this guide? In probability theory, it's common to quantify the difference between two probability distributions through the [KL divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence).
 
 $$
 \begin{align*}
@@ -346,8 +346,6 @@ $$
 
 The only difference is that the $$P_{\verb!model!}$$ term now is a joint probability instead of a conditional probability (and the overall term is not negated). See the Edward PPL page on [$$KL(q\|p)$$ minimiazation](http://edwardlib.org/tutorials/klqp) for the gory details on how this works. We can compute this quantity in code:
 
-We can compute this in code:
-
 ```python
 def elbo(guide, cond_model):
   dist = 0.
@@ -366,7 +364,7 @@ def elbo(guide, cond_model):
 elbo(sleep_guide, underslept) # -4.63
 ```
 
-Alright, well, that's certainly a number. To check out intuition for how KL divergence works, we can also compare against a guide that has a probability distribution closer to our expected posterior.
+Alright, well, that's certainly a number. To check our intuition for how KL divergence works, we can also compare against a guide that has a probability distribution closer to our expected posterior.
 
 ```python
 def sleep_guide2():
@@ -396,7 +394,9 @@ def sleep_guide():
     # Consistent with the model, we only sample ignore_alarm if
     # feeling_lazy is true
     if feeling_lazy == 1.:
-      sample('ignore_alarm', dist.Bernoulli(ia_p))
+        sample('ignore_alarm', dist.Bernoulli(ia_p))
+
+# Run once to register the param calls with Pyro
 sleep_guide()
 
 adam = Adam([param('fl_p').unconstrained(), param('ia_p').unconstrained()],
@@ -430,7 +430,7 @@ def elbo(guide, cond_model):
   return dist
 ```
 
-Again we return to "computationally intractable". We're essentially computing an integral, which we can either do analytically (compute a closed form for the ELBO that doesn't have an integral in it), or approximately (pick a few values between 0 and 1, and approximate the integral with an average). The simplest approximation only uses a single assignment to the latent variables.
+Again we return to "computationally intractable". We're essentially computing an integral, which we can either do analytically (compute a closed form for the ELBO that doesn't have an integral in it), or approximately (pick a few values between 0 and 1, and approximate the integral with an average). The simplest approximation only uses a single random assignment to the latent variables.
 
 ```python
 from pyro.poutine import replay
@@ -441,7 +441,7 @@ def elbo_approx(guide, cond_model):
     return model_trace.log_prob_sum() - guide_trace.log_prob_sum()
 ```
 
-Rather than simulate the guide and model under every assignment to the latents, we instead sample the guide for a single assignment to `feeling_lazy` and `ignore_alarm` (contained in `guide_trace`). We then condition the model on that assignment (`replay` is exactly like `condition` except it uses a trace object instead of a dictionary), and compare the probability of the model's trace versus the guide's trace. Again, this is approximating the expectation with a single assignment drawn from the guide's distribution.
+Rather than simulate the guide and model under every assignment to the latents, we instead sample the guide for a single assignment to `feeling_lazy` and `ignore_alarm` (contained in `guide_trace`). We then condition the model on that assignment (`replay` is exactly like `condition` except it takes as input a trace object instead of a dictionary), and compare the probability of the model's trace versus the guide's trace. Again, this is approximating the expectation with a single assignment drawn from the guide's distribution.
 
 We can directly replace our `elbo` with `elbo_approx` in the optimization code from earlier, and see how it works:
 
