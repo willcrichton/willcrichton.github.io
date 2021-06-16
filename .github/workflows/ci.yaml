@@ -13,7 +13,7 @@ jobs:
       - uses: helaili/jekyll-action@v2
         with:
           build_only: true
-      - run: cd wiki && ./publish.sh && sudo mv build/site ../build/wiki
+      - run: cd wiki && ./publish.sh && sudo mv docs ../build/wiki
       - uses: helaili/jekyll-action@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
