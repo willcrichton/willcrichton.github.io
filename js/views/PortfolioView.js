@@ -65,7 +65,7 @@ define(function(require) {
 
         id: 'research',
 
-        instructions: 'Arrow keys to move, space to open chests',
+        instructions: 'Arrow keys to move, space to open chests<br />(this isn\'t up to date, check out my <a href="/pdf/WillCrichton_CV.pdf" target="_blank">CV</a>)',
 
         initialize: function() {
             this.template = _.template(template);
