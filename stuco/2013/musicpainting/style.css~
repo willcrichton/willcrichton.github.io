@@ -1,6 +1,0 @@
-.fragment {
-    background: black;
-    width: 30px;
-    height: 30px;
-    position: absolute;
-}
