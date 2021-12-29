@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="I explore how to use Rust compiler internals to metaprogram Rust using information from the typechecker, e.g. to automatically insert garbage-collection into Rust code, and discuss the benefits and drawbacks of this approach.">
+    
+    
+    <title>
+      
+      Type-directed metaprogramming in Rust | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Type-directed metaprogramming in Rust
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    March 18, 2018
+  </div>
+  <div class="abstract">I explore how to use Rust compiler internals to metaprogram Rust using information from the typechecker, e.g. to automatically insert garbage-collection into Rust code, and discuss the benefits and drawbacks of this approach.</div>
+  <p><em>All code in this note is available in the <a href="https://github.com/willcrichton/rustc-type-metaprogramming">rustc-type-metaprogramming</a> repository.</em></p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>Metaprogramming, or code that generates code<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>, is broadly useful in statically typed languages for providing abstractions that are difficult to capture in the base syntax or type system. For example, Rust uses <a href="https://doc.rust-lang.org/book/first-edition/macros.html">macros</a> for simple pattern-matching-based code substitution (a more powerful and hygienic version of the C preprocessor), e.g. to implement variadic arguments like in <a href="https://doc.rust-lang.org/1.11.0/std/macro.println!.html">println!</a> and early returns like in <a href="https://doc.rust-lang.org/1.11.0/std/macro.try!.html">try!</a>.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"{} {} {}"</span><span class="p">,</span> <span class="s">"This has"</span><span class="p">,</span> <span class="s">"many"</span><span class="p">,</span> <span class="s">"arguments"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>However, pattern-matching-based metaprogramming tools are limited to simple syntactic transformations. Many common use cases require introspecting a syntactic construct and generating code accordingly, most notably <a href="https://github.com/dtolnay/syn#example-of-a-custom-derive">custom derive</a>. In that example, the metaprogram takes a struct and generates code by looking at the struct’s fields, e.g. to automatically generate <a href="https://github.com/serde-rs/serde">serializers</a> or <a href="http://docs.diesel.rs/diesel/deserialize/trait.Queryable.html">SQL queries</a>.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(Serialize)]</span>
+<span class="k">struct</span> <span class="n">Point</span> <span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="nb">f32</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">f32</span> <span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">origin</span><span class="p">:</span> <span class="n">Point</span> <span class="o">=</span> <span class="n">Point</span> <span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="mi">0</span> <span class="p">};</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span> <span class="n">origin</span><span class="nf">.to_json</span><span class="p">());</span> <span class="c">// {"x": 0, "y": 0}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Many of these custom derives are in fact examples of type-directed metaprograms, since they use the type of the struct fields to determine what code to generate.  However, this approach has two limitations:</p>
+<ol>
+  <li>This only works for structs since Rust requires the programmer to explicitly write down the type of each field. Many types in Rust are not written down, but instead inferred by the compiler.</li>
+  <li>The types are only treated syntactically, not semantically. For example, if the programmer does:
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">type</span> <span class="n">MyFloat</span> <span class="o">=</span> <span class="nb">f32</span><span class="p">;</span>
+
+ <span class="nd">#[derive(Serialize)]</span>
+ <span class="k">struct</span> <span class="n">Point</span> <span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="n">MyFloat</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">f32</span> <span class="p">}</span>
+</code></pre></div>    </div>
+    <p>Then then the deriver has no way to understand that the types <code class="highlighter-rouge">MyFloat</code> and <code class="highlighter-rouge">f32</code> are the same.</p>
+  </li>
+</ol>
+
+<p>More broadly, the issue is that <em class="hl">most compilers refuse to expose their type systems (or other internals) to the outside world.</em> Even today, compilers are largely treated as black boxes whose input is a text file and whose output is either a working binary or an error message. At most, languages like Rust will expose their syntax through procedural macro systems, never providing APIs for types, lifetimes, or properties/IRs.</p>
+
+<p>However, at the same time, <em class="hl">compilers are able to infer more than ever about their programs through static analysis.</em> With that comes a tradeoff—requiring the programmer to write down less information about their program (while still being type/memory-safe) makes the programmer more productive. However, <em>in plain text</em>, this makes it more difficult for others to read the same program, as understanding types and lifetimes often help us understand what a piece of code is doing. This is why IDEs are actually taking the charge in cracking open the compiler black box. The folks at Microsoft created both the <a href="https://langserver.org/">Language Server Protocol</a> for standardizing a common interface for program navigation/editing, and they’ve also been hard at work on <a href="https://github.com/dotnet/roslyn/wiki/Roslyn%20Overview">Roslyn</a>, a new API for opening up the C# compiler.</p>
+
+<p><em class="hl">The benefits of extracting knowledge out of the compiler extend well beyond IDEs.</em> As more compiler APIs emerge, statically typed languages can begin to approach dynamically typed languages in their flexibility and extensibility, but without the overhead. It will become easier to use the introspective tools of today (debugging complex data structures, automatic serializer generation) as well as enable the language extensions of tomorrow (<a href="https://www.cs.cmu.edu/~aldrich/papers/ecoop14-tsls.pdf">type-directed macro parsing</a>, <a href="http://terralang.org/">embedded high-performance DSLs</a>). So let’s figure out how much we can already do with our current compilers!</p>
+
+<h2 id="using-the-rustc-api">Using the rustc API</h2>
+
+<p>Of the moderately popular statically typed languages that I know of, Rust has one of the nicest compilers, <code class="highlighter-rouge">rustc</code>, in terms of its <a href="https://rust-lang-nursery.github.io/rustc-guide">documentation</a> and ease of integration. Since rustc is written in Rust, it’s easy to call out to Rust compiler functions in Rust code. Subsequently, in the remainder of this note, we will look at how to use the Rust compiler to do type-directed metaprogramming of Rust code.</p>
+
+<p>Before diving into details, a word of caution: the Rust compiler API is not stable at all, and changes frequently. The specific code in this note will likely be somewhat out of date in a few weeks or months. Running the code requires using the nightly builds. If you are a Rust metaprogramming compiler-hacking fanatic like me, then the specifics will help you understand how to actually use the compiler’s API. Otherwise, you can treat this as an example of what type-directed metaprogramming could look like in a brighter future where these APIs are stable. All of the code below is available in my repository <a href="https://github.com/willcrichton/rustc-type-metaprogramming">rustc-type-metaprogramming</a>. Let’s get to it!</p>
+
+<p>On a high level, our first goal is just to call the Rust compiler and extract the types of a few fragments of Rust code. The Rust compiler API can be found in their <a href="https://github.com/rust-lang/rust/tree/8aa27ee30972f16320ae4a8887c8f54616fff819/src">GitHub repo</a> with <a href="https://rust-lang-nursery.github.io/rustc-guide/">high-level documentation</a>. To start, we need to create a new crate and put it on nightly:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cargo new --bin rustc-type-metaprogramming
+$ cd rustc-type-metaprogramming
+$ rustup override set nightly-2018-03-19
+</code></pre></div></div>
+
+<p>Then we fill out the <code class="highlighter-rouge">src/main.rs</code> file:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#![feature(rustc_private,</span> <span class="nd">quote)]</span>
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{}</span>
+</code></pre></div></div>
+
+<p>We use Rust’s feature gates to explicitly declare that we intend to use the private API to rustc as well as the quotation API in <a href="https://github.com/rust-lang/rust/tree/8aa27ee30972f16320ae4a8887c8f54616fff819/src/libsyntax"><code class="highlighter-rouge">libsyntax</code></a> (more on that later). At this point, we can look to the rustc driver (<a href="https://github.com/rust-lang/rust/tree/8aa27ee30972f16320ae4a8887c8f54616fff819/src/librustc_driver"><code class="highlighter-rouge">librustc_driver</code></a>) to see how the Rust compiler calls its own functions from the top-level (i.e. when the user calls <code class="highlighter-rouge">rustc</code> on the command line). Specifically, the <a href="https://github.com/rust-lang/rust/blob/8aa27ee30972f16320ae4a8887c8f54616fff819/src/librustc_driver/lib.rs#L445"><code class="highlighter-rouge">run_compiler</code></a> and <a href="https://github.com/rust-lang/rust/blob/8aa27ee30972f16320ae4a8887c8f54616fff819/src/librustc_driver/driver.rs#L67"><code class="highlighter-rouge">compile_input</code></a> functions show the 10,000 feet view of the compiler stages. A plain English explanation of this is also provided in the <a href="https://rust-lang-nursery.github.io/rustc-guide/high-level-overview.html">documentation</a>.</p>
+
+<p>We need to do a lot of stuff that’s required by the compiler but largely irrelevant for our task (like provide command line options, create code maps for a non-existent source file, set up a bunch of compiler infrastructure). In the code snippets, I omit the uninteresting boilerplate/lifetimes/etc. with <code class="highlighter-rouge">...</code>, but you can find the full working example in the repository. Let’s say we want to type-check the function <code class="highlighter-rouge">fn main() { let x = 1 + 2; }</code>. Our metaprogramming function then looks like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="o">...</span>
+
+    <span class="k">let</span> <span class="n">krate</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="o">...</span>
+        <span class="nn">ast</span><span class="p">::</span><span class="n">Crate</span> <span class="p">{</span>
+            <span class="o">...</span>
+            <span class="nd">quote_item!</span><span class="p">(</span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span><span class="p">;</span> <span class="p">})</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+
+    <span class="k">let</span> <span class="n">hir</span> <span class="o">=</span> <span class="nn">driver</span><span class="p">::</span><span class="nf">phase_2_configure_and_expand</span><span class="p">(</span><span class="n">krate</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+    <span class="o">...</span>
+
+    <span class="nn">ty</span><span class="p">::</span><span class="nn">TyCtxt</span><span class="p">::</span><span class="nf">create_and_enter</span><span class="p">(</span><span class="n">hir</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="p">|</span><span class="n">tcx</span><span class="p">|</span> <span class="p">{</span>
+        <span class="nn">typeck</span><span class="p">::</span><span class="nf">check_create</span><span class="p">(</span><span class="n">tcx</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="nd">println!</span><span class="p">(</span><span class="s">"Type checked successfully!"</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This consists of three steps: first, we need to produce a syntactic representation of the program. One way to do this is to represent the program as a string and then run the rustc parser, e.g.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">prog</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span> <span class="o">=</span> <span class="s">"fn main() { let x = 1 + 2; }"</span><span class="p">;</span>
+<span class="k">let</span> <span class="n">parser</span> <span class="o">=</span> <span class="nn">Parser</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span> <span class="c">// not actually this easy IRL</span>
+<span class="k">let</span> <span class="n">func</span><span class="p">:</span> <span class="nn">ast</span><span class="p">::</span><span class="n">Item</span> <span class="o">=</span> <span class="n">parser</span><span class="nf">.parse</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>However, a nicer way to do this is to use quotations, or macros that essentially do the parsing for us. Quotations like <code class="highlighter-rouge">quote_item!</code> take as input Rust code and return the programmatic representation of that code as a Rust syntax tree (AST), which we use above. We then wrap the function in a crate, since that’s the input the Rust compiler expects.</p>
+
+<p>Second, we convert the AST into the high-level intermediate representation (HIR), described <a href="https://rust-lang-nursery.github.io/rustc-guide/hir.html">here</a>. HIR has fewer syntactic forms that the AST the programmer uses, e.g. <code class="highlighter-rouge">for</code> loops are converted into <code class="highlighter-rouge">loop</code> loops. Lastly, we run the typechecker by creating a type context <code class="highlighter-rouge">tcx</code> and run it with <code class="highlighter-rouge">TyCtxt::check_crate</code>. If our code snippet typechecks like it does in our example, then this code will execute and print the success message. You can verify this with:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cargo run
+Type checked successfully!
+</code></pre></div></div>
+
+<h2 id="extracting-types-from-rustc">Extracting types from rustc</h2>
+
+<p>Now that we can run the compiler, we next want to extract the types it computes. Let’s say we want to print out the type of every expression in our sample program. One way to do this would be to manually traverse the syntax tree with recursive <code class="highlighter-rouge">match</code> statements, but that’s onerous and not easily extensible when the AST changes. Instead, we can use the visitor pattern where we only define behavior for the parts of the syntax tree we care about, and use default implementations for the rest.</p>
+
+<p>Luckily, this is a common pattern in the Rust compiler so they have already implemented much of this machinery for us! Specifically, <code class="highlighter-rouge">librustc::hir::intravisit</code> provides a <a href="https://github.com/rust-lang/rust/blob/8aa27ee30972f16320ae4a8887c8f54616fff819/src/librustc/hir/intravisit.rs#L149">Visitor trait</a> that we can implement to walk through a HIR tree.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">TestVisitor</span> <span class="p">{</span>
+    <span class="n">tcx</span><span class="p">:</span> <span class="nn">ty</span><span class="p">::</span><span class="n">TyCtxt</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">Visitor</span> <span class="k">for</span> <span class="n">TestVisitor</span> <span class="p">{</span>
+    <span class="o">...</span>
+
+    <span class="k">fn</span> <span class="nf">visit_expr</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="o">&amp;</span><span class="nn">hir</span><span class="p">::</span><span class="n">Expr</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">ty</span> <span class="o">=</span> <span class="k">self</span><span class="py">.tcx</span><span class="nf">.type_of</span><span class="p">(</span><span class="n">expr</span><span class="p">);</span> <span class="c">// not actually this easy IRL</span>
+        <span class="nd">println!</span><span class="p">(</span><span class="s">"Node: {:?}, type: {:?}"</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">ty</span><span class="p">);</span>
+        <span class="nn">intravisit</span><span class="p">::</span><span class="nf">walk_expr</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="o">...</span>
+
+    <span class="nn">ty</span><span class="p">::</span><span class="nn">TyCtxt</span><span class="p">::</span><span class="nf">create_and_enter</span><span class="p">(</span><span class="n">hir</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="p">|</span><span class="n">tcx</span><span class="p">|</span> <span class="p">{</span>
+        <span class="nn">typeck</span><span class="p">::</span><span class="nf">check_crate</span><span class="p">(</span><span class="n">tcx</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="k">let</span> <span class="k">mut</span> <span class="n">visitor</span> <span class="o">=</span> <span class="n">TestVisitor</span> <span class="p">{</span> <span class="n">tcx</span><span class="p">:</span> <span class="n">tcx</span> <span class="p">};</span>
+        <span class="n">tcx</span><span class="py">.hir</span><span class="nf">.visit</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">visitor</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>Running this code, we get the following output:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cargo run
+Node: expr(13: { let x = 1 + 2; }), type: ()
+Node: expr(11: 1 + 2), type: i32
+Node: expr(9: 1), type: i32
+Node: expr(10: 2), type: i32
+</code></pre></div></div>
+
+<p>Awesome! We were able to access every expression and its type, even though no types were ever written down explicitly. The code works by creating a visitor <code class="highlighter-rouge">TestVisitor</code> that contains the type context <code class="highlighter-rouge">tcx</code> that tells us the types of expressions when we ask it with <code class="highlighter-rouge">type_of</code>. The visitor walks through the HIR tree, and when it finds an expression like <code class="highlighter-rouge">1+2</code>, it calls the function which prints both the expression and its type. Then we call <code class="highlighter-rouge">walk_expr</code> which continues recursively visiting the components of the expression, <code class="highlighter-rouge">1</code> and <code class="highlighter-rouge">2</code> in this case. Note that in Rust, function bodies are blocks which are expressions, so the block <code class="highlighter-rouge">{let x = 1 + 2;}</code> is an expression that has the empty tuple (unit) return type.</p>
+
+<h2 id="auto-gc-for-rust">Auto-GC for Rust</h2>
+
+<p>One possible application of type-directed metaprogramming could be the automated application of garbage collection techniques to selected code blocks. Dealing with lifetimes in Rust can be difficult sometimes, so it would be nice to have the compiler automatically reference count everything by default, which in the simplest (and least-performant) case looks like this:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// before</span>
+<span class="k">let</span> <span class="n">x</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="k">let</span> <span class="n">y</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="c">// after</span>
+<span class="k">let</span> <span class="n">x</span><span class="p">:</span> <span class="nb">Rc</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Rc</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="k">let</span> <span class="n">y</span><span class="p">:</span> <span class="nb">Rc</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Rc</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>While much of this translation can be done syntactically, knowing the types during translation can help us translate at a finer granularity  (only translate certain types) and produce better error messages (an issue with <code class="highlighter-rouge">Rc&lt;i32&gt;</code> is actually with <code class="highlighter-rouge">i32</code> in the source code). To demonstrate the simplest proof-of-concept, I implemented this approach as a procedural macro: <code class="highlighter-rouge">auto_gc!</code>. For example, if we have a <code class="highlighter-rouge">main.rs</code> that looks like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">...</span>
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nd">auto_gc!</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="k">let</span> <span class="n">y</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">x</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"{:?}"</span><span class="p">,</span> <span class="o">*</span><span class="n">y</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then running <code class="highlighter-rouge">cargo expand</code> (equivalent to <code class="highlighter-rouge">gcc -E</code>, expands out the macros), this generates:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">...</span>
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">x</span><span class="p">:</span> <span class="nb">Rc</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Rc</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+    <span class="k">let</span> <span class="n">y</span><span class="p">:</span> <span class="nb">Rc</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Rc</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="o">*</span><span class="nn">Rc</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="o">*</span><span class="nn">Rc</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">));</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Note that the expanded <code class="highlighter-rouge">x</code> has an explicit <code class="highlighter-rouge">Rc&lt;i32&gt;</code> type annotation despite not being in the original source, since we could use info from the Rust typechecker.</p>
+</blockquote>
+
+<p>The implementation (<a href="https://github.com/willcrichton/rustc-type-metaprogramming/blob/master/auto-gc/src/lib.rs">source here</a>) uses a “folder” (instead of a visitor) to generate an output for each node in the HIR, largely keeping the code the same except inserting dereferences and <code class="highlighter-rouge">Rc::new</code> calls where appropriate. My code is wrapped in Rust’s procedural macro interface that allows code inside an <code class="highlighter-rouge">auto_gc!</code> call to be replaced by arbitrary code generated by my function.</p>
+
+<h2 id="future-work">Future work</h2>
+
+<p>I’m glad I was able to get this off the ground. Hats off to the Rust developers for the time they’ve invested in documenting the compiler. I think it will pay great dividends for the future, not just for people who want to hack on the compiler, but also for people like me who want to take it in new directions.</p>
+
+<p>That said, after playing around, this approach has a number of logistical challenges today:</p>
+<ol>
+  <li>HIR wasn’t meant to be transformed like the AST. While the AST module has a Folder trait, the HIR module does not, so I had to implement it myself.</li>
+  <li>All code generation facilities are targeted towards the AST, not HIR. For example, if I’m folding over a HIR tree, I have to manually define the translation of values between HIR and AST, which is a lot of seemingly unnecessary work. There’s no quotation library for HIR.</li>
+  <li>Using the compiler (in my own code) inside the compiler (e.g. in a procedural macro definition) can be dangerous. I ran into a tricky bug where I accidentally defined two string interning contexts and had some wacky results when keywords were getting arbitrarily mutated to other words.</li>
+</ol>
+
+<p>None of these issues are fundamental, and largely just mean providing better library support around munging HIR constructs and mapping them back to the AST. I intend to investigate further into what rustc needs to better enable type-directed metaprogramming.</p>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>The line between metaprogramming and normal programming is quite blurry. For example, higher-order functions, or functions that return functions as inputs/outputs, are considered routine (distinctly normal) in functional languages like OCaml and Haskell (largely enabled by their <a href="https://realworldocaml.org/v1/en/html/variables-and-functions.html#multi-argument-functions">currying-by-default</a>). However, in Python, <a href="http://blog.thedigitalcatonline.com/blog/2015/04/23/python-decorators-metaprogramming-with-style/">decorators</a> are frequently called metaprograms, despite essentially being normal higher order functions with syntactic sugar. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>

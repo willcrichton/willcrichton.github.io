@@ -1,0 +1,232 @@
+@header{
+  @div{
+    @div{@h1{Will Crichton}}
+    @div{@img[className="profile"][width=200][src="/assets/img/headshot.jpg"]}
+  }
+  @div{
+    @div[className="links"]{
+      @a[className="email"][href="mailto:wcrichto@cs.stanford.edu"]{wcrichto\@cs.stanford.edu}
+      @a[href="https://twitter.com/wcrichton"]{@img[src="/assets/img/icon-twitter.png"]}
+      @a[href="https://github.com/willcrichton/"]{@img[src="/assets/img/icon-github.png"]}
+    }
+    @div{
+      @p{I am a computer science researcher. My research combines cognitive psychology and programming language theory to understand how people program, and to design better tools for programmers.}
+      @p{I am a 6th year Ph.D. student at Stanford University advised by @a[href="https://graphics.stanford.edu/~hanrahan/"]{Pat Hanrahan} and @a[href="https://graphics.stanford.edu/~maneesh/"]{Maneesh Agrawala}. I am planning to start a postdoc at the beginning of the next academic year, and to ultimately seek a faculty position.}
+    }
+  }
+}
+
+@section[className="portfolio shaded"]{
+  %(let Grid = ({children, gap}) => @div[className=`grid gap-${gap || "1rem"}`]{#children})
+  @p{In my research I build @em{theories} and @em{systems} about programming. A theory tries to understand a concept in a simplified setting where its properties can be identified via logical or statistical analysis. A system applies theory to a real-world setting where unexpected constraints and engineering concerns influence the theory's application.}
+  @Grid[gap="2rem"]{
+    %(let theories = [
+      ["infoflow", @p{I developed an algorithm for using ownership types to statically / modularly analyze information flow, and proved its soundness as noninterference @Ref{infoflow}.}],
+      ["memory", @p{I showed that working memory limits a person's ability to remember the value of variables while program tracing @Ref{tracing-wm}.}],
+      ["docgen", @p{I articulated a design space for documentation generators based on a cognitive task analysis of how developers search through APIs @Ref{docgen-infovis}.}],
+      ["cluster", @p{I demonstrated that machine learning models can classify a program's high-level structure to a high degree of accuracy @Ref{structure-classification}.}]
+    ])
+    @div[className="theories"]{
+      @h2{Theories}
+      @Grid{
+        #(theories.map(([name, desc], i) => @div[key=i]{
+          @img[src=`/assets/img/theory-${name}.jpg`]
+          #desc
+        }))
+      }
+    }
+
+    %(let systems = [
+      ["flowistry", @p{I built @a[href="https://github.com/willcrichton/flowistry/"]{Flowistry}, an information flow analyzer for Rust, to help programmers identify code unrelated to their current task @Ref{infoflow}.}],
+      ["cs242", @p{I redesigned @a[href="https://stanford-cs242.github.io/f19/"]{CS 242}, a graduate-level course on programming languages, to help students better understand how PL theory works in the real world @Ref{plclass}.}],
+      ["rustdoc", @p{I extended @a[href="https://doc.rust-lang.org/rustdoc"]{Rustdoc} to @a[href="https://twitter.com/wcrichton/status/1456112165744615426"]{automatically find examples} for documented functions, to help programmers find examples when learning a new API.}],
+      ["nota", @p{I created @a[href="https://nota-lang.org/"]{Nota}, a document language for the browser, to make a world where I never have to write LaTeX again @Ref{nota}.}]
+    ])
+    @div[className="projects"]{
+      @h2{Systems}
+      @Grid{
+        #(systems.map(([name, desc], i) => @div[key=i]{
+          @img[src=`/assets/img/system-${name}.jpg`]
+          #desc
+        }))
+      }
+  }
+  }
+}
+
+
+
+
+%(let pubs = [
+  {
+    name: "infoflow-apps",
+    paper: "TODO",
+    title: "Applying Information Flow to Program Comprehension",
+    authors: ["Will Crichton"],
+    kind: "workshop",
+    venue: "PLATEAU",
+    year: 2021
+  },
+  {
+    name: "infoflow",
+    paper: "https://arxiv.org/abs/2111.13662",
+    github: "https://github.com/willcrichton/flowistry",
+    title: "Modular Information Flow Through Ownership",
+    authors: ["Will Crichton", "Marco Patrignani", "Maneesh Agrawala", "Pat Hanrahan"],
+    kind: "conference"
+  },
+  {
+    name: "nota",
+    paper: "https://willcrichton.net/nota/",
+    github: "https://github.com/willcrichton/nota",
+    title: "A New Medium for Communicating Research on Programming Languages",
+    authors: ["Will Crichton"],
+    venue: "HATRA @ SPLASH",
+    year: 2021,
+    kind: "workshop"
+  },
+  {
+    name: "tracing-wm",
+    title: "The Role of Working Memory in Program Tracing",
+    paper: "https://arxiv.org/abs/2101.06305",
+    authors: ["Will Crichton", "Maneesh Agrawala", "Pat Hanrahan"],
+    venue: "CHI",
+    year: 2021,
+    kind: "conference"
+  },
+  {
+    name: "structure-classification",
+    title: "Automating Program Structure Classification",
+    paper: "https://arxiv.org/abs/2101.10087",
+    github: "https://github.com/willcrichton/autoplan",
+    authors: ["Will Crichton", "Georiga Gabriela Sampaio", "Pat Hanrahan"],
+    venue: "SIGCSE",
+    year: 2021,
+    kind: "conference"
+  },
+  {
+    title: "Analysis of Faces in a Decade of US Cable TV News",
+    paper: "https://jhong93.github.io/pdf/tvnews.pdf",
+    site: "https://tvnews.stanford.edu",
+    authors: "James Hong, Will Crichton, Haotian Zhang, Daniel Y. Fu, Jacob Ritchie, Jeremy Barenholtz, Ben Hannel, Xinwei Yao, Michaela Murray, Geraldine Moriba, Maneesh Agrawala, Kayvon Fatahalian".split(", "),
+    venue: "KDD",
+    year: 2021,
+    kind: "conference"
+  },
+  {
+    name: "docgen-infovis",
+    title: "Documentation Generation as Information Visualization",
+    paper: "https://arxiv.org/abs/2011.05600",
+    authors: ["Will Crichton"],
+    venue: "PLATEAU @ SPLASH",
+    year: 2020,
+    kind: "workshop",
+  },
+  {
+    title: "The Usability of Ownership",
+    paper: "https://arxiv.org/abs/2011.06171",
+    authors: ["Will Crichton"],
+    venue: "HATRA @ SPLASH",
+    year: 2020,  
+    kind: "workshop",
+  },
+  {
+    title: "Human-Centric Program Synthesis",
+    paper: "https://arxiv.org/abs/1909.12281",
+    authors: ["Will Crichton"],
+    venue: "PLATEAU @ UIST",
+    year: 2019,
+    kind: "workshop",  
+  },
+  {
+    title: "Scanner: Efficient Video Analysis at Scale",
+    github: "https://github.com/scanner-research/scanner",
+    paper: "https://arxiv.org/abs/1805.07339",
+    authors: ["Fait Poms", "Will Crichton", "Pat Hanrahan", "Kayvon Fatahalian"],
+    venue: "SIGGRAPH",
+    year: 2019,
+    kind: "conference"
+  },
+  {
+    title: "Rekall: Specifying Video Events using Compositions of Spatiotemporal Labels",
+    paper: "https://arxiv.org/abs/1910.02993",
+    authors: "Daniel Y. Fu, Will Crichton, James Hong, Xinwei Yao, Haotian Zhang, Anh Truong, Avanika Narayan, Maneesh Agrawala, Christopher Ré, Kayvon Fatahalian".split(", "),
+    venue: "AI Systems @ SOSP",
+    year: 2019,
+    kind: "workshop",
+  },
+  {
+    name: "plclass",
+    title: "From Theory to Systems: A Grounded Approach to Programming Language Education",
+    paper: "https://arxiv.org/abs/1904.06750",
+    authors: ["Will Crichton"],
+    venue: "SNAPL",
+    year: 2019,
+    kind: "workshop",
+  },
+  {
+    title: "Identifying Barriers to Adoption for Rust through Online Discourse",
+    paper: "https://arxiv.org/abs/1901.01001",
+    authors: ["Anna Zeng", "Will Crichton"],
+    venue: "PLATEAU @ SPLASH",
+    year: 2018,
+    kind: "workshop",
+  }
+])
+
+%(let Publication = ({pub, index}) =>
+  @Definition[block][name=pub.name][Label=@{\[#index\]}]{@div[className="pub"]{
+    @div[className="pub-title"]{
+      @a[href=pub.paper]{#(pub.title).}      
+    }
+    @div{@p[className="pub-authors"]{
+      %(let me = "Will Crichton")
+      #(pub.authors.map((a, i) => {
+        let author = a == me ? @span[key=i][className="author-me"]{#a} : a;
+        if (pub.authors.length == 1) {
+          return author;
+        } else {
+          return i == pub.authors.length - 1 
+            ? @{ and #author}
+            : @{#author, };
+          }
+        })).
+    }}
+    @div{@p{
+      #(pub.venue ? @{#(pub.venue) #(pub.year)} : @{Under submission}).
+    }}
+  }})
+
+@section[className="publications"]{
+  @h2{Publications}
+
+  @h3{Conference publications}
+
+  #(pubs
+    .map((pub, i) => [pub, i])
+    .filter(([p]) => p.kind == "conference")
+    .map(([pub, i]) => @Publication[key=i][pub=pub][index=i]))
+
+  @h3{Workshop publications}
+  @p[style={marginBottom: '1rem', fontStyle: 'italic'}]{
+    I love workshops! I enjoy discussing my half-baked or weirdly-niche ideas with other researchers. @a[href="https://plateau-workshop.org/"]{PLATEAU} and @a[href="https://snapl.org/"]{SNAPL} were a big part of the reason I got into PL/HCI research.
+  }
+
+  #(pubs
+    .map((pub, i) => [pub, i])
+    .filter(([p]) => p.kind == "workshop")
+    .map(([pub, i]) => @Publication[key=i][pub=pub][index=i]))
+}
+
+
+@section[className="ideas shaded"]{@div{
+  @h2{Good Ideas For Free}
+  @p[style={marginTop: '1rem'}]{Here are some interesting ideas that I haven't had time to keep exploring.}
+
+  @ul{
+    @li{It should be possible to build a garbage-collected programming language on top of a non-GC language, @em{and get the standard library for free!}
+    For instance, there should be a version of OCaml built on Rust that doesn't need to reimplement @code{Vec} or @code{HashMap}. See @q{@a[href="https://willcrichton.net/notes/gradual-programming/"]{Gradual Programming}}, @q{@a[href="/notes/rust-the-new-llvm/"]{Rust: The New LLVM}} and @a[href="https://github.com/willcrichton/lia"]{willcrichton/lia} for further inspiration.}
+    @li{When a CS teacher gets 100 solutions to a new assignment, they should be able to explore the commonalities and differences between solutions. I worked on this a bit @Ref{structure-classification}, but there's a lot more to explore. See @a[href="https://web.stanford.edu/~cpiech/bio/papers/generativeGrading.pdf"]{"Generative Grading: Neural Approximate Parsing for Automated Student Feedback"} for another cool concept in this space.}
+    @li{Trait-based languages like Rust have a @a[href="https://sdleffler.github.io/RustTypeSystemTuringComplete/"]{Turing-complete} logic-programming-esque computation model embedded into their type system. I built @a[href="https://github.com/willcrichton/tyrade"]{Tyrade} to show that it's possible to translate a sensible functional language into traits. But the translation is limited and I never formally proved the kind of relationship between these languages.}
+  }
+}}

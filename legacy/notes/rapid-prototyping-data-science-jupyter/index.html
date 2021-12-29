@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="Motivated by my experience in research on large-scale video analysis, I look at how Jupyter's web integration provides new opportunities for easily creating bespoke interactive data processing pipelines with a human in the loop.">
+    
+    
+    <title>
+      
+      Rapid Prototyping of Interactive Data Science Workflows in Jupyter | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Rapid Prototyping of Interactive Data Science Workflows in Jupyter
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    May 30, 2018
+  </div>
+  <div class="abstract">Motivated by my experience in research on large-scale video analysis, I look at how Jupyter's web integration provides new opportunities for easily creating bespoke interactive data processing pipelines with a human in the loop.</div>
+  <p>For the past year, I’ve been working on a research project to analyze American TV news using modern computer vision techniques at scale (on the order of 100,000 hours of video, see: <a href="http://www.cs.cmu.edu/~apoms/blog/scanner/2018/05/21/scanner.html">Processing Terabytes of Video on Hundreds of Machines</a>). The work isn’t published yet (more on that later!), but I now have a wealth of experience in building infrastructure to enable our tiny rag-tag team of academics to deal with all the issues of data science, machine learning, computer vision, distributed systems, and human-computer interfaces that accompany these sorts of endeavors. In this note, I want to discuss one particular design process that’s emerged for us which I haven’t seen elsewhere: prototyping UIs in Jupyter, specifically in the data science context.</p>
+
+<h2 id="labeling-faces">Labeling faces</h2>
+
+<p>Let’s jump right into a motivating example. As a part of our video study, we needed to find individuals (hosts, politicians, celebrities) in our dataset. For this, we used neural networks to <a href="https://github.com/kpzhang93/MTCNN_face_detection_alignment/">locate</a> and <a href="https://github.com/davidsandberg/facenet">identify</a> the faces of people in our videos, producing a database of 60 million detected faces (thus far). Running deep learning tools on video at scale was a logistical nightmare in of itself—see our upcoming SIGGRAPH paper on the <a href="https://github.com/scanner-research/scanner">system we built</a> for large-scale video analysis (another multi-year effort).</p>
+
+<p>Once we had the the predicted bounding boxes/face embeddings, the next step is to just look at the data and see if it makes sense. Normally this is done with some combination of OpenCV and Jupyter, but we did this kind of visualization so often that we built a web UI instead.</p>
+
+<p><img src="/images/assets/prototyping1.png" alt="" /></p>
+
+<p>On a high level, we have a Postgres SQL database holding all the metadata (e.g. bounding boxes), a Python web server (Django) that interfaces with the database via the ORM, and an HTML/CSS/Javascript frontend that visualizes the images + metadata, talking to the web server over REST endpoints. We actually have the user write a Python program on the frontend which is <code class="highlighter-rouge">exec</code>‘d on the server to run the query to visualize (don’t do this at home, kids!).</p>
+
+<p>In the course of visual inspection, we inevitably noticed some mistakes by the neural nets, so the next step for the UI was to make it interactive: allows users to fix mistakes or create gold standard data by manually drawing/correcting visual metadata.</p>
+
+<p><video src="/images/assets/prototyping2.mp4" autoplay="" loop="" muted=""></video></p>
+
+<h2 id="multi-stage-interactive-workflows">Multi-stage interactive workflows</h2>
+
+<p>While the system above worked well for simple workflows like selecting random images, labeling them, and saving the labels to the database, over time our workflows became more complex. For example, let’s say we want to make a classifier for Rachel Maddow, a TV news host on MSNBC. Our current algorithm is roughly:</p>
+
+<ol>
+  <li>Take the top 25 search results for “Rachel Maddow” from Google Images.</li>
+  <li>Filter the results for ones that are just Rachel Maddow (our new ground truth).</li>
+  <li>Compute the face embedding<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup> for each ground truth Rachel Maddow and average them all together.</li>
+  <li>Sort all previously detected faces in the database by distance in embedding space to the averaged ground truth.</li>
+  <li>Pick a few distance thresholds, and for each threshold, randomly sample faces at that distance (e.g. 0.5), and hand-label the number of correct/incorrect Rachel Maddow predictions.</li>
+</ol>
+
+<p>While we initially wanted to implement this process in our web UI, the trouble is that because it’s a multi-stage interactive pipeline, we would need to persist the pipeline state across both the server and the client, synchronizing between Python and Javascript and visualizing the current stage in the pipeline for the user. We realized that what we really wanted was just a normal Jupyter notebook, except with interactive inputs in between the pipeline stages for the manual labeling. This idea lead us to an approach like this:</p>
+
+<p><video src="/images/assets/prototyping3.mp4" autoplay="" loop="" muted=""></video></p>
+
+<p>Essentially, we took our existing web UI and compressed it into a <a href="https://github.com/jupyter-widgets/ipywidgets/">Jupyter widget</a>. We added a thin layer to allow values to pass back and forth between the Python runtime and the Javascript widget, and that was it! Our new API looks roughly like:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">face_list</span> <span class="o">=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>                 <span class="c1"># Get a list of faces to display
+</span><span class="n">widget</span> <span class="o">=</span> <span class="n">esper_widget</span><span class="p">(</span><span class="n">face_list</span><span class="p">)</span>  <span class="c1"># Create a Python widget to display faces
+</span><span class="n">widget</span>                            <span class="c1"># Ask Jupyter to display the widget
+</span>
+<span class="c1">### code cell boundary ###
+</span>
+<span class="k">print</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">selected</span><span class="p">)</span>            <span class="c1"># Print the faces selected in the
+</span></code></pre></div></div>
+
+<p>With this API, we’ve been able to start rapidly prototyping the sort of workflows described above. The cool thing is that we’re not just prototyping purely data processing Python pipelines, but we can also capture human-in-the-loop pipelines which involve manual input.</p>
+
+<h2 id="the-general-case">The general case</h2>
+
+<p>More broadly, I think this is representative of a design process that many data scientists have encountered. In the exploration phase of data analysis, while we want to automate as much of our pipelines as possible, there’s an inevitable human component that’s hard to remove, so we should have the means to properly encapsulate that in the tools we use to create pipelines.</p>
+
+<p>However, for a long time, our automation tools and our GUI tools have existed in separate worlds. While the world’s richest ecosystem for creating GUIs has flourished for web applications (HTML/CSS/JS), languages used for data processing like Python, R, etc. are left with… Tkinter? Qt? Outdated, difficult, imperative GUI toolkits from a bygone era<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>. Or even just the command line, using the same text-based GUI systems we’ve had for over half a century.</p>
+
+<p>By contrast, the promise of Jupyter here is that it offers a language-agonstic program runtime environment that can interleave languages like Python with web GUIs. Rather than needing servers, endpoints, and a complex ecosystem of tools, the barrier to co-existence is lower than ever. Web GUI programming becomes just another tool in a programmer’s toolkit rather than a walled garden. That said, I think a lot more work needs to be done here in fleshing out this space of prototyping interactive workflows. Specifically:</p>
+
+<ol>
+  <li>
+    <p><strong>It’s hard to move past the prototype stage.</strong> For example, when we created our Jupyter labeling pipeline as above, it works great for a single user, but if we want to then have many users concurrently labeling, it’s impossible to have multiple individuals running on the same Jupyter notebook. You have to duplicate the notebook separately for each user. Ideally, there would be some way to “freeze” a Jupyter pipeline into a standalone web page which would easily support concurrent access in the same way most modern web frameworks do.</p>
+  </li>
+  <li>
+    <p><strong>The tooling is not up to par.</strong> Today, there’s a significant imbalance between widget users and widget creators—very little documentation/support exists for creating bespoke Jupyter widgets, and most searchable issues are from people trying to use the standard set of Jupyter widgets, not creating their own. Moreover, creating a widget is <a href="https://github.com/jupyter-widgets/widget-cookiecutter">fairly complex</a> and involves at least three different package managers (pip, jupyter, and npm). Simplifying this process is crucial to reducing the overhead of creating a new custom widget.</p>
+  </li>
+</ol>
+
+<p>If this is a problem you’ve also run in to, or if you know of any tools that address this space, I’d love to hear about it. Just send me an <a href="mailto:wcrichto@cs.stanford.edu">email</a> or leave a comment on <a href="https://news.ycombinator.com/item?id=17202387">Hacker News</a>.</p>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>A face embedding is an array of floats that abstractly describes a face. The goal of a face embedding space is that two embeddings of different images of the same person should be closer to each other than to other people, even if the algorithm producing the embedding has never seen the input faces before. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p>The web ecosystem, of course, is not perfect. Javascript is an experiment in large-scale distributed programming language design. HTML/CSS are limited and so have spawned dozens of derivative languages and templating systems (SASS, Jade, etc.) in their wake. But it’s inarguable that more time has been spent developing GUI tools for the web than any other medium. <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>

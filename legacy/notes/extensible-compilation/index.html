@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="We need programming languages that can evolve with us as our requirements and coding styles change. I look at prior work in components of such an extensible compiler: combining static and dynamic types, breaking the GC/systems divide, and lowering the barrier to DSLs. I consider how we can combine these features into a single language, and argue for a few design decisions to underpin this new language.">
+    
+    
+    <title>
+      
+      Extensible Compilation: Goals and Related Work | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Extensible Compilation: Goals and Related Work
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    July 30, 2016
+  </div>
+  <div class="abstract">We need programming languages that can evolve with us as our requirements and coding styles change. I look at prior work in components of such an extensible compiler: combining static and dynamic types, breaking the GC/systems divide, and lowering the barrier to DSLs. I consider how we can combine these features into a single language, and argue for a few design decisions to underpin this new language.</div>
+  <p><em>Note: this post is part of an ongoing series on extensible compilation. See <a href="http://notes.willcrichton.net/the-coming-age-of-the-polyglot-programmer/">Part 1: “A Coming Revolution in Metaprogramming”</a> and <a href="http://notes.willcrichton.net/rust-the-new-llvm/">Part 2: “Rust: The New LLVM”</a>.</em></p>
+
+<p><em>Warning: this post contains strong opinions on programming languages. Viewer discretion is advised.</em></p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>Software development, like progress, most often happens in small increments. I have never encountered a large piece of software that was written perfectly on the first try. And even if someone is capable of such a feat, the requirements will assuredly change the day after it’s done. This means that we need tools and idioms for creating software that can evolve with the programmer as he understands more of the program he is writing.</p>
+
+<p>This is a well-studied area of computer science which all developers have experienced in one form or another. For example, modularity is an important programming pattern for incremental progress. When you break up your code into components, it makes it easier to refactor individual pieces when the requirements change and to fix bugs when you mess up. It enables a team to work in parallel instead of individual developers contributing to a monolith. Over the last couple decades, we have developed countless kinds of development patterns like this for promoting good software.</p>
+
+<p>However, as patterns and tools and ecosystems have sprung up in multitudes to ease the pains of software development, surprisingly little of the enormous progress made in programming languages/compiler development has found its way into the mainstream. Today, most developers use inflexible, unsafe languages with limited type systems. Closures have existed since 1975 but only got into Java and C++ this decade. Rust is the first major language to promote composition over inheritance with traits. Type inference is largely limited to ML/Haskell-style languages. Languages continue to proliferate today in increasing numbers to solve these issues, but they rarely find any real adoption <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>.</p>
+
+<p>I believe that the next step in programming language development should be the creation of an extensible compiler, or a language/runtime that can change with the needs of its users instead of forcing them to conform to a particular paradigm <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>. In this note, I’m going to look at three concrete examples of how language-level improvements can adopt the incremental software development philosophy: hybrid type systems, fusing high/low level runtime, and interoperability with domain-specific languages. I will evaluate prior work in each of these areas and conclude with a vision for how to combine these advances together into a single extensible compiler.</p>
+
+<h2 id="1-hybrid-type-systems">1. Hybrid type systems</h2>
+
+<p>Dynamic or static typing? This question has sparked decades of controversy and flame wars between language fanatics. For now, let’s assume the position that they both have their place in the world. Clearly, many programmers find it more productive to prototype code and write small applications in dynamically-typed scripting languages like Python, Javascript, Ruby, Lua and so on. Static typing provides a myriad of benefits in both catching bugs at compile-time and generating more efficient code. So if they both have their benefits, why are we asked to choose? Because most languages traditionally pick one of these paradigms and refuse to budge. Types or bust.</p>
+
+<p>However, a number of potentially practical solutions to the static/dynamic typing divide have emerged within the last decade and are slowly making their way into commonly used languages. These are largely based on <a href="http://wphomes.soic.indiana.edu/jsiek/what-is-gradual-typing/">gradual typing</a>, a novel type system created by Jeremy Siek and Walid Taha in 2006 that merges static and dynamic typing with optional type annotations. This has since been implemented in <a href="http://siek.blogspot.com/2012/10/is-typescript-gradually-typed-part-1.html">TypeScript</a>, <a href="http://blogs.adobe.com/avikchaudhuri/2012/01/17/type-inference-for-actionscript/">ActionScript</a>, <a href="https://docs.racket-lang.org/ts-guide/">Racket</a>, <a href="http://typedclojure.org/">Clojure</a>, and a few other languages. There are also proposals to introduce gradual typing in the form of type hints to <a href="https://www.python.org/dev/peps/pep-0484/">Python</a>. Here’s an example of a generic logger in typed Python:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Generic</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">Logger</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s">'T'</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">LoggedVar</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">'Set '</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">new</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">'Get '</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">'{}: {}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">message</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>Consider again the idea of incremental development: to develop software with hybrid typing, you can first quickly write your program using dynamic types to get maximum productivity, and then as performance becomes more important or the codebase grows large, gradually start to add type annotations to the most important interfaces until almost all the code becomes fully type-safe. The language grows with the developer in a smooth fashion.</p>
+
+<p>However, the work here is far from finished. Many attempts at gradual typing have been “<a href="http://www.ccs.neu.edu/racket/pubs/popl16-tfgnvf.pdf">disastrous</a>” for performance, and companies like CircleCI that tried ended up <a href="https://circleci.com/blog/why-were-no-longer-using-core-typed/">dropping support for it</a>. Because gradual typing is a new idea, we haven’t figured out the best way to create a stable ecosystem of libraries that integrate into a hybrid typing system. I personally think that <a href="http://www.di.ens.fr/~zappa/projects/liketypes/paper.pdf">“like” types</a> are a cool idea that might ameliorate some of these issues. Additionally, we need more work on gradual typing for languages with type inference. This was explored by <a href="http://ecee.colorado.edu/~siek/dls08igtlc.pdf">Siek 08</a> and more recently in <a href="http://www.cs.umd.edu/~avik/projects/iogti/paper.pdf">ActionScript</a>, but we should explore hybrid typing in the context of languages like OCaml and Haskell instead of just as a bolt-on to dynamically typed languages.</p>
+
+<h2 id="2-fusing-high-level-and-systems-languages">2. Fusing high-level and systems languages</h2>
+
+<p>Many software systems rely on high-performance components. Numerical computing uses hand-tuned GPU routines for functions like multiplying matrices. High-frequency trading requires micro/nanosecond latency networking. Backend web development uses high performance databases and efficient file servers. However, in almost all of these cases, the majority of the system does not need to be written at the low-level. For example, most data scientists use tools like Matlab, R, or numpy which provide a high-level abstraction so you can translate mathematical formulae into code with relative ease while still getting high performance. These kinds of applications need the ability to customize the software stack at many layers and to have each layer interoperate with the rest.</p>
+
+<p>Most popular languages that I’m aware of usually have some form of interop with C. Java has the <a href="https://en.wikipedia.org/wiki/Java_Native_Interface">Java Native Interface</a> (JNI), Python has well documented <a href="https://docs.python.org/3/extending/extending.html">C extensions</a>, Haskell has <a href="https://hackage.haskell.org/package/language-c">language-c</a>, and so on. These kinds of interfaces usually run into two issues:</p>
+
+<ol>
+  <li><em class="hl">Low-level interfaces are fragile and verbose.</em> When writing a C extension to Python, for example, the programmer has to do manual reference counting on any Python values used by the C code (more generally, it’s a hard time to move beteween a language with runtime management of memory and a language with compile time management). Error information often gets propagated through null pointers. For example, this snippet from the <a href="https://docs.python.org/3/extending/extending.html&quot;">Python interface tutorial</a> calls a function with an argument:
+    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">PyObject</span> <span class="o">*</span><span class="n">arglist</span><span class="p">;</span>
+<span class="p">...</span>
+<span class="n">arglist</span> <span class="o">=</span> <span class="n">Py_BuildValue</span><span class="p">(</span><span class="s">"(l)"</span><span class="p">,</span> <span class="n">eventcode</span><span class="p">);</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">PyObject_CallObject</span><span class="p">(</span><span class="n">my_callback</span><span class="p">,</span> <span class="n">arglist</span><span class="p">);</span>
+<span class="n">Py_DECREF</span><span class="p">(</span><span class="n">arglist</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">result</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+ <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span> <span class="cm">/* Pass error back */</span>
+<span class="cm">/* Here maybe use the result */</span>
+<span class="n">Py_DECREF</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+</code></pre></div>    </div>
+  </li>
+  <li><em class="hl">Type information gets lost at the border.</em> The C/C++ type systems are not as expressive as those of higher-level languages, so a large amount of glue is required to convert values between the runtimes such that both can understand the other.</li>
+</ol>
+
+<p>To date, the best attempt I’ve seen at integrating high-level and systems languages is Haskell’s <a href="https://hackage.haskell.org/package/language-c">language-c</a>, although I haven’t used it extensively so I can’t comment on its virtues or vices. As detailed in my prior notes, I’m also working on <a href="https://github.com/willcrichton/lia">Lia</a>, a high-level language that compiles to Rust for this exact reason. Most of the work I’ve seen in these kinds of interfaces has been largely engineering, not research—if anyone has good references for work in these areas, please let me know and I can update this section.</p>
+
+<h2 id="3-interoperability-with-domain-specific-languages">3. Interoperability with Domain-Specific Languages</h2>
+
+<p>Sometimes the syntax and semantics provided to us by a general-purpose language just isn’t right for the job at hand. In such a case, we again want our language to grow with us and to change as we see fit. Domain-specific languages (DSLs) are a great tool to concisely express software like user interfaces or data analyses. Web programmers routinely make use of DSLs: HTML for expressing webpage layouts and CSS for writing style rules on HTML documents. Java developers can use Groovy to define custom data/configuration formats. A large body of research in the last decade has focused on both creating DSLs like <a href="http://halide-lang.org">Halide</a> and creating frameworks to create DSLs like <a href="http://stanford-ppl.github.io/Delite/">Delite</a> and <a href="http://terralang.org/">Terra</a>.</p>
+
+<p>However, many new DSLs fail to find traction because of insufficient interoperability with existing languages. DSLs need to be designed as embedded languages within existing ecosystems in order to be maximally usable. The solution is that our compilers must be more extensible at the parser and type level so as to be composable with other compilers. I discuss this point at length in <a href="http://notes.willcrichton.net/the-coming-age-of-the-polyglot-programmer/">part 1</a> specifically with respect to Terra and <a href="https://www.cs.cmu.edu/~aldrich/wyvern/">Wyvern</a>, so I encourage you to read through the note for perspective.</p>
+
+<h2 id="combining-forces-an-example">Combining Forces: An Example</h2>
+
+<p>The question now becomes: how can we design a language/compiler with all these features? What would that language even look like? As an example, I’ve created what I’ll call an “artist’s rendering” of how such an extensible language could be used to implement a webpage. This is ExtLang, an OCaml-y and by-default garbage collected language with a gradual type system.</p>
+
+<pre><code class="language-raw">type Server {
+  routes: Map&lt;URL, Request ⟶ Response&gt;;
+  ...
+}
+
+public fn Server::route(
+  self, route: URL, callback: Request ⟶ Response)
+{
+  self.routes[route] = callback;
+  ...
+}
+
+private fn Server::copy_packets(self) {
+  let n = self.packets.size();
+  rust{
+    let mut buff = Buffer::new({n})
+    let mut offset = 0;
+    for i in 0..{n} {
+      let packet = self.packets[i].borrow_from_gc();
+      memcpy(buff.ptr + offset, packet.ptr, packet.size());
+      offset += packet.size();
+    }
+    ..
+  }
+}
+
+fn main() {
+  let server = Server::new();
+  let db = Database::new(url{my-db.localhost:3000});
+  let server_path = url{search-test};
+
+  @server.route(url{{server_path}/search})
+  fn search (req) {
+    return html{
+      &lt;html&gt;
+        &lt;head&gt;
+          &lt;style&gt; {css{
+            body {
+              background: {url{{server_path}/images/bg.jpg}}
+            }
+          }}
+          &lt;/style&gt;
+        &lt;/head&gt;
+        &lt;body&gt;
+          &lt;h1&gt;Search results:&lt;/h1&gt;
+          {format_results(sql(db){
+            SELECT * FROM products
+            WHERE title LIKE {req["searchQuery"]}
+          })}
+        &lt;/body&gt;
+      &lt;/html&gt;
+    }
+  };
+
+  server.serve(port=80)
+}
+</code></pre>
+
+<p>Here, different languages are embedded via the <code class="highlighter-rouge">&lt;lang_name&gt;{}</code> notation, and each sub-language can have values from the base language. Notably, I use five different sub-languages here: Rust to handle low-level memory operations for transferring packets, HTML to define my webpage, CSS to style it, SQL to fetch results from a database, and URLs to have a URL interface that’s not “stringly typed.” This is clearly not a compiling example, but I think it’s indicative of how we could combine the aforementioned extensions into a single language.</p>
+
+<ol>
+  <li>For hybrid typing, we see <code class="highlighter-rouge">req["searchQuery"]</code> used as a part of the SQL query. <code class="highlighter-rouge">req</code> could be like a Python dictionary in that a given key isn’t guaranteed to exist, and its value are dynamically typed. This allows the programmer to use the search parameters quickly without having to put in error checking or type casting. However, the server object is statically typed, so assuming it would be given to the programmer as a library, it could run more efficiently than if the types were unknown.</li>
+  <li>For system/high-level interop, the server implementation shows how one could drop down from the garbage collected base language into a systems language with greater control over memory. However, only the relevant parts of the server are implemented this way, so the rest of the server implementation can be written productively at a higher level.</li>
+  <li>For DSL interop, because each language is written as an extension to the base language, it’s dead simple to compose them with close to no glue.</li>
+</ol>
+
+<h2 id="high-level-design">High-level Design</h2>
+
+<p>Implementing ExtLang to fulfill the above specification requires a couple of notable design decisions to become an extensible compiler. I’ll walk through each and compare them to existing languages with similar capabilities.</p>
+
+<ol>
+  <li><em class="hl">Extensible parsing.</em> The user should be able to add new productions to the language’s grammar at compile time, similar to the work in <a href="https://www.student.informatik.tu-darmstadt.de/~xx00seba/projects/sugarj/">SugarJ</a> and <a href="https://www.cs.cmu.edu/~aldrich/papers/ecoop14-tsls.pdf">Wyvern</a>. This extension would constitute the macro system for ExtLang, and each macro could either be simple substitution template macros or procedural macros. The procedural macros could choose to compile to ExtLang syntax or compile into the lower level systems language, similar to <a href="http://terralang.org/">Terra</a>.</li>
+  <li><em class="hl">Gradual typing with inference.</em> The program could be typed with the following idea: for each variable, attempt to infer its type, and if that fails or if the variable can take on multiple types, then assign its type at runtime. During code generation, if the type of a variable is known, then make optimizations based on that information (e.g. if you know a variable is an integer and you use it in an arithmetic operation, then you don’t need to generate instructions to check its type before doing the operation). This is most similar to ActionScript in the status quo.</li>
+  <li><em class="hl">Compile to Rust.</em> I already laid out many of the benefits in my <a href="http://notes.willcrichton.net/rust-the-new-llvm/">controversial previous post</a>, but the gist is this: if the runtime for ExtLang is written in Rust, then it’s a lot easier to have Rust extensions, similar to how CPython makes it easier to call out to C. However, because Rust’s type system is far more expressive than that of C, it will be easier to translate between the two languages with minimal glue. By compiling to Rust, ExtLang can have seamless interoperability with a systems language <sup id="fnref:3"><a href="#fn:3" class="footnote">3</a></sup>.</li>
+</ol>
+
+<h2 id="moving-forward">Moving Forward</h2>
+
+<p>After two months of research, discussion, and thought, this is the last post in the series I’ll publish before getting some real results. I wanted to write this to put my previous posts into context and attempt to start a real bibliography on the area. I hope to continue my work with <a href="https://github.com/willcrichton/lia">Lia</a> and slowly evolve it into my vision for ExtLang.</p>
+
+<p>That said, I will be taking a hiatus from language development for at least the next few months to start my Ph.D. on a collaboration with some <a href="http://www.cs.cmu.edu/~kayvonf/">great</a> <a href="http://www.cs.cmu.edu/~apoms/">folks</a> at CMU. I’m continuing <a href="http://willcrichton.net/thesis.pdf">my senior thesis</a> in exploring interfaces/languages for large-scale visual data applications. Stay tuned for more on that soon!</p>
+
+<p>As always, if you have any opinions or incredulous tirades, please direct them my way at <a href="mailto:wcrichto@stanford.edu">wcrichto@stanford.edu</a> or post them in the comments.</p>
+
+<h2 id="references">References</h2>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>This occurs for a multitude of reasons, each of which could be analyzed in its own note. Some languages are primarily research tools intended as short explorations for paper publication, so they become user unfriendly. Other languages focus hard on language-level features but leave tooling (e.g. IDEs, syntax highlighters, linters) to languish. And rarely do these new languages interoperate with any existing ecosystem, requiring its early adopters to rewrite a lot of existing software. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p>A common refrain in PL-related threads on Hacker News is “languages/paradigms are just tools, pick the best one for the job!” The issue is, there’s no easy way to mix and match programming languages in the same way one can do for physical tools. Try using Python, Haskell, and C++ in the same program. <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:3">
+      <p>There are other good options for runtimes that I could choose as a compile target, such as the <a href="https://en.wikipedia.org/wiki/Java_virtual_machine">JVM</a> or the <a href="https://en.wikipedia.org/wiki/Common_Language_Runtime">CLR</a> (also see: <a href="http://stackoverflow.com/questions/453610/javas-virtual-machine-and-clr">their differences</a>). In particular, it’s tempting to build for the JVM because this gives you automatic access to the tools and libraries built for the many languages on the JVM. However, systems-level compatibility is an important design goal of ExtLang, and compiling to the JVM means going through the JNI which is too difficult to use in the seamless manner that I envision. <a href="#fnref:3" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>
