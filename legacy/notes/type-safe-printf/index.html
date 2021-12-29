@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="I show how to use heterogeneous lists and traits to implement a type-safe printf in Rust. These mechanisms can ensure that two variadic argument lists share important properties, like the number of format string holes matches the number of printf arguments.">
+    
+    
+    <title>
+      
+      Implementing a Type-safe printf in Rust | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Implementing a Type-safe printf in Rust
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    June 21, 2020
+  </div>
+  <div class="abstract">I show how to use heterogeneous lists and traits to implement a type-safe printf in Rust. These mechanisms can ensure that two variadic argument lists share important properties, like the number of format string holes matches the number of printf arguments.</div>
+  <p><em>Part of an ongoing series about type-level programming in Rust. Consider reading <a href="http://willcrichton.net/notes/type-level-programming/">part one</a> first! All code in this note can be found in <a href="https://gist.github.com/willcrichton/e7fcf1b0e84b4be7f172f0e0245cf149">this gist</a>.</em></p>
+
+<p>Rust has a great printf function, <a href="https://doc.rust-lang.org/std/macro.println.html"><code class="highlighter-rouge">println!</code></a>. It has a rich formatting language, but also catches mistakes at compile-time. For example, <code class="highlighter-rouge">println!</code> will check that the number of arguments matches the number of holes in the format string:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>error: 2 positional arguments in format string, but there is 1 argument
+  --&gt; src/printf.rs:36:13
+   |
+36 |   println!("{} {}", "Hello");
+</code></pre></div></div>
+
+<p>How does the Rust compiler make this check? Because both the format string and the argument are within the macro, Rust will check that the number of holes matches the number of arguments. Consequently, format strings <em>have</em> to be within the macro. If we write:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="s">"{} {}"</span><span class="p">;</span>
+<span class="nd">println!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s">"hi"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This code fails to compile with the error:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>error: format argument must be a string literal
+  --&gt; src/printf.rs:42:12
+   |
+42 |   println!(s, "hi");
+</code></pre></div></div>
+
+<p>I’ll show you how to implement type-safe printf without using procedural macros. More generally, this note contains a Rust recipe for functions where:</p>
+
+<ol>
+  <li>Arguments are variadic</li>
+  <li>Each argument can be a different type (<code class="highlighter-rouge">Vec&lt;T&gt;</code> not allowed)</li>
+  <li>Multiple variadic inputs share a parallel property, e.g. the number of arguments should match the number of format holes</li>
+</ol>
+
+<h2 id="core-mechanism-hlist">Core mechanism: HList</h2>
+
+<p>First, we need to understand the main type-level mechanism: a heterogeneous list (or H-list). An H-list is a sequence of values of potentially different types. For example, <code class="highlighter-rouge">[1, "a", true]</code> is an H-list, but not a valid Rust vector. H-lists are implemented in Rust using a linked-list style:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">HNil</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">HCons</span><span class="o">&lt;</span><span class="n">Head</span><span class="p">,</span> <span class="n">Tail</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="n">head</span><span class="p">:</span> <span class="n">Head</span><span class="p">,</span>
+  <span class="n">tail</span><span class="p">:</span> <span class="n">Tail</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="n">example</span><span class="p">:</span> <span class="n">HCons</span><span class="o">&lt;</span><span class="nb">i32</span><span class="p">,</span> <span class="n">HCons</span><span class="o">&lt;</span><span class="nb">bool</span><span class="p">,</span> <span class="n">HNil</span><span class="o">&gt;&gt;</span> <span class="o">=</span>
+  <span class="n">HCons</span><span class="p">{</span><span class="n">head</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tail</span><span class="p">:</span> <span class="n">HCons</span><span class="p">{</span><span class="n">head</span><span class="p">:</span> <span class="k">true</span><span class="p">,</span> <span class="n">tail</span><span class="p">:</span> <span class="n">HNil</span><span class="p">}};</span>
+</code></pre></div></div>
+
+<p>The key idea is that the type of an H-list changes every time you make a change to it. By contrast, if you push to a <code class="highlighter-rouge">Vec&lt;T&gt;</code>, the type of the vector stays the same.</p>
+
+<p>Just like Rust has <code class="highlighter-rouge">vec![]</code>, we can use the <a href="https://github.com/lloydmeta/frunk#hlist">frunk</a> crate to get an <code class="highlighter-rouge">hlist!</code> macro.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">example</span> <span class="o">=</span> <span class="nd">hlist!</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="kc">true</span><span class="p">];</span> <span class="c">// same as above</span>
+</code></pre></div></div>
+
+<h2 id="setting-up-printf">Setting up printf</h2>
+
+<p>Let’s go back to the ingredients of printf. We need a format string and an argument list. The key idea is to represent both with an H-list, and carefully use Rust’s traits to ensure our desired property: the number of arguments should match the number of holes.</p>
+
+<p>First, to represent format strings, we will have a sequence of structs that represent each part of the string.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="nf">FString</span><span class="p">(</span><span class="o">&amp;</span><span class="nv">'static</span> <span class="nb">str</span><span class="p">);</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">FVar</span><span class="p">;</span>
+
+<span class="c">// Assume that we compile "Hello {}! The first prime is {}" into this code.</span>
+<span class="c">// That would be a simple syntactic transformation.</span>
+<span class="k">let</span> <span class="n">example</span> <span class="o">=</span> <span class="nd">hlist!</span><span class="p">[</span>
+  <span class="nf">FString</span><span class="p">(</span><span class="s">"Hello "</span><span class="p">),</span> <span class="n">FVar</span><span class="p">,</span> <span class="nf">FString</span><span class="p">(</span><span class="s">"! The first prime is "</span><span class="p">),</span> <span class="n">FVar</span>
+<span class="p">];</span>
+</code></pre></div></div>
+
+<p>To represent arguments, we will use a matching H-list of values. For example:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">args</span> <span class="o">=</span> <span class="nd">hlist!</span><span class="p">[</span><span class="s">"world"</span><span class="p">,</span> <span class="mi">2</span><span class="p">];</span>
+</code></pre></div></div>
+
+<p>Then, our goal is to create a function <code class="highlighter-rouge">format</code> such that this is true:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">assert_eq!</span><span class="p">(</span>
+  <span class="n">example</span><span class="nf">.format</span><span class="p">(</span><span class="n">args</span><span class="p">),</span>
+  <span class="s">"Hello world! The first prime is 2"</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>And this should be a compile-time (NOT run-time) error:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">example</span><span class="nf">.format</span><span class="p">(</span><span class="nd">hlist!</span><span class="p">[</span><span class="s">"Only one arg"</span><span class="p">]);</span>
+</code></pre></div></div>
+
+<h2 id="the-format-trait">The Format trait</h2>
+
+<p>In the spirit of type-level computation, we start by defining a trait.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Format</span><span class="o">&lt;</span><span class="n">ArgList</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">format</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">ArgList</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">String</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Here, <code class="highlighter-rouge">self</code> is the H-list of the format directives, and <code class="highlighter-rouge">ArgList</code> is the H-list of the variadic arguments. <code class="highlighter-rouge">Format</code> need to take <code class="highlighter-rouge">ArgList</code> as a type parameter, because its type will change as we remove elements from the <code class="highlighter-rouge">ArgList</code> list.</p>
+
+<p>Now, we proceed to implement the <code class="highlighter-rouge">Format</code> trait by cases. First, the base case for reaching the end of the format list <code class="highlighter-rouge">HNil</code>:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">Format</span><span class="o">&lt;</span><span class="n">HNil</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">HNil</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">format</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="mi">_</span><span class="n">args</span><span class="p">:</span> <span class="n">HNil</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">String</span> <span class="p">{</span>
+    <span class="s">""</span><span class="nf">.to_string</span><span class="p">()</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This impl says that when we reach the end of a format list, just return the empty string. And the only argument we will accept is an empty argument list. Combined with the next impls, this inductively ensures that extra arguments are not accepted.</p>
+
+<p>Next, we will implement <code class="highlighter-rouge">FString</code>. This implementation should use the string constant contained in the <code class="highlighter-rouge">FString</code> struct, and combine it recursively with the rest of the format list. We don’t use variadic arguments for <code class="highlighter-rouge">FString</code>, so they get passed along. In Rust, this English specification becomes:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span><span class="o">&lt;</span><span class="n">ArgList</span><span class="p">,</span> <span class="n">FmtList</span><span class="o">&gt;</span> <span class="n">Format</span><span class="o">&lt;</span><span class="n">ArgList</span><span class="o">&gt;</span>
+<span class="k">for</span> <span class="n">HCons</span><span class="o">&lt;</span><span class="n">FString</span><span class="p">,</span> <span class="n">FmtList</span><span class="o">&gt;</span>
+<span class="k">where</span> <span class="n">FmtList</span><span class="p">:</span> <span class="n">Format</span><span class="o">&lt;</span><span class="n">ArgList</span><span class="o">&gt;</span>
+<span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">format</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">ArgList</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">String</span> <span class="p">{</span>
+    <span class="k">self</span><span class="py">.head</span><span class="err">.</span><span class="mi">0</span><span class="nf">.to_owned</span><span class="p">()</span> <span class="o">+</span> <span class="o">&amp;</span><span class="k">self</span><span class="py">.tail</span><span class="nf">.format</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Note that we have to add <code class="highlighter-rouge">FmtList: Format&lt;ArgList&gt;</code> to ensure the recursive call to <code class="highlighter-rouge">self.tail.format</code> works. Also note that we aren’t implementing <code class="highlighter-rouge">Format</code> directly on <code class="highlighter-rouge">FString</code>, but rather on an H-list containing <code class="highlighter-rouge">FString</code>.</p>
+
+<p>Finally, the most complex case, <code class="highlighter-rouge">FVar</code>. We want this impl to take an argument from the <code class="highlighter-rouge">ArgList</code>, then format the remaining format list with the remaining arguments.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">ArgList</span><span class="p">,</span> <span class="n">FmtList</span><span class="o">&gt;</span> <span class="n">Format</span><span class="o">&lt;</span><span class="n">HCons</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">ArgList</span><span class="o">&gt;&gt;</span>
+<span class="k">for</span> <span class="n">HCons</span><span class="o">&lt;</span><span class="n">FVar</span><span class="p">,</span> <span class="n">FmtList</span><span class="o">&gt;</span>
+<span class="k">where</span>
+  <span class="n">FmtList</span><span class="p">:</span> <span class="n">Format</span><span class="o">&lt;</span><span class="n">ArgList</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="n">T</span><span class="p">:</span> <span class="n">ToString</span><span class="p">,</span>
+<span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">format</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">HCons</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">ArgList</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">String</span> <span class="p">{</span>
+    <span class="n">args</span><span class="py">.head</span><span class="nf">.to_string</span><span class="p">()</span> <span class="o">+</span> <span class="o">&amp;</span><span class="k">self</span><span class="py">.tail</span><span class="nf">.format</span><span class="p">(</span><span class="n">args</span><span class="py">.tail</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Be careful to observe which H-list is being accessed by <code class="highlighter-rouge">head</code> and <code class="highlighter-rouge">tail</code>. Here, the <code class="highlighter-rouge">args</code> H-list provides the data to fill the hole via <code class="highlighter-rouge">args.head</code>.</p>
+
+<h2 id="checking-our-properties">Checking our properties</h2>
+
+<p>With this implementation, our correct example successfully compiles and runs:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">example</span> <span class="o">=</span> <span class="nd">hlist!</span><span class="p">[</span>
+  <span class="nf">FString</span><span class="p">(</span><span class="s">"Hello "</span><span class="p">),</span> <span class="n">FVar</span><span class="p">,</span> <span class="nf">FString</span><span class="p">(</span><span class="s">"! The first prime is "</span><span class="p">),</span> <span class="n">FVar</span>
+<span class="p">];</span>
+<span class="nd">assert_eq!</span><span class="p">(</span>
+  <span class="n">example</span><span class="nf">.format</span><span class="p">(</span><span class="nd">hlist!</span><span class="p">[</span><span class="s">"world"</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+  <span class="s">"Hello world! The first prime is 2"</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>What about our incorrect example? If we write this:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">example</span><span class="nf">.format</span><span class="p">(</span><span class="nd">hlist!</span><span class="p">[</span><span class="s">"just one arg"</span><span class="p">]);</span>
+</code></pre></div></div>
+
+<p>This code fails to compile with the error:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>error[E0308]: mismatched types
+  --&gt; src/printf.rs:48:18
+   |
+48 |   example.format(hlist!["just one arg"]);
+   |                  ^^^^^^^^^^^^^^^^^^^^^^
+   |                  expected struct `Cons`, found struct `HNil`
+   |
+   = note: expected struct `HCons&lt;_, HNil&gt;`
+              found struct `HNil`
+</code></pre></div></div>
+
+<p>While the error is enigmatic, our mistake is at least correctly caught at compile-time. This is because Rust deduces that <code class="highlighter-rouge">example.format()</code> expects an H-list of the shape <code class="highlighter-rouge">HCons&lt;_, HCons&lt;_, HNil&gt;&gt;</code>, but it finds <code class="highlighter-rouge">HNil</code> too soon in our 1-element H-list. A similar error occurs when providing too many args.</p>
+
+<p>Stupendous! We have successfully implemented a type-safe printf using H-lists and traits.</p>
+
+<h2 id="extending-our-abstraction">Extending our abstraction</h2>
+
+<p>Right now, our <code class="highlighter-rouge">Format</code> function just checks that the format list and argument list are the same length. We could extend our format structures, for example to ensure that an <code class="highlighter-rouge">FVar</code> must be a particular type, or must use <code class="highlighter-rouge">Debug</code> vs. <code class="highlighter-rouge">Display</code>. Here’s the sketch of such a strategy:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">marker</span><span class="p">::</span><span class="n">PhantomData</span><span class="p">;</span>
+
+<span class="c">// Add flags for whether using Display or Debug</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">FDisplay</span><span class="p">;</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">FDebug</span><span class="p">;</span>
+
+<span class="c">// Use a type parameter with PhantomData to represent the intended type</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">FVar</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">Flag</span><span class="o">&gt;</span><span class="p">(</span><span class="n">PhantomData</span><span class="o">&lt;</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">Flag</span><span class="p">)</span><span class="o">&gt;</span><span class="p">);</span>
+
+<span class="c">// Now, T has to be the same between the format list and arg list</span>
+<span class="c">// Also, FDisplay flag requires that `T: Display`</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">ArgList</span><span class="p">,</span> <span class="n">FmtList</span><span class="o">&gt;</span> <span class="n">Format</span><span class="o">&lt;</span><span class="n">HCons</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">ArgList</span><span class="o">&gt;&gt;</span>
+<span class="k">for</span> <span class="n">HCons</span><span class="o">&lt;</span><span class="n">FVar</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">FDisplay</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">FmtList</span><span class="o">&gt;</span>
+<span class="k">where</span>
+  <span class="n">FmtList</span><span class="p">:</span> <span class="n">Format</span><span class="o">&lt;</span><span class="n">ArgList</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="n">T</span><span class="p">:</span> <span class="n">Display</span><span class="p">,</span>
+<span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">format</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">HCons</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">ArgList</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">String</span> <span class="p">{</span>
+    <span class="c">// using format! is cheating, but you get the idea</span>
+    <span class="nd">format!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="o">&amp;</span><span class="k">self</span><span class="py">.tail</span><span class="nf">.format</span><span class="p">(</span><span class="n">args</span><span class="py">.tail</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c">// Similar impl for `T: Debug` when `FDebug` is used</span>
+</code></pre></div></div>
+
+<p>With this approach, if our format list and arg list differ in type:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">fmt</span> <span class="o">=</span> <span class="nd">hlist!</span><span class="p">[</span><span class="nf">FString</span><span class="p">(</span><span class="s">"n: "</span><span class="p">),</span> <span class="nn">FVar</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">i32</span><span class="p">,</span> <span class="n">FDisplay</span><span class="o">&gt;</span><span class="p">(</span><span class="n">PhantomData</span><span class="p">)];</span>
+<span class="n">fmt</span><span class="nf">.format</span><span class="p">(</span><span class="nd">hlist!</span><span class="p">[</span><span class="s">"not a number"</span><span class="p">]);</span>
+</code></pre></div></div>
+
+<p>Then the code will not compile with the error, <code class="highlighter-rouge">&amp;'static str is not i32</code>.</p>
+
+<p>Shout-out to <a href="https://www.servant.dev/posts/2018-07-12-servant-dsl-typelevel.html">this blog post</a> from Haskell’s servant framework which got me thinking about adapting their strategy into Rust.</p>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>

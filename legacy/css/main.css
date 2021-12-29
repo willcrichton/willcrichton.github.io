@@ -1,0 +1,808 @@
+/* @font-face kit by Fonts2u (http://www.fonts2u.com) */
+@font-face {
+  font-family: "Pokemon Pixel";
+  src: url("/legacy/fonts/pokemon_pixel_font.eot?") format("eot"), url("/legacy/fonts/pokemon_pixel_font.woff") format("woff"), url("/legacy/fonts/pokemon_pixel_font.ttf") format("truetype"), url("/legacy/fonts/pokemon_pixel_font.svg#Pokemon-Pixel-Font") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+@font-face {
+  font-family: 'FippsRegular';
+  src: url("/legacy/fonts/fipps-regular-webfont.eot");
+  src: url("/legacy/fonts/fipps-regular-webfont.eot?#iefix") format("embedded-opentype"), url("/legacy/fonts/fipps-regular-webfont.woff") format("woff"), url("/legacy/fonts/fipps-regular-webfont.ttf") format("truetype"), url("/legacy/fonts/fipps-regular-webfont.svg#FippsRegular") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+@font-face {
+  font-family: 'emulogic';
+  src: url("/legacy/fonts/emulogic-webfont.eot");
+  src: url("/legacy/fonts/emulogic-webfont.eot?#iefix") format("embedded-opentype"), url("/legacy/fonts/emulogic-webfont.woff") format("woff"), url("/legacy/fonts/emulogic-webfont.ttf") format("truetype"), url("/legacy/fonts/emulogic-webfont.svg#emulogicregular") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+@font-face {
+  font-family: 'Futura';
+  src: url("/legacy/fonts/FuturaStd-HeavyOblique.eot");
+  src: url("/legacy/fonts/FuturaStd-HeavyOblique.eot?#iefix") format("embedded-opentype"), url("/legacy/fonts/FuturaStd-HeavyOblique.woff") format("woff"), url("/legacy/fonts/FuturaStd-HeavyOblique.ttf") format("truetype");
+  font-weight: 900;
+  font-style: italic; }
+@media (min-width: 1200px) {
+  .container {
+    max-width: 800px; } }
+@media (min-width: 960px) {
+  .container {
+    max-width: 800px; } }
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  vertical-align: baseline; }
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+body {
+  line-height: 1; }
+
+ol, ul {
+  list-style: none; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+body {
+  font-family: 'Pokemon Pixel', monospace;
+  font-size: 18px;
+  letter-spacing: 1px; }
+
+ul {
+  list-style-position: inside; }
+
+#gameboy-mobile {
+  display: none;
+  padding: 15px; }
+  @media (max-width: 600px) {
+    #gameboy-mobile {
+      display: block; } }
+  #gameboy-mobile .header {
+    overflow: auto; }
+  #gameboy-mobile h1 {
+    font: 18px 'FippsRegular', 'Pokemon Pixel', monospace;
+    text-align: center;
+    width: 70%;
+    float: left;
+    margin-left: 20px;
+    margin-top: 12px; }
+  #gameboy-mobile img {
+    height: 100px;
+    display: block;
+    float: right;
+    margin-right: 15px; }
+  #gameboy-mobile .intro {
+    font-size: 24px;
+    margin-top: 10px; }
+    #gameboy-mobile .intro p {
+      margin-bottom: 10px; }
+    #gameboy-mobile .intro .buttons {
+      text-align: center; }
+      #gameboy-mobile .intro .buttons button {
+        margin-right: 5px; }
+
+#gameboy {
+  width: 1000px;
+  height: 600px;
+  margin: 0 auto;
+  background: url("/images/gba.png");
+  position: relative;
+  /* styles for elements outside of screen */
+  /* styles for each screen view */ }
+  @media (max-width: 600px) {
+    #gameboy {
+      display: none; } }
+  #gameboy #start {
+    display: block;
+    position: absolute;
+    top: 365px;
+    left: 126px;
+    width: 100px;
+    height: 25px;
+    transform: rotate(14deg);
+    -webkit-transform: rotate(14deg);
+    -ms-transform: rotate(14deg); }
+    @media (max-width: 600px) {
+      #gameboy #start {
+        display: none; } }
+  #gameboy #back-home {
+    position: absolute;
+    top: 112px;
+    left: 298px;
+    color: white;
+    display: none;
+    text-decoration: none; }
+    @media (max-width: 600px) {
+      #gameboy #back-home {
+        position: relative;
+        top: 0;
+        left: 0;
+        color: black;
+        float: right;
+        margin-right: 10px; } }
+  #gameboy #email {
+    position: absolute;
+    top: 442px;
+    left: 330px;
+    text-decoration: none;
+    color: #CBCBCB;
+    font: 22px 'Futura', Arial, sans-serif;
+    text-transform: uppercase;
+    -webkit-text-stroke: 1px #cbcbcb; }
+    @media (max-width: 600px) {
+      #gameboy #email {
+        display: none; } }
+  #gameboy #instructions {
+    position: absolute;
+    top: 600px;
+    left: 50%;
+    width: 700px;
+    margin-left: -350px;
+    text-align: center;
+    font-size: 36px; }
+    @media (max-width: 600px) {
+      #gameboy #instructions {
+        position: relative;
+        left: 0;
+        top: 0;
+        width: auto;
+        margin: auto; } }
+  #gameboy #screen {
+    width: 402px;
+    height: 273px;
+    top: 133px;
+    left: 298px;
+    background: #f8f8f8;
+    position: absolute; }
+    @media (max-width: 600px) {
+      #gameboy #screen {
+        width: 100%;
+        position: relative;
+        left: 0;
+        top: 0; } }
+  #gameboy #screen > div {
+    width: 402px;
+    height: 273px; }
+  #gameboy #control-pad {
+    position: absolute;
+    left: 88px;
+    top: 190px; }
+    #gameboy #control-pad div {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      cursor: pointer; }
+    #gameboy #control-pad #control-up {
+      left: 40px; }
+    #gameboy #control-pad #control-left {
+      top: 40px; }
+    #gameboy #control-pad #control-right {
+      top: 40px;
+      left: 80px; }
+    #gameboy #control-pad #control-down {
+      top: 80px;
+      left: 40px; }
+    @media (max-width: 600px) {
+      #gameboy #control-pad {
+        display: none; } }
+  #gameboy #control-buttons {
+    position: absolute;
+    left: 765px;
+    top: 205px; }
+    #gameboy #control-buttons div {
+      position: absolute;
+      width: 62px;
+      height: 62px;
+      border-radius: 50px;
+      cursor: pointer; }
+    #gameboy #control-buttons #control-a {
+      top: 30px; }
+    #gameboy #control-buttons #control-b {
+      left: 88px; }
+    @media (max-width: 600px) {
+      #gameboy #control-buttons {
+        display: none; } }
+  #gameboy #on-light {
+    position: absolute;
+    left: 790px;
+    top: 111px;
+    width: 17px;
+    height: 17px;
+    background-image: -webkit-gradient(radial, center center, 0, center center, 10, from(rgba(108, 199, 72, 0.6)), to(rgba(0, 0, 0, 0)));
+    background-image: -moz-radial-gradient(center center, circle cover, rgba(108, 199, 72, 0.6) 0%, rgba(0, 0, 0, 0) 200%);
+    border-radius: 10px;
+    display: none; }
+  #gameboy #home {
+    width: 382px;
+    height: 263px;
+    padding: 5px 10px; }
+    #gameboy #home #menu {
+      width: 120px;
+      height: 220px;
+      border-image: url("/images/border.png") 50 repeat;
+      border-width: 20px;
+      border-style: solid;
+      float: left;
+      margin-left: 10px;
+      box-sizing: content-box; }
+      #gameboy #home #menu ul {
+        list-style: none; }
+        #gameboy #home #menu ul li {
+          font-size: 28px;
+          padding-bottom: 5px;
+          padding-left: 10px;
+          text-transform: uppercase;
+          cursor: pointer; }
+          #gameboy #home #menu ul li a {
+            text-decoration: none;
+            color: black; }
+        #gameboy #home #menu ul li:hover {
+          background: url("/images/arrow.png") no-repeat left 9px; }
+    #gameboy #home #avatar {
+      float: left;
+      width: 218px;
+      height: 210px;
+      text-align: center;
+      padding-top: 15px; }
+      #gameboy #home #avatar h1, #gameboy #home #avatar h2 {
+        font: 18px 'FippsRegular', 'Pokemon Pixel', monospace;
+        letter-spacing: 0; }
+      #gameboy #home #avatar h2 {
+        font-size: 16px; }
+      #gameboy #home #avatar .img-wrapper {
+        margin-top: 15px;
+        position: relative; }
+        #gameboy #home #avatar .img-wrapper .avatar-hidden {
+          position: absolute;
+          top: -4px;
+          left: 52px;
+          opacity: 0;
+          width: 120px; }
+          #gameboy #home #avatar .img-wrapper .avatar-hidden:hover {
+            opacity: 1; }
+          @media (max-width: 600px) {
+            #gameboy #home #avatar .img-wrapper .avatar-hidden {
+              display: none; } }
+        #gameboy #home #avatar .img-wrapper .avatar {
+          height: 130px; }
+  #gameboy #about {
+    background: white; }
+    #gameboy #about img {
+      display: block;
+      margin: 0 auto 16px;
+      position: relative;
+      top: 8px; }
+    #gameboy #about #text {
+      border-image: url("/images/border.png") 50 repeat;
+      border-width: 20px;
+      border-style: solid;
+      font-size: 24px;
+      height: 127px;
+      overflow: auto;
+      line-height: 1.3em;
+      position: relative;
+      overflow: hidden;
+      box-sizing: content-box; }
+      #gameboy #about #text div.section {
+        height: 100%; }
+    #gameboy #about [id*=arrow] {
+      position: absolute;
+      background: url("/images/arrow.png") no-repeat center center;
+      width: 18px;
+      height: 7px;
+      display: block;
+      right: 25px; }
+    #gameboy #about #arrow-down {
+      right: 25px;
+      bottom: 45px;
+      transform: rotate(90deg) scale(2);
+      -webkit-transform: rotate(90deg) scale(2);
+      -ms-transform: rotate(90deg); }
+    #gameboy #about #arrow-up {
+      display: none;
+      top: 110px;
+      transform: rotate(270deg) scale(2);
+      -webkit-transform: rotate(270deg) scale(2);
+      -ms-transform: rotate(270deg); }
+  #gameboy #contact {
+    overflow: hidden; }
+    #gameboy #contact #map {
+      background: black url("/images/map.png") no-repeat 0px center;
+      width: 1297px;
+      height: 100%;
+      position: relative; }
+      #gameboy #contact #map input, #gameboy #contact #map textarea {
+        position: absolute;
+        padding: 2px 5px;
+        bottom: 120px; }
+      #gameboy #contact #map [name=name] {
+        left: 130px; }
+      #gameboy #contact #map [name=email] {
+        left: 440px; }
+      #gameboy #contact #map [name=message] {
+        left: 700px; }
+      #gameboy #contact #map [type=submit] {
+        left: 1100px; }
+      #gameboy #contact #map #message {
+        position: absolute;
+        left: 972px;
+        display: none;
+        width: 250px;
+        top: 90px;
+        text-align: center;
+        font-size: 24px; }
+    #gameboy #contact .mario {
+      background-image: url("/images/mario.png");
+      background-repeat: no-repeat;
+      display: block;
+      position: absolute; }
+    #gameboy #contact .mario-jumpleft {
+      width: 17px;
+      height: 15px;
+      background-position: -5px -4px; }
+    #gameboy #contact .mario-left1 {
+      width: 16px;
+      height: 16px;
+      background-position: -32px -4px; }
+    #gameboy #contact .mario-left2 {
+      width: 12px;
+      height: 16px;
+      background-position: -58px -4px; }
+    #gameboy #contact .mario-left3 {
+      width: 14px;
+      height: 15px;
+      background-position: -5px -29px; }
+    #gameboy #contact .mario-left0 {
+      width: 13px;
+      height: 16px;
+      background-position: -29px -29px; }
+    #gameboy #contact .mario-right0 {
+      width: 13px;
+      height: 16px;
+      background-position: -52px -29px; }
+    #gameboy #contact .mario-right1 {
+      width: 14px;
+      height: 15px;
+      background-position: -5px -54px; }
+    #gameboy #contact .mario-right2 {
+      width: 12px;
+      height: 16px;
+      background-position: -29px -54px; }
+    #gameboy #contact .mario-right3 {
+      width: 16px;
+      height: 16px;
+      background-position: -51px -54px; }
+    #gameboy #contact .mario-jumpright {
+      width: 17px;
+      height: 16px;
+      background-position: -80px -4px; }
+  #gameboy #research {
+    background: url("/images/portfolio.png"); }
+    #gameboy #research #overlay {
+      width: 342px;
+      height: 213px;
+      position: absolute;
+      z-index: 5;
+      border-image: url("/images/border2.png") 20 repeat;
+      border-width: 20px;
+      border-style: solid;
+      padding: 10px;
+      background: #d2d2d2;
+      display: none;
+      overflow: auto;
+      box-sizing: content-box; }
+      #gameboy #research #overlay #back {
+        position: absolute;
+        right: 2px;
+        top: 2px; }
+      #gameboy #research #overlay h2 {
+        font-size: 27px;
+        line-height: 0.8em;
+        margin-bottom: 5px; }
+      #gameboy #research #overlay h3 {
+        font-size: 20px;
+        margin-bottom: 10px;
+        line-height: 0.8em; }
+      #gameboy #research #overlay p, #gameboy #research #overlay ul {
+        font-family: 'Myriad Pro', Arial, sans-serif;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        line-height: 1.25em; }
+    #gameboy #research #sprite {
+      position: absolute;
+      background-image: url("/images/spritesheet.png");
+      background-repeat: no-repeat; }
+    #gameboy #research .sprite-down0 {
+      width: 18px;
+      height: 23px;
+      background-position: -5px -5px; }
+    #gameboy #research .sprite-down1 {
+      width: 18px;
+      height: 24px;
+      background-position: -33px -5px; }
+    #gameboy #research .sprite-down2 {
+      width: 18px;
+      height: 24px;
+      background-position: -61px -5px; }
+    #gameboy #research .sprite-left0 {
+      width: 17px;
+      height: 22px;
+      background-position: -89px -5px; }
+    #gameboy #research .sprite-left1 {
+      width: 20px;
+      height: 22px;
+      background-position: -89px -37px; }
+    #gameboy #research .sprite-left2 {
+      width: 19px;
+      height: 22px;
+      background-position: -5px -69px; }
+    #gameboy #research .sprite-right0 {
+      width: 17px;
+      height: 22px;
+      background-position: -34px -69px; }
+    #gameboy #research .sprite-right1 {
+      width: 20px;
+      height: 22px;
+      background-position: -61px -69px; }
+    #gameboy #research .sprite-right2 {
+      width: 19px;
+      height: 22px;
+      background-position: -91px -69px; }
+    #gameboy #research .sprite-sworddown {
+      width: 19px;
+      height: 35px;
+      background-position: -119px -5px; }
+    #gameboy #research .sprite-swordleft {
+      width: 31px;
+      height: 22px;
+      background-position: -120px -50px; }
+    #gameboy #research .sprite-swordright {
+      width: 36px;
+      height: 20px;
+      background-position: -5px -101px; }
+    #gameboy #research .sprite-swordup {
+      width: 18px;
+      height: 31px;
+      background-position: -120px -82px; }
+    #gameboy #research .sprite-up0 {
+      width: 18px;
+      height: 21px;
+      background-position: -51px -123px; }
+    #gameboy #research .sprite-up1 {
+      width: 18px;
+      height: 25px;
+      background-position: -79px -123px; }
+    #gameboy #research .sprite-up2 {
+      width: 18px;
+      height: 25px;
+      background-position: -107px -123px; }
+    #gameboy #research .chest {
+      background-image: url("/images/chest.png");
+      background-repeat: no-repeat;
+      display: block;
+      position: absolute;
+      cursor: pointer; }
+    #gameboy #research .chest-0 {
+      width: 32px;
+      height: 24px;
+      background-position: -5px -5px; }
+    #gameboy #research .chest-1 {
+      width: 32px;
+      height: 29px;
+      background-position: -5px -39px; }
+    #gameboy #research .chest-2 {
+      width: 32px;
+      height: 33px;
+      background-position: -47px -5px; }
+    #gameboy #research .chest-3 {
+      width: 32px;
+      height: 38px;
+      background-position: -47px -48px; }
+
+/* @font-face kit by Fonts2u (http://www.fonts2u.com) */
+@font-face {
+  font-family: "Pokemon Pixel";
+  src: url("/legacy/fonts/pokemon_pixel_font.eot?") format("eot"), url("/legacy/fonts/pokemon_pixel_font.woff") format("woff"), url("/legacy/fonts/pokemon_pixel_font.ttf") format("truetype"), url("/legacy/fonts/pokemon_pixel_font.svg#Pokemon-Pixel-Font") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+@font-face {
+  font-family: 'FippsRegular';
+  src: url("/legacy/fonts/fipps-regular-webfont.eot");
+  src: url("/legacy/fonts/fipps-regular-webfont.eot?#iefix") format("embedded-opentype"), url("/legacy/fonts/fipps-regular-webfont.woff") format("woff"), url("/legacy/fonts/fipps-regular-webfont.ttf") format("truetype"), url("/legacy/fonts/fipps-regular-webfont.svg#FippsRegular") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+@font-face {
+  font-family: 'emulogic';
+  src: url("/legacy/fonts/emulogic-webfont.eot");
+  src: url("/legacy/fonts/emulogic-webfont.eot?#iefix") format("embedded-opentype"), url("/legacy/fonts/emulogic-webfont.woff") format("woff"), url("/legacy/fonts/emulogic-webfont.ttf") format("truetype"), url("/legacy/fonts/emulogic-webfont.svg#emulogicregular") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+@font-face {
+  font-family: 'Futura';
+  src: url("/legacy/fonts/FuturaStd-HeavyOblique.eot");
+  src: url("/legacy/fonts/FuturaStd-HeavyOblique.eot?#iefix") format("embedded-opentype"), url("/legacy/fonts/FuturaStd-HeavyOblique.woff") format("woff"), url("/legacy/fonts/FuturaStd-HeavyOblique.ttf") format("truetype");
+  font-weight: 900;
+  font-style: italic; }
+@media (min-width: 1200px) {
+  .container {
+    max-width: 800px; } }
+@media (min-width: 960px) {
+  .container {
+    max-width: 800px; } }
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  vertical-align: baseline; }
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+body {
+  line-height: 1; }
+
+ol, ul {
+  list-style: none; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+.note, .notes {
+  font-family: 'Source Sans Pro', 'Helvetica Neue', 'Arial', sans-serif;
+  font-size: 22px;
+  line-height: 1.4em;
+  letter-spacing: 0px; }
+  @media (max-width: 576px) {
+    .note, .notes {
+      font-size: 18px; } }
+  .note h1, .notes h1 {
+    font-family: 'Pokemon Pixel', monospace;
+    letter-spacing: 1px; }
+  .note h2, .note h3, .note h4, .note h5, .note h6, .notes h2, .notes h3, .notes h4, .notes h5, .notes h6 {
+    line-height: 0.8em;
+    margin-bottom: 3px; }
+  .note h1.site-title, .notes h1.site-title {
+    font-family: 'FippsRegular', 'Pokemon Pixel', monospace;
+    font-size: 36px;
+    margin-top: 30px;
+    text-align: left;
+    padding-bottom: 30px;
+    border-bottom: 1px dashed black; }
+    .note h1.site-title a, .notes h1.site-title a {
+      color: black; }
+      .note h1.site-title a, .note h1.site-title a:hover, .notes h1.site-title a, .notes h1.site-title a:hover {
+        text-decoration: none;
+        border-bottom: none; }
+  .note pre, .notes pre {
+    font-size: 16px; }
+
+.notes .highlights {
+  margin-top: 20px; }
+.notes div.note-list {
+  margin-top: 20px; }
+  .notes div.note-list .row {
+    margin-bottom: 30px; }
+    @media (max-width: 576px) {
+      .notes div.note-list .row {
+        margin-bottom: 0; } }
+  .notes div.note-list a.note-link {
+    display: block;
+    float: left;
+    color: black; }
+    @media (max-width: 576px) {
+      .notes div.note-list a.note-link {
+        margin-bottom: 30px; } }
+    .notes div.note-list a.note-link:hover {
+      text-decoration: none; }
+    .notes div.note-list a.note-link h2 {
+      font-size: 36px;
+      font-family: 'Pokemon Pixel', monospace; }
+    .notes div.note-list a.note-link h3 {
+      margin: 8px 0;
+      font-family: 'Pokemon Pixel', monospace;
+      font-size: 28px; }
+
+.note h1 {
+  font-size: 64px;
+  margin-top: 30px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+  line-height: 0.95em; }
+  @media (max-width: 576px) {
+    .note h1 {
+      font-size: 48px; } }
+.note .date {
+  font-family: 'Pokemon Pixel', monospace;
+  text-align: center;
+  font-size: 30px;
+  margin-bottom: 30px; }
+  @media (max-width: 576px) {
+    .note .date {
+      margin-bottom: 10px; } }
+.note .abstract {
+  border: 1px dashed black;
+  padding: 20px 20px;
+  margin: 10px 40px 40px; }
+  @media (max-width: 576px) {
+    .note .abstract {
+      margin: 10px; } }
+.note h2 {
+  font-size: 36px;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  font-weight: bold; }
+  @media (max-width: 576px) {
+    .note h2 {
+      line-height: 1em;
+      font-size: 26px; } }
+.note h3 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 5px; }
+.note img, .note video {
+  max-width: 100%;
+  max-height: 500px;
+  display: block;
+  margin: 0 auto; }
+.note p {
+  margin-bottom: 20px; }
+.note .hl {
+  font-style: normal;
+  background-color: rgba(255, 255, 0, 0.2); }
+.note ol, .note ul {
+  padding-left: 20px;
+  margin-bottom: 20px; }
+  .note ol li, .note ul li {
+    margin-bottom: 10px; }
+.note ol {
+  list-style-type: decimal; }
+  .note ol ol {
+    list-style-type: decimal; }
+.note ul {
+  list-style-type: circle; }
+  .note ul ul {
+    list-style-type: square; }
+.note pre {
+  margin-bottom: 20px;
+  background: #fafafa;
+  padding: 10px;
+  line-height: 1.3em;
+  font-size: 16px;
+  border: 2px solid #eee; }
+  .note pre code {
+    font-size: 16px;
+    padding: 0;
+    border: 0; }
+.note code {
+  font-size: 16px;
+  padding: 3px 5px;
+  color: #aa3f3f;
+  border: 1px solid #eee; }
+.note a code {
+  padding: 0;
+  color: #2169a5;
+  border: 0; }
+.note sup {
+  font-size: 18px; }
+.note blockquote {
+  padding-left: 20px;
+  color: #555;
+  border-left: 2px solid #555; }
+.note div.figure {
+  display: block;
+  margin-bottom: 20px; }
+  .note div.figure img {
+    margin-bottom: 10px; }
+.note div.caption {
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 20px; }
+.note .footnotes {
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+  font-size: 16px;
+  line-height: 1.3em; }
+  .note .footnotes p {
+    margin-bottom: 10px; }
+.note a {
+  color: #2169a5;
+  border-bottom: dotted 1px #2169a5;
+  text-decoration: none; }
+  .note a:hover {
+    color: #378ace;
+    border-bottom: solid 1px #378ace; }
+
+.publication {
+  font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.3;
+  letter-spacing: 0;
+  width: 1152px;
+  margin: 0 auto;
+  padding: 20px 0;
+  font-size: 22px; }
+  .publication hr {
+    margin-bottom: 2rem; }
+  .publication h1 {
+    font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+    font-size: 54px; }
+  .publication h1, .publication h2, .publication h3 {
+    font-weight: bold; }
+  .publication p {
+    margin-bottom: 1.5rem; }
+  .publication ul, .publication ol {
+    list-style-position: outside;
+    padding-left: 25px; }
+    .publication ul li > span, .publication ol li > span {
+      position: relative;
+      left: -5px; }
+  .publication img {
+    max-width: 100%; }
+    .publication img.banner {
+      display: block;
+      margin: 0 auto; }
+  .publication .clearfix {
+    clear: both; }
+  .publication .title {
+    margin-bottom: 2rem; }
+  .publication .authors {
+    margin-bottom: 2rem; }
+    .publication .authors p {
+      margin: 0; }
+  .publication .body h2 {
+    font-size: 30px;
+    margin-bottom: 1rem;
+    margin-top: 2rem; }

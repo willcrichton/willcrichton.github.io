@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="I show how to implement event listeners and dependency injection using Rust's type system to avoid common errors in stringly-typed versions of these extensible architectures.">
+    
+    
+    <title>
+      
+      Types Over Strings: Extensible Architectures in Rust | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Types Over Strings: Extensible Architectures in Rust
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    April 12, 2020
+  </div>
+  <div class="abstract">I show how to implement event listeners and dependency injection using Rust's type system to avoid common errors in stringly-typed versions of these extensible architectures.</div>
+  <p><em>All code in this note is available <a href="https://github.com/willcrichton/types-over-strings">on Github</a>.</em></p>
+
+<p>Types are a useful tool to make sure software libraries work together. I expect an int, you give me a string, compiler raises an error. In my experience, types, interfaces and encapsulation work best when using black-box APIs: hash maps, regexes, HTTP requests. The programmer controls the top-level program, i.e. the types that orchestrate the individual pieces.</p>
+
+<p>However, the Type Life tends to become harder when dealing with frameworks, or any kind of <em>extensible architecture</em> where the programmer is plugging components into a bigger system they don’t control. For example, consider the venerable <a href="https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener"><code class="highlighter-rouge">EventTarget.addEventListener</code></a> from JavaScript:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">click</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">clientX</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">clientY</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>This is an extensible architecture in the sense that you don’t control the DOM API, nor can you control what events are registered to DOM nodes. That changes all the time. You can only hook in to events the browser provides.</p>
+
+<p>Let’s look at this function with two related questions: what is the type of <code class="highlighter-rouge">addEventListener</code>? And what kinds of errors can we make using this function?</p>
+
+<p>The most basic type for <code class="highlighter-rouge">addEventListener(event, listener)</code> is that <code class="highlighter-rouge">event</code> is a string, and <code class="highlighter-rouge">listener</code> is a function. A function from what to what? The input is an “event”, whatever that means, and there is no output. Indeed, when <code class="highlighter-rouge">addEventListener</code> gets ported into a statically typed language like <a href="https://github.com/reasonml-community/bs-webapi-incubator/blob/ffa8b27ffacbe9c2a97b9ee1509d83918a5ea01a/src/Webapi/Webapi__Dom/Webapi__Dom__EventTarget.re#L4">ReasonML</a>, the type definition looks like:</p>
+
+<div class="language-ocaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">external</span> <span class="n">addEventListener</span> <span class="o">:</span> <span class="p">(</span><span class="kt">string</span><span class="o">,</span> <span class="nn">Dom</span><span class="p">.</span><span class="n">event</span> <span class="o">=&gt;</span> <span class="kt">unit</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="kt">unit</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Here’s two ways we can mess this up.</p>
+<ul>
+  <li>
+    <p><strong>Typo the event name</strong>: as with all stringly-typed programming, we can write the event name incorrectly, like <code class="highlighter-rouge">"clack"</code> instead of <code class="highlighter-rouge">"click"</code>. This error gets caught at runtime, usually when we register the handler.</p>
+  </li>
+  <li>
+    <p><strong>Use the event object incorrectly:</strong> while all events implement the base <a href="https://developer.mozilla.org/en-US/docs/Web/API/Event"><code class="highlighter-rouge">Event</code> interface</a>, each individual event has different fields. For example, “click” is a <a href="https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent"><code class="highlighter-rouge">MouseEvent</code></a> so it contains fields <code class="highlighter-rouge">clientX</code> and <code class="highlighter-rouge">clientY</code>. But what if I tried to access <code class="highlighter-rouge">clientX</code> on a <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent"><code class="highlighter-rouge">KeyboardEvent</code></a>? That error gets caught at runtime, when we execute the offending code path in the handler.</p>
+  </li>
+</ul>
+
+<p>In this note, I’ll show how you can avoid errors like these by designing type-safe extensible systems. We’ll look at two examples: event handling and dependency injection. The code will use Rust, but the lessons apply to any functional language.</p>
+
+<h2 id="type-safe-event-listeners">Type-safe event listeners</h2>
+
+<p>The basic idea in making type-safe extensible architectures is to replace strings with types. Any time you use a string as an identifier (e.g. for an event, or a software component), use a type instead. Why?</p>
+<ul>
+  <li>Types are better identifiers than strings. If you typo a type, the type checker can catch your mistake.</li>
+  <li>Types can be associated with additional information. The string <code class="highlighter-rouge">"click"</code> means nothing to the type checker. But the type <code class="highlighter-rouge">ClickEvent</code> tells the typechecker about what fields the event has, and how event listeners should handle the event.</li>
+</ul>
+
+<p>Here’s an example of using a type-safe event API in Rust.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">OnClick</span> <span class="p">{</span>
+  <span class="n">mouse_x</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span>
+  <span class="n">mouse_y</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="k">mut</span> <span class="n">dispatcher</span> <span class="o">=</span> <span class="nn">EventDispatcher</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+
+<span class="n">dispatcher</span><span class="nf">.add_event_listener</span><span class="p">(|</span><span class="n">event</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">OnClick</span><span class="p">|</span> <span class="p">{</span>
+  <span class="nd">assert_eq!</span><span class="p">(</span><span class="n">event</span><span class="py">.mouse_x</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+  <span class="nd">assert_eq!</span><span class="p">(</span><span class="n">event</span><span class="py">.mouse_y</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="n">dispatcher</span><span class="nf">.trigger</span><span class="p">(</span><span class="o">&amp;</span><span class="n">OnClick</span> <span class="p">{</span>
+  <span class="n">mouse_x</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+  <span class="n">mouse_y</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<p>In the snippet above, the event type is inferred from the type parameter <code class="highlighter-rouge">OnClick</code> of the closure, rather than using a string argument. This solves both of our errors:</p>
+<ul>
+  <li>If we wrote <code class="highlighter-rouge">&amp;OnClack</code>, the type checker will say <code class="highlighter-rouge">OnClack not found</code>.</li>
+  <li>If we wrote <code class="highlighter-rouge">event.keyboard_input</code> instead of <code class="highlighter-rouge">event.mouse_x</code>, the typechecker will say <code class="highlighter-rouge">no field keyboard_input on type OnClick</code>.</li>
+</ul>
+
+<p>Stupendous! But how does it work? Here’s the basic structure.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Events must not contain pointers to things, for simplicity</span>
+<span class="k">trait</span> <span class="n">Event</span><span class="p">:</span> <span class="nv">'static</span> <span class="p">{}</span>
+
+<span class="c">// An event listener is a function from an event to nil</span>
+<span class="k">trait</span> <span class="n">EventListener</span><span class="o">&lt;</span><span class="n">E</span><span class="p">:</span> <span class="n">Event</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nf">FnMut</span><span class="p">(</span><span class="o">&amp;</span><span class="n">E</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">()</span> <span class="o">+</span> <span class="nv">'static</span><span class="p">;</span>
+
+<span class="c">// An event dispatcher holds all the event listeners</span>
+<span class="k">struct</span> <span class="n">EventDispatcher</span> <span class="p">{</span> <span class="cm">/* .. */</span> <span class="p">}</span>
+<span class="k">impl</span> <span class="n">EventDispatcher</span> <span class="p">{</span>
+  <span class="c">// Registers a function `f` to listen for an event `E`</span>
+  <span class="k">fn</span> <span class="n">add_event_listener</span><span class="o">&lt;</span><span class="n">E</span><span class="p">,</span> <span class="n">F</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">F</span><span class="p">)</span>
+  <span class="k">where</span>
+    <span class="n">E</span><span class="p">:</span> <span class="n">Event</span><span class="p">,</span>
+    <span class="n">F</span><span class="p">:</span> <span class="n">EventListener</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span>
+  <span class="p">{</span>
+    <span class="cm">/* .. */</span>
+  <span class="p">}</span>
+
+  <span class="c">// Runs all the registered listeners for the event `E`</span>
+  <span class="k">fn</span> <span class="n">trigger</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">E</span><span class="p">)</span>
+  <span class="k">where</span>
+    <span class="n">E</span><span class="p">:</span> <span class="n">Event</span>
+  <span class="p">{</span>
+    <span class="cm">/* .. */</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>In order to implement <code class="highlighter-rouge">EventDispatcher</code>, we need a data structure that can hold all the listeners. Given an event <code class="highlighter-rouge">E</code>, it should provide all the listeners for <code class="highlighter-rouge">E</code>. This raises two questions:</p>
+<ul>
+  <li>How can we associate a listener with a type <code class="highlighter-rouge">E</code>?</li>
+  <li>How can a single data structure hold listeners for multiple events, which all have different types?</li>
+</ul>
+
+<h3 id="mapping-types-to-values">Mapping types to values</h3>
+
+<p>We will briefly detour to make a critical building block: the <code class="highlighter-rouge">TypeMap</code>. Based on our two requirements above, we will make a data structure that a) maps types to values, and b) holds values of different types.</p>
+
+<p>Rust has <a href="https://doc.rust-lang.org/std/any/"><code class="highlighter-rouge">std::any</code></a> for this purpose. <a href="https://doc.rust-lang.org/std/any/struct.TypeId.html"><code class="highlighter-rouge">TypeId</code></a> allows us to get a unique, hashable identifier for each type. <a href="https://doc.rust-lang.org/std/any/trait.Any.html"><code class="highlighter-rouge">Any</code></a> allows us to up-cast/down-cast objects at runtime. Hence, our <code class="highlighter-rouge">TypeMap</code> will map from <code class="highlighter-rouge">TypeId</code> to <code class="highlighter-rouge">Box&lt;dyn Any&gt;</code>.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">collections</span><span class="p">::</span><span class="n">HashMap</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">any</span><span class="p">::{</span><span class="n">TypeId</span><span class="p">,</span> <span class="n">Any</span><span class="p">};</span>
+
+<span class="k">struct</span> <span class="nf">TypeMap</span><span class="p">(</span><span class="n">HashMap</span><span class="o">&lt;</span><span class="n">TypeId</span><span class="p">,</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Any</span><span class="o">&gt;&gt;</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>To add an element to the map:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">TypeMap</span> <span class="p">{</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="n">set</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">Any</span> <span class="o">+</span> <span class="nv">'static</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="nf">.insert</span><span class="p">(</span><span class="nn">TypeId</span><span class="p">::</span><span class="nn">of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(),</span> <span class="nn">Box</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This means our map has one unique value for a given type. For example, if we use the <code class="highlighter-rouge">TypeMap</code> like this:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">map</span> <span class="o">=</span> <span class="nn">TypeMap</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+<span class="n">map</span><span class="py">.set</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Aside: the syntax <code class="highlighter-rouge">::&lt;i32&gt;</code> is Rust’s “turbofish”. It explicitly binds a type parameter of a polymorphic function, rather than leaving it to be inferred. <a href="https://stackoverflow.com/questions/52360464/what-is-the-syntax-instance-methodsomething/52361559">Further</a> <a href="https://matematikaadit.github.io/posts/rust-turbofish.html">explanation</a> <a href="https://techblog.tonsser.com/posts/what-is-rusts-turbofish">here</a>.</p>
+</blockquote>
+
+<p>Then we insert a value <code class="highlighter-rouge">1</code> at the key <code class="highlighter-rouge">TypeId::of::&lt;i32&gt;()</code>. We can also implement <code class="highlighter-rouge">has</code> and <code class="highlighter-rouge">get</code> functions:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">TypeMap</span> <span class="p">{</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="n">has</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="nv">'static</span><span class="o">+</span><span class="n">Any</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">bool</span> <span class="p">{</span>
+    <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="nf">.contains_key</span><span class="p">(</span><span class="o">&amp;</span><span class="nn">TypeId</span><span class="p">::</span><span class="nn">of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">())</span>
+  <span class="p">}</span>
+
+  <span class="k">pub</span> <span class="k">fn</span> <span class="n">get_mut</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="nv">'static</span><span class="o">+</span><span class="n">Any</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="nf">.get_mut</span><span class="p">(</span><span class="o">&amp;</span><span class="nn">TypeId</span><span class="p">::</span><span class="nn">of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">())</span><span class="nf">.map</span><span class="p">(|</span><span class="n">t</span><span class="p">|</span> <span class="p">{</span>
+      <span class="n">t</span><span class="py">.downcast_mut</span><span class="p">::</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()</span>
+    <span class="p">})</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Look carefully at <code class="highlighter-rouge">get_mut</code>. The inner hash map returns a value of type <code class="highlighter-rouge">Box&lt;dyn Any&gt;</code>, which we can <code class="highlighter-rouge">downcast_mut</code> to become a value of type <code class="highlighter-rouge">&amp;mut T</code>. This operation is guaranteed to not fail, because only values of type <code class="highlighter-rouge">T</code> are stored in the hash map under the key for <code class="highlighter-rouge">T</code>.</p>
+
+<h3 id="finishing-our-event-system">Finishing our event system</h3>
+
+<p>With the <code class="highlighter-rouge">TypeMap</code> in hand, we can finish our event system. For the <code class="highlighter-rouge">EventDispatcher</code>, the <code class="highlighter-rouge">TypeMap</code> will map from events to a vector of listeners.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="nf">EventDispatcher</span><span class="p">(</span><span class="n">TypeMap</span><span class="p">);</span>
+
+<span class="c">// Type alias for a list of listeners for an event</span>
+<span class="k">type</span> <span class="n">ListenerVec</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">EventListener</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;&gt;&gt;</span><span class="p">;</span>
+
+<span class="k">impl</span> <span class="n">EventDispatcher</span> <span class="p">{</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="n">add_event_listener</span><span class="o">&lt;</span><span class="n">E</span><span class="p">,</span> <span class="n">F</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">F</span><span class="p">)</span>
+  <span class="k">where</span>
+    <span class="n">E</span><span class="p">:</span> <span class="n">Event</span><span class="p">,</span>
+    <span class="n">F</span><span class="p">:</span> <span class="n">EventListener</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="o">!</span><span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="py">.has</span><span class="p">::</span><span class="o">&lt;</span><span class="n">ListenerVec</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;&gt;</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="py">.set</span><span class="p">::</span><span class="o">&lt;</span><span class="n">ListenerVec</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="nn">Vec</span><span class="p">::</span><span class="nf">new</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="k">let</span> <span class="n">listeners</span> <span class="o">=</span> <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="py">.get_mut</span><span class="p">::</span><span class="o">&lt;</span><span class="n">ListenerVec</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;&gt;</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
+    <span class="n">listeners</span><span class="nf">.push</span><span class="p">(</span><span class="nn">Box</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">f</span><span class="p">));</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>When asked to register an event listener, we get the <code class="highlighter-rouge">ListenerVec</code> from the <code class="highlighter-rouge">TypeMap</code> and insert the new listener. Trigger is similarly simple:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">EventDispatcher</span> <span class="p">{</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="n">trigger</span><span class="o">&lt;</span><span class="n">E</span><span class="p">:</span> <span class="n">Event</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">E</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">listeners</span><span class="p">)</span> <span class="o">=</span> <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="py">.get_mut</span><span class="p">::</span><span class="o">&lt;</span><span class="n">ListenerVec</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;&gt;</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">for</span> <span class="n">callback</span> <span class="n">in</span> <span class="n">listeners</span> <span class="p">{</span>
+        <span class="nf">callback</span><span class="p">(</span><span class="n">event</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>That’s it! Now we have a type-safe event system.</p>
+
+<h2 id="type-safe-dependency-injection">Type-safe dependency injection</h2>
+
+<p>To avoid the impression that this pattern is specific to event listeners, I want to show another example of using types-over-strings in extensible architectures. I started playing with <a href="https://github.com/amethyst/specs">specs</a> recently, an entity-component-system architecture written in Rust. Its <code class="highlighter-rouge">System</code> uses a dependency-injection-like pattern, so I wanted to distill that to a pedagogical example here.</p>
+
+<p>Dependency injection systems are often rife with <a href="https://www.vogella.com/tutorials/SpringDependencyInjection/article.html">XML files</a>, string keys, and other stringly-typed problems. DI makes for a good use case here.</p>
+
+<h3 id="motivation">Motivation</h3>
+
+<p>The basic idea of dependency injection (DI) is that you have a component that depends on another, like a web server using a database. However, you don’t want to hard-code a particular database constructor, and rather make it easy to swap in different databases. For example:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Database</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">name</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nv">'static</span> <span class="nb">str</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">MySQL</span><span class="p">;</span>
+<span class="k">impl</span> <span class="n">Database</span> <span class="k">for</span> <span class="n">MySQL</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">name</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nv">'static</span> <span class="nb">str</span> <span class="p">{</span> <span class="s">"MySQL"</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">Postgres</span><span class="p">;</span>
+<span class="k">impl</span> <span class="n">Database</span> <span class="k">for</span> <span class="n">Postgres</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">name</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nv">'static</span> <span class="nb">str</span> <span class="p">{</span> <span class="s">"Postgres"</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">WebServer</span> <span class="p">{</span> <span class="n">db</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Database</span><span class="o">&gt;</span> <span class="p">}</span>
+<span class="k">impl</span> <span class="n">WebServer</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">run</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"Db name: {}"</span><span class="p">,</span> <span class="k">self</span><span class="py">.db</span><span class="nf">.name</span><span class="p">());</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>To implement DI, we need two things:</p>
+<ul>
+  <li>We need a way to register a global <code class="highlighter-rouge">Database</code> at runtime to a particular instance, e.g. <code class="highlighter-rouge">MySQL</code> or <code class="highlighter-rouge">Postgres</code>.</li>
+  <li>We need a way to describe a constructor for <code class="highlighter-rouge">WebServer</code> that fetches the registered <code class="highlighter-rouge">Database</code> instance.</li>
+</ul>
+
+<p>With these pieces, we can use our DI system like so:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">manager</span> <span class="o">=</span> <span class="nn">DIManager</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+<span class="n">manager</span><span class="py">.build</span><span class="p">::</span><span class="o">&lt;</span><span class="n">MySQL</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="k">let</span> <span class="n">server</span> <span class="o">=</span> <span class="n">manager</span><span class="py">.build</span><span class="p">::</span><span class="o">&lt;</span><span class="n">WebServer</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="n">server</span><span class="nf">.lock</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()</span><span class="nf">.run</span><span class="p">();</span> <span class="c">// prints Db name: MySQL</span>
+</code></pre></div></div>
+
+<h3 id="di-constructors">DI constructors</h3>
+
+<p>First, we’ll define a trait <code class="highlighter-rouge">DIBuilder</code> that represents a constructor within our DI system.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">DIBuilder</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Input</span><span class="p">;</span>
+  <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
+
+  <span class="k">fn</span> <span class="nf">build</span><span class="p">(</span><span class="n">input</span><span class="p">:</span> <span class="nn">Self</span><span class="p">::</span><span class="n">Input</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nn">Self</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The <code class="highlighter-rouge">build</code> method is a static method (doesn’t take <code class="highlighter-rouge">self</code> as input). It just takes <code class="highlighter-rouge">Input</code> as input, and produces <code class="highlighter-rouge">Output</code> as output. The key idea is that because <code class="highlighter-rouge">Input</code> and <code class="highlighter-rouge">Output</code> are <a href="https://doc.rust-lang.org/book/ch19-03-advanced-traits.html#specifying-placeholder-types-in-trait-definitions-with-associated-types">associated types</a>, we can inspect them later on. We will need to find values for <code class="highlighter-rouge">Input</code> and to store <code class="highlighter-rouge">Output</code> in our DI manager.</p>
+
+<p>We implement <code class="highlighter-rouge">DIBuilder</code> for each type in the system. The databases have no inputs, so their input is <code class="highlighter-rouge">()</code>. Their return type is <code class="highlighter-rouge">Box&lt;dyn Database&gt;</code>, meaning they are explicitly cast to a trait object so they can be used interchangeably.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">DIBuilder</span> <span class="k">for</span> <span class="n">MySQL</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Input</span> <span class="o">=</span> <span class="p">();</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Database</span><span class="o">&gt;</span><span class="p">;</span>
+  <span class="k">fn</span> <span class="nf">build</span><span class="p">(():</span> <span class="p">())</span> <span class="k">-&gt;</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Database</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nn">Box</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">MySQL</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">DIBuilder</span> <span class="k">for</span> <span class="n">Postgres</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Input</span> <span class="o">=</span> <span class="p">();</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Database</span><span class="o">&gt;</span><span class="p">;</span>
+  <span class="k">fn</span> <span class="nf">build</span><span class="p">(():</span> <span class="p">())</span> <span class="k">-&gt;</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Database</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nn">Box</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">Postgres</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">DIBuilder</span> <span class="k">for</span> <span class="n">WebServer</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Input</span> <span class="o">=</span> <span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Database</span><span class="o">&gt;</span><span class="p">,);</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">WebServer</span><span class="p">;</span>
+
+  <span class="k">fn</span> <span class="nf">build</span><span class="p">((</span><span class="n">db</span><span class="p">,):</span> <span class="nn">Self</span><span class="p">::</span><span class="n">Input</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">WebServer</span> <span class="p">{</span>
+    <span class="n">WebServer</span> <span class="p">{</span> <span class="n">db</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="di-manager">DI manager</h3>
+
+<p>Now that we know the dependency structure of our objects, we need a centralized manager to store the objects and fetch their dependencies.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="nf">DIManager</span><span class="p">(</span><span class="n">TypeMap</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>In this <code class="highlighter-rouge">TypeMap</code>, we will store the constructed objects. For example, once we make a <code class="highlighter-rouge">Box&lt;dyn Database&gt;</code>, then we will map <code class="highlighter-rouge">TypeId::of::&lt;Box&lt;dyn Database&gt;&gt;</code> to one of <code class="highlighter-rouge">Box&lt;Postgres&gt;</code> or <code class="highlighter-rouge">Box&lt;MySQL&gt;</code>.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">DIManager</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="n">build</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">DIBuilder</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nn">T</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">input</span> <span class="o">=</span> <span class="cm">/* get the inputs, somehow */</span><span class="p">;</span>
+    <span class="k">let</span> <span class="n">obj</span> <span class="o">=</span> <span class="nn">T</span><span class="p">::</span><span class="nf">build</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
+    <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="py">.set</span><span class="p">::</span><span class="o">&lt;</span><span class="nn">T</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Ignoring how we fetch dependencies for now, this function calls the <code class="highlighter-rouge">DIBuilder::build</code> implementation for <code class="highlighter-rouge">T</code>, then stores the result in the <code class="highlighter-rouge">TypeMap</code>. This approach <em>almost</em> works, except not for Rust: ownership of <code class="highlighter-rouge">obj</code> is passed into <code class="highlighter-rouge">TypeMap</code> and the result of <code class="highlighter-rouge">build</code>.</p>
+
+<p>And, intuitively, this makes sense. If a component like a database cursor needs to be shared across many downstream components, it needs some kind of access protection. Hence, we tweak our interface a bit to wrap everything in an <a href="https://doc.rust-lang.org/std/sync/struct.Arc.html"><code class="highlighter-rouge">Arc</code></a> and <a href="https://doc.rust-lang.org/std/sync/struct.Mutex.html"><code class="highlighter-rouge">Mutex</code></a>.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">DIObj</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+
+<span class="k">impl</span> <span class="n">DIManager</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="n">build</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">DIBuilder</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nn">T</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">input</span> <span class="o">=</span> <span class="cm">/* get the inputs, somehow */</span><span class="p">;</span>
+    <span class="k">let</span> <span class="n">obj</span> <span class="o">=</span> <span class="nn">T</span><span class="p">::</span><span class="nf">build</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
+    <span class="k">let</span> <span class="n">sync_obj</span> <span class="o">=</span> <span class="nn">Arc</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="nn">Mutex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">obj</span><span class="p">));</span>
+    <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="py">.set</span><span class="p">::</span><span class="o">&lt;</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nn">T</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">sync_obj</span><span class="nf">.clone</span><span class="p">());</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">sync_obj</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="di-dependencies">DI dependencies</h3>
+
+<p>Finally, we need a way to implement the <code class="highlighter-rouge">let input</code> line in <code class="highlighter-rouge">DIManager::build</code>. Given a type <code class="highlighter-rouge">T: DIBuilder</code>, it has an associated type <code class="highlighter-rouge">T::Input</code> that represents the inputs needed to build it.</p>
+
+<p>To simplify the problem, imagine <code class="highlighter-rouge">T::Input = S</code> where <code class="highlighter-rouge">S: DIBuilder</code>. Then if <code class="highlighter-rouge">S</code> has already been built, e.g. <code class="highlighter-rouge">T = WebServer</code> and <code class="highlighter-rouge">S = Box&lt;dyn Database&gt;</code>, we can fetch it directly from the typemap:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">input</span> <span class="o">=</span> <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="py">.get</span><span class="p">::</span><span class="o">&lt;</span><span class="nn">T</span><span class="p">::</span><span class="n">Input</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">obj</span><span class="p">|</span> <span class="n">obj</span><span class="nf">.clone</span><span class="p">())</span><span class="o">?</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>However, in practice <code class="highlighter-rouge">T::Input</code> could be several dependencies. For example, if our server depends on a configuration, it might be:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">DIBuilder</span> <span class="k">for</span> <span class="n">WebServer</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Input</span> <span class="o">=</span> <span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Database</span><span class="o">&gt;</span><span class="p">,</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">ServerConfig</span><span class="o">&gt;</span><span class="p">);</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">WebServer</span><span class="p">;</span>
+
+  <span class="k">fn</span> <span class="nf">build</span><span class="p">((</span><span class="n">db</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span> <span class="nn">Self</span><span class="p">::</span><span class="n">Input</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">WebServer</span> <span class="p">{</span>
+    <span class="n">WebServer</span> <span class="p">{</span> <span class="n">db</span><span class="p">,</span> <span class="n">config</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Let’s assume now <code class="highlighter-rouge">T::Input</code> is always a tuple <code class="highlighter-rouge">(S1, S2, ...)</code> of types where each type <code class="highlighter-rouge">Si : DIBuilder</code>. Ideally, we could write something like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">input</span> <span class="o">=</span> <span class="p">(</span><span class="nn">T</span><span class="p">::</span><span class="n">Input</span><span class="p">)</span><span class="nf">.map</span><span class="p">(|</span><span class="n">S</span><span class="p">|</span> <span class="p">{</span>
+  <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="py">.get</span><span class="p">::</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">obj</span><span class="p">|</span> <span class="n">obj</span><span class="nf">.clone</span><span class="p">())</span><span class="nf">.unwrap</span><span class="p">()</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>But, alas, our language of expressions is not our language of types. Such a thing is the provenance of languages we can only <a href="https://leanprover.github.io/">dream about</a>. Instead, we have to cleverly use traits to inductively define a way to extract inputs from the tuple. To start, we’ll make a trait that gets an object of a particular type from the <code class="highlighter-rouge">DIManager</code>:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">GetInput</span><span class="p">:</span> <span class="n">Sized</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">get_input</span><span class="p">(</span><span class="n">manager</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">DIManager</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Self</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>For <code class="highlighter-rouge">DIObj&lt;T&gt;</code>, this means looking up the type in the <code class="highlighter-rouge">TypeMap</code>:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="nv">'static</span><span class="o">&gt;</span> <span class="n">GetInput</span> <span class="k">for</span> <span class="n">DIObj</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">get_input</span><span class="p">(</span><span class="n">manager</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">DIManager</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Self</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">manager</span><span class="err">.</span><span class="mi">0</span><span class="py">.get</span><span class="p">::</span><span class="o">&lt;</span><span class="n">Self</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">obj</span><span class="p">|</span> <span class="n">obj</span><span class="nf">.clone</span><span class="p">())</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then for tuples of <code class="highlighter-rouge">DIObj&lt;T&gt;</code>, we can make an inductive definition like so:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">GetInput</span> <span class="k">for</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">get_input</span><span class="p">(</span><span class="mi">_</span><span class="n">manager</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">DIManager</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Self</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nf">Some</span><span class="p">(())</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">S</span><span class="p">:</span> <span class="n">GetInput</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">GetInput</span><span class="o">&gt;</span> <span class="n">GetInput</span> <span class="k">for</span> <span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">get_input</span><span class="p">(</span><span class="n">manager</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">DIManager</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Self</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nn">S</span><span class="p">::</span><span class="nf">get_input</span><span class="p">(</span><span class="n">manager</span><span class="p">)</span><span class="nf">.and_then</span><span class="p">(|</span><span class="n">s</span><span class="p">|</span> <span class="p">{</span>
+      <span class="nn">T</span><span class="p">::</span><span class="nf">get_input</span><span class="p">(</span><span class="n">manager</span><span class="p">)</span><span class="nf">.and_then</span><span class="p">(|</span><span class="n">t</span><span class="p">|</span> <span class="p">{</span>
+        <span class="nf">Some</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+      <span class="p">})</span>
+    <span class="p">})</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then we can modify our <code class="highlighter-rouge">WebServer</code> example to use an inductive structure:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">DIBuilder</span> <span class="k">for</span> <span class="n">WebServer</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Input</span> <span class="o">=</span> <span class="p">(</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Database</span><span class="o">&gt;&gt;</span><span class="p">,(</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">ServerConfig</span><span class="o">&gt;&gt;</span><span class="p">,()));</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">WebServer</span><span class="p">;</span>
+
+  <span class="k">fn</span> <span class="nf">build</span><span class="p">((</span><span class="n">db</span><span class="p">,</span> <span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="p">())):</span> <span class="nn">Self</span><span class="p">::</span><span class="n">Input</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">WebServer</span> <span class="p">{</span>
+    <span class="n">WebServer</span> <span class="p">{</span> <span class="n">db</span><span class="p">,</span> <span class="n">config</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Aside: in practice, rather than doing nested pairs, you can use a macro to create the <code class="highlighter-rouge">GetInput</code> impl for many tuple types <a href="https://github.com/amethyst/shred/blob/0.10.2/src/system.rs#L438-L469">like this</a>.</p>
+</blockquote>
+
+<p>And at last, we can implement <code class="highlighter-rouge">DIManager::build</code>:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">DIManager</span> <span class="p">{</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="n">build</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">DIBuilder</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nn">T</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">input</span> <span class="o">=</span> <span class="nn">T</span><span class="p">::</span><span class="nn">Input</span><span class="p">::</span><span class="nf">get_input</span><span class="p">(</span><span class="k">self</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
+    <span class="k">let</span> <span class="n">obj</span> <span class="o">=</span> <span class="nn">T</span><span class="p">::</span><span class="nf">build</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
+    <span class="k">let</span> <span class="n">sync_obj</span> <span class="o">=</span> <span class="nn">Arc</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="nn">Mutex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">obj</span><span class="p">));</span>
+    <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="py">.set</span><span class="p">::</span><span class="o">&lt;</span><span class="n">DIObj</span><span class="o">&lt;</span><span class="nn">T</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">sync_obj</span><span class="nf">.clone</span><span class="p">());</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">sync_obj</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Now, the expression <code class="highlighter-rouge">T::Input::get_input(self)</code> will convert a tuple of types into a tuple of values of those types.</p>
+
+<h3 id="final-api-example">Final API example</h3>
+
+<p>With the API complete, our example now looks like this:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">manager</span> <span class="o">=</span> <span class="nn">DIManager</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+<span class="n">manager</span><span class="py">.build</span><span class="p">::</span><span class="o">&lt;</span><span class="n">MySQL</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="k">let</span> <span class="n">server</span> <span class="o">=</span> <span class="n">manager</span><span class="py">.build</span><span class="p">::</span><span class="o">&lt;</span><span class="n">WebServer</span><span class="o">&gt;</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="n">server</span><span class="nf">.lock</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()</span><span class="nf">.run</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>We can construct a <code class="highlighter-rouge">WebServer</code> without explicitly passing in a <code class="highlighter-rouge">dyn Database</code> instance. When we use the <code class="highlighter-rouge">server</code>, we have to explicitly call <code class="highlighter-rouge">.lock()</code> now that it’s wrapped in a mutex. And lo, our dependencies have been injected.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Across these examples, there are a few main language-level mechanisms that enable the high-level patterns:</p>
+
+<ul>
+  <li><a href="https://doc.rust-lang.org/std/any/struct.TypeId.html"><code class="highlighter-rouge">TypeId</code></a> turns types into unique runtime identifiers. This allows us to have heterogeneous data structures like <code class="highlighter-rouge">TypeMap</code> while still getting compile-time safety.</li>
+  <li>Traits and associated types enable polymorphic functions like <code class="highlighter-rouge">EventDispatcher::add_event_listener</code> and <code class="highlighter-rouge">DIManger::build</code> to statically ensure many valuable properties of the system. For example, an event listener can only be registered to an event that matches the type of its parameters.</li>
+  <li>Polymorphic trait implementations enable type-level programming, like getting a value for each type in a arbitrary-size tuple of types.</li>
+</ul>
+
+<p>It seems that these mechanisms are important for type-safe extensible architectures. I’m super excited to see the next generation of frameworks like <a href="https://github.com/amethyst/specs">specs</a> and <a href="https://rocket.rs/">Rocket</a> creatively applying these ideas to make programming safer.</p>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>

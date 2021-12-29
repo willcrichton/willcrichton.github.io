@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<!--
+ _    _ _ _ _   _____      _      _     _
+| |  | (_) | | /  __ \    (_)    | |   | |
+| |  | |_| | | | /  \/_ __ _  ___| |__ | |_ ___  _ __
+| |/\| | | | | | |   | '__| |/ __| '_ \| __/ _ \| '_ \
+\  /\  / | | | | \__/\ |  | | (__| | | | || (_) | | | |
+ \/  \/|_|_|_| \_____/_|  |_|\___|_| |_|\__\___/|_| |_|
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description"
+          content="Starting with my experiences as a young, naïve game developer, I argue the importance of learning programming and its tools through the lens of goals, methods, and metrics.">
+    
+    
+    <title>
+      
+      Learning Through Goals in Computer Science | Will Crichton
+      
+    </title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,500,700,700i,900" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/tango.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+    
+    
+    <div style="display:none;">
+      $$
+      % Typography and symbols
+      \newcommand{\msf}[1]{\mathsf{#1}}
+      \newcommand{\ctx}{\Gamma}
+      \newcommand{\qamp}{&\quad}
+      \newcommand{\qqamp}{&&\quad}
+      \newcommand{\Coloneqq}{::=}
+      \newcommand{\proves}{\vdash}
+      \newcommand{\star}[1]{#1^{*}}
+      \newcommand{\eps}{\varepsilon}
+      \newcommand{\nul}{\varnothing}
+      \newcommand{\brc}[1]{\{{#1}\}}
+      \newcommand{\binopm}[2]{#1~\bar{\oplus}~#2}
+      \newcommand{\mag}[1]{|{#1}|}
+      \newcommand{\aequiv}{\equiv_\alpha}
+      \newcommand{\semi}[2]{{#1};~{#2}}
+      % Untyped lambda calculus
+      \newcommand{\fun}[2]{\lambda ~ {#1} ~ . ~ {#2}}
+      \newcommand{\app}[2]{#1 ~ #2}
+      \newcommand{\fix}[3]{\msf{fix}~({#1} : {#2}) ~ . ~ #3 }
+      \newcommand{\truet}{\msf{true}}
+      \newcommand{\falset}{\msf{false}}
+      \newcommand{\define}[2]{{#1} \triangleq {#2}}
+
+      % Typed lambda calculus - expressions
+      \newcommand{\funt}[3]{\lambda ~ \left(#1 : #2\right) ~ . ~ #3}
+      \newcommand{\lett}[4]{\msf{let} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}
+      \newcommand{\letrec}[4]{\msf{letrec} ~ \hasType{#1}{#2} = #3 ~ \msf{in} ~ #4}a
+      \newcommand{\ift}[3]{\msf{if} ~ {#1} ~ \msf{then} ~ {#2} ~ \msf{else} ~ {#3}}
+      \newcommand{\rec}[5]{\msf{rec}(#1; ~ #2.#3.#4)(#5)}
+      \newcommand{\case}[5]{\msf{case} ~ {#1} ~ \{ L(#2) \to #3 \mid R(#4) \to #5 \}}
+      \newcommand{\pair}[2]{\left({#1},~{#2}\right)}
+      \newcommand{\proj}[2]{#1 . #2}
+      \newcommand{\inj}[3]{\msf{inj} ~ #1 = #2 ~ \msf{as} ~ #3}
+      \newcommand{\letv}[3]{\msf{let} ~ {#1} = {#2} ~ \msf{in} ~ {#3}}
+      \newcommand{\fold}[2]{\msf{fold}~{#1}~\msf{as}~{#2}}
+      \newcommand{\unfold}[1]{\msf{unfold}~{#1}}
+      \newcommand{\poly}[2]{\Lambda~{#1}~.~ #2}
+      \newcommand{\polyapp}[2]{{#1}~\left[{#2}\right]}
+      \newcommand{\export}[3]{\msf{export}~ #1 ~\msf{without}~{#2}~\msf{as}~ #3}
+      \newcommand{\import}[4]{\msf{import} ~ ({#1}, {#2}) = {#3} ~ \msf{in} ~ #4}
+
+      % Typed lambda calculus - types
+      \newcommand{\tnum}{\msf{num}}
+      \newcommand{\tstr}{\msf{string}}
+      \newcommand{\tint}{\msf{int}}
+      \newcommand{\tbool}{\msf{bool}}
+      \newcommand{\tfun}[2]{#1 \rightarrow #2}
+      \newcommand{\tprod}[2]{#1 \times #2}
+      \newcommand{\tsum}[2]{#1 + #2}
+      \newcommand{\trec}[2]{\mu~{#1}~.~{#2}}
+      \newcommand{\tvoid}{\msf{void}}
+      \newcommand{\tunit}{\msf{unit}}
+      \newcommand{\tpoly}[2]{\forall~{#1}~.~{#2}}
+      \newcommand{\tmod}[2]{\exists ~ {#1} ~ . ~ #2}
+
+      % WebAssembly
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wclab}{\msf{labels}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wconst}[1]{\msf{i32.const}~{#1}}
+      \newcommand{\wbinop}[1]{\msf{i32}.{#1}}
+      \newcommand{\wgetlocal}[1]{\msf{get\_local}~{#1}}
+      \newcommand{\wsetlocal}[1]{\msf{set\_local}~{#1}}
+      \newcommand{\wgetglobal}[1]{\msf{get\_global}~{#1}}
+      \newcommand{\wsetglobal}[1]{\msf{set\_global}~{#1}}
+      \newcommand{\wload}{\msf{i32.load}}
+      \newcommand{\wstore}{\msf{i32.store}}
+      \newcommand{\wsize}{\msf{memory.size}}
+      \newcommand{\wgrow}{\msf{memory.grow}}
+      \newcommand{\wunreachable}{\msf{unreachable}}
+      \newcommand{\wblock}[1]{\msf{block}~{#1}}
+      \newcommand{\wloop}[1]{\msf{loop}~{#1}}
+      \newcommand{\wbr}[1]{\msf{br}~{#1}}
+      \newcommand{\wbrif}[1]{\msf{br\_if}~{#1}}
+      \newcommand{\wreturn}{\msf{return}}
+      \newcommand{\wcall}[1]{\msf{call}~{#1}}
+      \newcommand{\wlabel}[2]{\msf{label}~\{#1\}~{#2}}
+      \newcommand{\wframe}[2]{\msf{frame}~({#1}, {#2})}
+      \newcommand{\wtrapping}{\msf{trapping}}
+      \newcommand{\wbreaking}[1]{\msf{breaking}~{#1}}
+      \newcommand{\wreturning}[1]{\msf{returning}~{#1}}
+      \newcommand{\wconfig}[5]{\{\msf{module}{:}~{#1};~\msf{mem}{:}~{#2};~\msf{locals}{:}~{#3};~\msf{stack}{:}~{#4};~\msf{instrs}{:}~{#5}\}}
+      \newcommand{\wfunc}[4]{\{\msf{params}{:}~{#1};~\msf{locals}{:}~{#2};~\msf{return}~{#3};~\msf{body}{:}~{#4}\}}
+      \newcommand{\wmodule}[1]{\{\msf{funcs}{:}~{#1}\}}
+      \newcommand{\wcg}{\msf{globals}}
+      \newcommand{\wcf}{\msf{funcs}}
+      \newcommand{\wci}{\msf{instrs}}
+      \newcommand{\wcs}{\msf{stack}}
+      \newcommand{\wcl}{\msf{locals}}
+      \newcommand{\wcm}{\msf{mem}}
+      \newcommand{\wcmod}{\msf{module}}
+      \newcommand{\wsteps}[2]{\steps{\brc{#1}}{\brc{#2}}}
+      \newcommand{\with}{\underline{\msf{with}}}
+      \newcommand{\wvalid}[2]{{#1} \vdash {#2}~\msf{valid}}
+      % assign4.3 custom
+      \newcommand{\wtry}[2]{\msf{try}~{#1}~\msf{catch}~{#2}}
+      \newcommand{\wraise}{\msf{raise}}
+      \newcommand{\wraising}[1]{\msf{raising}~{#1}}
+      \newcommand{\wif}[2]{\msf{if}~{#1}~{\msf{else}}~{#2}}
+      \newcommand{\wfor}[4]{\msf{for}~(\msf{init}~{#1})~(\msf{cond}~{#2})~(\msf{post}~{#3})~{#4}}
+      \newcommand{\windirect}[1]{\msf{call\_indirect}~{#1}}
+
+      % session types
+      \newcommand{\ssend}[2]{\msf{send}~{#1};~{#2}}
+      \newcommand{\srecv}[2]{\msf{recv}~{#1};~{#2}}
+      \newcommand{\soffer}[4]{\msf{offer}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\schoose}[4]{\msf{choose}~\{{#1}\colon({#2})\mid{#3}\colon({#4})\}}
+      \newcommand{\srec}[1]{\msf{label};~{#1}}
+      \newcommand{\sgoto}[1]{\msf{goto}~{#1}}
+      \newcommand{\dual}[1]{\overline{#1}}
+
+      % Inference rules
+      \newcommand{\inferrule}[3][]{\cfrac{#2}{#3}\;{#1}}
+      \newcommand{\ir}[3]{\inferrule[\text{(#1)}]{#2}{#3}}
+      \newcommand{\s}{\hspace{1em}}
+      \newcommand{\nl}{\\[2em]}
+      \newcommand{\evalto}{\boldsymbol{\overset{*}{\mapsto}}}
+      \newcommand{\steps}[2]{#1 \boldsymbol{\mapsto} #2}
+      \newcommand{\evals}[2]{#1 \evalto #2}
+      \newcommand{\subst}[3]{[#1 \rightarrow #2] ~ #3}
+      \newcommand{\dynJ}[2]{#1 \proves #2}
+      \newcommand{\dynJC}[1]{\dynJ{\ctx}{#1}}
+      \newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+      \newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+      \newcommand{\hasType}[2]{#1 : #2}
+      \newcommand{\val}[1]{#1~\msf{val}}
+      \newcommand{\num}[1]{\msf{Int}(#1)}
+      \newcommand{\err}[1]{#1~\msf{err}}
+      \newcommand{\trans}[2]{#1 \leadsto #2}
+      \newcommand{\size}[1]{\left|#1\right|}
+      $$
+    </div>
+    
+    
+  </head>
+  <body>
+    <div class="container note">
+  <h1 class="site-title"><a href="/notes">&Notepad</a></h1>
+  <h1>
+    
+    Learning Through Goals in Computer Science
+    
+  </h1>
+  <div class="date">
+    
+    Will Crichton
+    
+    &nbsp; &mdash; &nbsp;
+    September 22, 2016
+  </div>
+  <div class="abstract">Starting with my experiences as a young, naïve game developer, I argue the importance of learning programming and its tools through the lens of goals, methods, and metrics.</div>
+  <center>
+<img src="http://i.imgur.com/v81zeot.jpg" />
+</center>
+
+<h2 id="hello-gaben">Hello, Gaben</h2>
+
+<p>At the tender age of 17, like many boys of the time I aspired to be a professional game developer. For the last three years, I had spent innumerable hours playing and scripting a game called <a href="http://www.garrysmod.com/">Garry’s Mod</a>, through which I learned the fundamentals of scripting languages, software design, and programming in Lua. But eventually, I hit a wall. I watched as other developers in the community made amazing tools using their 1337 hacker knowledge of C++ (which was a complete enigma to me at the time), and I felt like I just didn’t know how to progress. No one at school or amongst my friends was even remotely interested in what I was doing, so I needed to look elsewhere for help.</p>
+
+<p>Naturally, as anyone would do in this situation, I emailed Gabe Newell, the CEO of <a href="http://valvesoftware.com/">Valve</a>. Having played practically all of their games (Half Life, Portal, Team Fortress 2, etc.), I idolized that company. Although I knew next to nothing about real game development, I had heard enough to know that Valve stood at the shining pinnacle of game companies, towering over the scummy studios like EA and Ubisoft. Gabe was the company’s most public figure, and his name often invoked in hopeful discussions on the coming of Half-Life 3. So I figured, hey, if I wanted to be a game dev, who better to know than him? I wrote:</p>
+
+<blockquote>
+  <p>Hey Gabe, I’m Will Crichton, 17, and an up-and-coming scripter. I’ve seen and heard much of your generosity and willingness to actually interact with the community around Valve, so I ask not for a free mousepad or autograph but for some advice.</p>
+
+  <p>Since a wee age, Valve’s games heavily influenced my entertainment tastes. I initially got into PC gaming playing CS:S, which later evolved into TF2, and then transitioned into my involvement with Garry’s Mod. Over the past few years, I’ve come to know the Source engine that we all hold so close to our hearts very well, releasing various Lua-based addons for the community.</p>
+
+  <p>So, my question is this: can you provide any recommendations for an upcoming developer? How I can get involved in the industry on a professional level, or even how I could land a job  working with Valve? Should I study hard to learn C++ and OpenGL or something, attend a major video game development seminar, major in game design versus computer science?</p>
+
+  <p>Thanks,
+Will Crichton</p>
+</blockquote>
+
+<p>Now, in the inevitable conclusion to this tragic story, he never replied back. Gabe was probably too busy making billions of dollars to talk to a 17-year-old. However, not all hope was lost. My interests shifted into web development and later computer systems once I started at CMU. I even learned C++ along the way! But this email highlights something of fundamental importance in learning about computer science (or learning in general): setting the right goals. As I was learning about game development, I never had a goal like “learn X tool” or “learn Y language.” My goals were “make games that other people enjoy” or “get a job at Valve working on the stuff I love.” Even if this led me to do outlandish things like emailing Gabe and expecting a response, I was always seeking knowledge with a purpose.</p>
+
+<h2 id="goal-setting">Goal setting</h2>
+
+<p>Personally, my success in programming has been entirely driven by treating the act of learning to program as purely a means to some greater end. An anecdote for concreteness: I tried to pick up programming when I was 13, because I heard programming was cool and I had written some HTML code before. My goal then was to learn Python. I didn’t really know what Python was or why it was useful, but someone told me it wasn’t too hard so that became my goal: learn Python. And sure enough, by slogging through a few tutorials, I learned some Python. I could write a simple script to parse text files or check if a number was prime. But  eventually, I just dropped the whole project entirely. I wasn’t interested enough in the abstract idea of “learning Python” to keep up, so I left it for greener pastures.</p>
+
+<p>When I actually learned programming, it was mere coincidence. At 15, I started playing Garry’s Mod, and after playing long enough there were certain aspects of the game I wanted to change—I wanted to add an item, change a setting, modify an entire map. Here the goal was to play Garry’s Mod in a way that was maximally fun. And so I incrementally started to accomplish these goals. I learned the syntax of Lua so as to change some config scripts. I browsed through a few tutorials to pick up the basic semantics, enough to rewrite copy+pasted code into something I could call my own. As my programs started to grow, this forced me to learn about classes, modules, and encapsulation to manage the emergent complexity (although I wouldn’t have used any of those words to describe it at the time). And the key part: I loved every second of it. Even when I was down in the trenches debugging some stupid libraries, I saw the light at the end of the tunnel. I wasn’t passionate about programming, I was passionate about what programming enabled me to do. When I re-learned some of these concepts formally in undergrad, it made perfect sense because I had seen why it was useful. I didn’t accept on face that encapsulation is a good software practice, but I had lived it.</p>
+
+<p>To some extent, you may think, “This is obvious. Of course people learn better by doing instead of by reading textbooks.” But the lesson here is deeper than that. Even if you’re learning by doing, it still matters what you’re doing it for. The single biggest mistake that I’ve seen time and time again in programmers, whether novices or senior developers, is learning tools <em>for the sake of learning the tool</em>. Consider how effective one can learn in the following scenarios:</p>
+
+<ul>
+  <li>I’ve seen lots of people using React, I’m going to sit down and learn React this weekend.</li>
+  <li>I’ve heard that people who learn Java can get jobs, so I’m going to take a Java class this semester.</li>
+  <li>My friend uses a lot of monads in his code, so I’m going to rewrite my code using those.</li>
+</ul>
+
+<p>Now consider these same hypotheticals in a different context:</p>
+
+<ul>
+  <li>I’m trying to build this JS app for my client, but I keep forgetting to update the HTML when I change certain parts of my state. I’ve heard React can fix that, let me take a look.</li>
+  <li>I talked with a recruiter from a trading firm that says they need Java devs with a finance background, so I’m going to take a Java class this semester to complement my finance major.</li>
+  <li>My code is getting ugly because I have to keep nesting these matches on option types. I wonder if there’s a way around that?</li>
+</ul>
+
+<p>When the tool/language/library that you’re learning is a means to an end, you will know not just how to use it but also when and why. A common refrain in programming circles is “use the right tools for the job,” and a natural corollary is “learn tools for a job, not for the tools.” As a caveat, I recognize there are some who learn tools just for the intrinsic enjoyment of learning them or to broaden their horizons, and that’s totally ok. My goal of this post is just to remind you to be cautious when learning, and reflect on why you’re doing so.</p>
+
+<p>Internalizing this idea is only the first step towards being a better goal-setter. We’ve separated out methods (or means) from the goals (or ends) they accomplish. The missing piece of the puzzle is metrics, or answering two questions: 1) given a method, how effectively is it accomplishing my goal, and 2) given a goal, how desirable is that goal? For example, 17 year old me really wanted to become a game developer. This is a simple goal to evaluate in terms of its methods: after using a particular method, can I get a job at a game company? Does it substantially increase my probability of doing so? My method was to write Lua scripts for a game, which provides good hands-on experience and gets me in touch with community members who could later land me a job. By the methods metric, it’s a pretty good one. However, the goal itself turned out to be a suboptimal one. I didn’t <em>really</em> want to be a game developer, I just liked it as a hobby. Here, the goal metric was: “can this goal bring me routine happiness?” And I realized the answer was no. I couldn’t work on games every single day and be happy, so I found other programming pursuits.</p>
+
+<p>So remember: separate out the method from the goal. Avoid learning tools for the sake of learning them. And come up with concrete metrics for evaluating both your methods and your goals.</p>
+
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-16662292-3"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'UA-16662292-3');
+    </script>
+
+    <!-- Mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full" type="text/javascript"></script>
+    <script type="text/javascript">
+     MathJax.Hub.Config({
+       messageStyle: "none",
+       tex2jax: {inlineMath: [['($', '$)'], ['\\(','\\)']]},
+       "HTML-CSS": {
+         fonts: ["TeX"]
+       }
+     });
+     MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+       console.error(message[2]);
+     });
+     MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+       console.error(message[1]);
+     });
+    </script>
+  </body>
+</html>

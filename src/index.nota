@@ -1,18 +1,25 @@
 @header{
-  @div[className="profile"]{
-    @h1{Will Crichton}
-    @img[width=200][src="/assets/img/headshot.jpg"]  
+  @div{
+    @div{@h1{Will Crichton}}
+    @div{@img[className="profile"][width=200][src="/assets/img/headshot.jpg"]}
   }
-  @div[className="description"]{
-    @p{I am a computer science researcher. My research combines cognitive psychology and programming language theory to understand how people program, and to design better tools for programmers.}
-    @p{I am a 6th year Ph.D. student at Stanford University advised by @a[href="https://graphics.stanford.edu/~hanrahan/"]{Pat Hanrahan} and @a[href="https://graphics.stanford.edu/~maneesh/"]{Maneesh Agrawala}. I am planning to start a postdoc at the beginning of the next academic year, and to ultimately seek a faculty position.}
+  @div{
+    @div[className="links"]{
+      @a[className="email"][href="mailto:wcrichto@cs.stanford.edu"]{wcrichto\@cs.stanford.edu}
+      @a[href="https://twitter.com/wcrichton"]{@img[src="/assets/img/icon-twitter.png"]}
+      @a[href="https://github.com/willcrichton/"]{@img[src="/assets/img/icon-github.png"]}
+    }
+    @div{
+      @p{I am a computer science researcher. My research combines cognitive psychology and programming language theory to understand how people program, and to design better tools for programmers.}
+      @p{I am a 6th year Ph.D. student at Stanford University advised by @a[href="https://graphics.stanford.edu/~hanrahan/"]{Pat Hanrahan} and @a[href="https://graphics.stanford.edu/~maneesh/"]{Maneesh Agrawala}. I am planning to start a postdoc at the beginning of the next academic year, and to ultimately seek a faculty position.}
+    }
   }
 }
 
-@section[className="portfolio"]{
-  %(let Grid = ({children, gap}) => @div[className=`grid gap-${gap || "2rem"}`]{#children})
+@section[className="portfolio shaded"]{
+  %(let Grid = ({children, gap}) => @div[className=`grid gap-${gap || "1rem"}`]{#children})
   @p{In my research I build @em{theories} and @em{systems} about programming. A theory tries to understand a concept in a simplified setting where its properties can be identified via logical or statistical analysis. A system applies theory to a real-world setting where unexpected constraints and engineering concerns influence the theory's application.}
-  @Grid[gap="4rem"]{
+  @Grid[gap="2rem"]{
     %(let theories = [
       ["infoflow", @p{I developed an algorithm for using ownership types to statically / modularly analyze information flow, and proved its soundness as noninterference @Ref{infoflow}.}],
       ["memory", @p{I showed that working memory limits a person's ability to remember the value of variables while program tracing @Ref{tracing-wm}.}],
@@ -212,7 +219,7 @@
 }
 
 
-@section[className="ideas"]{@div{
+@section[className="ideas shaded"]{@div{
   @h2{Good Ideas For Free}
   @p[style={marginTop: '1rem'}]{Here are some interesting ideas that I haven't had time to keep exploring.}
 
