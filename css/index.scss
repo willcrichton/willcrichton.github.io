@@ -29,12 +29,8 @@ body {
   }
 
   @include mobile {
-    margin: 8px;
+    margin: 0 8px;
   }
-}
-
-#app {
-  margin: 1rem auto;
 }
 
 $primary: #4597b8;
@@ -53,11 +49,11 @@ $tertiary: #b8b132;
     @include monitor {
       margin: 2rem 0 1rem;
       gap: 1.5rem;
-
     }
 
     @include mobile {
       flex-direction: column;
+      margin-top: 1rem;
     }
 
     display: flex;
@@ -90,6 +86,7 @@ $tertiary: #b8b132;
         }
 
         .links {
+          margin-bottom: 0.5rem;
           text-align: center;
         }
       }
@@ -252,6 +249,7 @@ $tertiary: #b8b132;
 
   .ideas {
     width: 100%;
+    margin-bottom: 0;
 
     > div {
       @include monitor {
