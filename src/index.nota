@@ -1,3 +1,9 @@
+%(export let metadata = {
+  title: "Will Crichton"
+})
+%(import "@nota-lang/nota-components/dist/nota-components.css")
+%(import "../css/index.scss")
+
 @header{
   @div{
     @div{@h1{Will Crichton}}
@@ -182,7 +188,7 @@
     @div{@p[className="pub-authors"]{
       %(let me = "Will Crichton")
       #(pub.authors.map((a, i) => {
-        let author = a == me ? @span[key=i][className="author-me"]{#a} : a;
+        let author = a == me ? @span[key=a][className="author-me"]{#a} : a;
         if (pub.authors.length == 1) {
           return author;
         } else {

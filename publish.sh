@@ -9,3 +9,4 @@ mv assets dist
 echo "willcrichton.net" > dist/CNAME
 pushd dist/legacy
 mv images demos wedding ..
+mv notes/* ../notes/
