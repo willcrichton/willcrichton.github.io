@@ -1,16 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400;0,700;1,400&family=Expletus+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <link href="index.css" rel="stylesheet" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Will Crichton</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script src="index.js"></script>
-  </body>
-</html>
+<!DOCTYPE html><html lang="en"><head><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true"/><link href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400;0,700;1,400&amp;family=Expletus+Sans:wght@400;700&amp;display=swap" rel="stylesheet"/><link href="index.css" rel="stylesheet"/><meta charSet="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Will Crichton</title></head><body><div class="nota-document"><div class=""><header><div><div><h1>Will Crichton</h1></div>
+<div><img class="profile" width="200" src="/assets/img/headshot.jpg"/></div></div>
+<div><div class="links"><a class="email" href="mailto:wcrichto@cs.stanford.edu">wcrichto@cs.stanford.edu</a>
+<a href="https://twitter.com/wcrichton"><img src="/assets/img/icon-twitter.png"/></a>
+<a href="https://github.com/willcrichton/"><img src="/assets/img/icon-github.png"/></a></div>
+<div><p>I am a computer science researcher. My research combines cognitive psychology and programming language theory to understand how people program, and to design better tools for programmers.</p>
+<p>I am a 6th year Ph.D. student at Stanford University advised by <a href="https://graphics.stanford.edu/~hanrahan/">Pat Hanrahan</a> and <a href="https://graphics.stanford.edu/~maneesh/">Maneesh Agrawala</a>. I am planning to start a postdoc at the beginning of the next academic year, and to ultimately seek a faculty position.</p></div></div></header><section class="portfolio shaded">
+<p>In my research I build <em>theories</em> and <em>systems</em> about programming. A theory tries to understand a concept in a simplified setting where its properties can be identified via logical or statistical analysis. A system applies theory to a real-world setting where unexpected constraints and engineering concerns influence the theory&#x27;s application.</p>
+<div class="grid gap-2rem">
+<div class="theories"><h2>Theories</h2>
+<div class="grid gap-1rem"><div><img src="/assets/img/theory-infoflow.jpg"/>
+<p>I developed an algorithm for using ownership types to statically / modularly analyze information flow, and proved its soundness as noninterference <span class="error">infoflow</span>.</p></div><div><img src="/assets/img/theory-memory.jpg"/>
+<p>I showed that working memory limits a person&#x27;s ability to remember the value of variables while program tracing <span class="error">tracing-wm</span>.</p></div><div><img src="/assets/img/theory-docgen.jpg"/>
+<p>I articulated a design space for documentation generators based on a cognitive task analysis of how developers search through APIs <span class="error">docgen-infovis</span>.</p></div><div><img src="/assets/img/theory-cluster.jpg"/>
+<p>I demonstrated that machine learning models can classify a program&#x27;s high-level structure to a high degree of accuracy <span class="error">structure-classification</span>.</p></div></div></div>
+<!-- -->
+<!-- -->
+<div class="projects"><h2>Systems</h2>
+<div class="grid gap-1rem"><div><img src="/assets/img/system-flowistry.jpg"/>
+<p>I built <a href="https://github.com/willcrichton/flowistry/">Flowistry</a>, an information flow analyzer for Rust, to help programmers identify code unrelated to their current task <span class="error">infoflow</span>.</p></div><div><img src="/assets/img/system-cs242.jpg"/>
+<p>I redesigned <a href="https://stanford-cs242.github.io/f19/">CS 242</a>, a graduate-level course on programming languages, to help students better understand how PL theory works in the real world <span class="error">plclass</span>.</p></div><div><img src="/assets/img/system-rustdoc.jpg"/>
+<p>I extended <a href="https://doc.rust-lang.org/rustdoc">Rustdoc</a> to <a href="https://twitter.com/wcrichton/status/1456112165744615426">automatically find examples</a> for documented functions, to help programmers find examples when learning a new API.</p></div><div><img src="/assets/img/system-nota.jpg"/>
+<p>I created <a href="https://nota-lang.org/">Nota</a>, a document language for the browser, to make a world where I never have to write LaTeX again <span class="error">nota</span>.</p></div></div></div></div></section><section class="publications"><h2>Publications</h2>
+<!-- -->
+<h3>Conference publications</h3>
+<!-- -->
+<div id="def-infoflow" class="definition"><div class="pub"><div class="pub-title"><a href="https://arxiv.org/abs/2111.13662">Modular Information Flow Through Ownership<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<span class="author-me">Will Crichton</span>, <!-- -->Marco Patrignani<!-- -->, <!-- -->Maneesh Agrawala<!-- -->, <!-- --> and <!-- -->Pat Hanrahan<!-- -->.</p></div>
+<div><p>Under submission<!-- -->.</p></div></div></div><div id="def-tracing-wm" class="definition"><div class="pub"><div class="pub-title"><a href="https://arxiv.org/abs/2101.06305">The Role of Working Memory in Program Tracing<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<span class="author-me">Will Crichton</span>, <!-- -->Maneesh Agrawala<!-- -->, <!-- --> and <!-- -->Pat Hanrahan<!-- -->.</p></div>
+<div><p>CHI<!-- --> <!-- -->2021<!-- -->.</p></div></div></div><div id="def-structure-classification" class="definition"><div class="pub"><div class="pub-title"><a href="https://arxiv.org/abs/2101.10087">Automating Program Structure Classification<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<span class="author-me">Will Crichton</span>, <!-- -->Georiga Gabriela Sampaio<!-- -->, <!-- --> and <!-- -->Pat Hanrahan<!-- -->.</p></div>
+<div><p>SIGCSE<!-- --> <!-- -->2021<!-- -->.</p></div></div></div><div id="def-1" class="definition"><div class="pub"><div class="pub-title"><a href="https://jhong93.github.io/pdf/tvnews.pdf">Analysis of Faces in a Decade of US Cable TV News<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<!-- -->James Hong<!-- -->, <span class="author-me">Will Crichton</span>, <!-- -->Haotian Zhang<!-- -->, <!-- -->Daniel Y. Fu<!-- -->, <!-- -->Jacob Ritchie<!-- -->, <!-- -->Jeremy Barenholtz<!-- -->, <!-- -->Ben Hannel<!-- -->, <!-- -->Xinwei Yao<!-- -->, <!-- -->Michaela Murray<!-- -->, <!-- -->Geraldine Moriba<!-- -->, <!-- -->Maneesh Agrawala<!-- -->, <!-- --> and <!-- -->Kayvon Fatahalian<!-- -->.</p></div>
+<div><p>KDD<!-- --> <!-- -->2021<!-- -->.</p></div></div></div><div id="def-2" class="definition"><div class="pub"><div class="pub-title"><a href="https://arxiv.org/abs/1805.07339">Scanner: Efficient Video Analysis at Scale<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<!-- -->Fait Poms<!-- -->, <span class="author-me">Will Crichton</span>, <!-- -->Pat Hanrahan<!-- -->, <!-- --> and <!-- -->Kayvon Fatahalian<!-- -->.</p></div>
+<div><p>SIGGRAPH<!-- --> <!-- -->2019<!-- -->.</p></div></div></div>
+<!-- -->
+<h3>Workshop publications</h3>
+<p style="margin-bottom:1rem;font-style:italic">I love workshops! I enjoy discussing my half-baked or weirdly-niche ideas with other researchers. <a href="https://plateau-workshop.org/">PLATEAU</a> and <a href="https://snapl.org/">SNAPL</a> were a big part of the reason I got into PL/HCI research.</p>
+<!-- -->
+<div id="def-infoflow-apps" class="definition"><div class="pub"><div class="pub-title"><a href="TODO">Applying Information Flow to Program Comprehension<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<span class="author-me">Will Crichton</span>.</p></div>
+<div><p>PLATEAU<!-- --> <!-- -->2021<!-- -->.</p></div></div></div><div id="def-nota" class="definition"><div class="pub"><div class="pub-title"><a href="https://willcrichton.net/nota/">A New Medium for Communicating Research on Programming Languages<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<span class="author-me">Will Crichton</span>.</p></div>
+<div><p>HATRA @ SPLASH<!-- --> <!-- -->2021<!-- -->.</p></div></div></div><div id="def-docgen-infovis" class="definition"><div class="pub"><div class="pub-title"><a href="https://arxiv.org/abs/2011.05600">Documentation Generation as Information Visualization<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<span class="author-me">Will Crichton</span>.</p></div>
+<div><p>PLATEAU @ SPLASH<!-- --> <!-- -->2020<!-- -->.</p></div></div></div><div id="def-3" class="definition"><div class="pub"><div class="pub-title"><a href="https://arxiv.org/abs/2011.06171">The Usability of Ownership<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<span class="author-me">Will Crichton</span>.</p></div>
+<div><p>HATRA @ SPLASH<!-- --> <!-- -->2020<!-- -->.</p></div></div></div><div id="def-4" class="definition"><div class="pub"><div class="pub-title"><a href="https://arxiv.org/abs/1909.12281">Human-Centric Program Synthesis<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<span class="author-me">Will Crichton</span>.</p></div>
+<div><p>PLATEAU @ UIST<!-- --> <!-- -->2019<!-- -->.</p></div></div></div><div id="def-5" class="definition"><div class="pub"><div class="pub-title"><a href="https://arxiv.org/abs/1910.02993">Rekall: Specifying Video Events using Compositions of Spatiotemporal Labels<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<!-- -->Daniel Y. Fu<!-- -->, <span class="author-me">Will Crichton</span>, <!-- -->James Hong<!-- -->, <!-- -->Xinwei Yao<!-- -->, <!-- -->Haotian Zhang<!-- -->, <!-- -->Anh Truong<!-- -->, <!-- -->Avanika Narayan<!-- -->, <!-- -->Maneesh Agrawala<!-- -->, <!-- -->Christopher Ré<!-- -->, <!-- --> and <!-- -->Kayvon Fatahalian<!-- -->.</p></div>
+<div><p>AI Systems @ SOSP<!-- --> <!-- -->2019<!-- -->.</p></div></div></div><div id="def-plclass" class="definition"><div class="pub"><div class="pub-title"><a href="https://arxiv.org/abs/1904.06750">From Theory to Systems: A Grounded Approach to Programming Language Education<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<span class="author-me">Will Crichton</span>.</p></div>
+<div><p>SNAPL<!-- --> <!-- -->2019<!-- -->.</p></div></div></div><div id="def-6" class="definition"><div class="pub"><div class="pub-title"><a href="https://arxiv.org/abs/1901.01001">Identifying Barriers to Adoption for Rust through Online Discourse<!-- -->.</a>      </div>
+<div><p class="pub-authors">
+<!-- -->Anna Zeng<!-- -->, <!-- --> and <span class="author-me">Will Crichton</span>.</p></div>
+<div><p>PLATEAU @ SPLASH<!-- --> <!-- -->2018<!-- -->.</p></div></div></div></section><section class="ideas shaded"><div><h2>Good Ideas For Free</h2>
+<p style="margin-top:1rem">Here are some interesting ideas that I haven&#x27;t had time to keep exploring.</p>
+<!-- -->
+<ul><li>It should be possible to build a garbage-collected programming language on top of a non-GC language, <em>and get the standard library for free!</em>
+<!-- -->For instance, there should be a version of OCaml built on Rust that doesn&#x27;t need to reimplement <code>Vec</code> or <code>HashMap</code>. See <q><a href="https://willcrichton.net/notes/gradual-programming/">Gradual Programming</a></q>, <q><a href="/notes/rust-the-new-llvm/">Rust: The New LLVM</a></q> and <a href="https://github.com/willcrichton/lia">willcrichton/lia</a> for further inspiration.</li>
+<li>When a CS teacher gets 100 solutions to a new assignment, they should be able to explore the commonalities and differences between solutions. I worked on this a bit <span class="error">structure-classification</span>, but there&#x27;s a lot more to explore. See <a href="https://web.stanford.edu/~cpiech/bio/papers/generativeGrading.pdf">&quot;Generative Grading: Neural Approximate Parsing for Automated Student Feedback&quot;</a> for another cool concept in this space.</li>
+<li>Trait-based languages like Rust have a <a href="https://sdleffler.github.io/RustTypeSystemTuringComplete/">Turing-complete</a> logic-programming-esque computation model embedded into their type system. I built <a href="https://github.com/willcrichton/tyrade">Tyrade</a> to show that it&#x27;s possible to translate a sensible functional language into traits. But the translation is limited and I never formally proved the kind of relationship between these languages.</li></ul></div></section><div class="logger"></div></div><div class="portal"></div></div><script src="./index.mjs" type="module"></script></body></html>
