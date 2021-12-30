@@ -24,13 +24,7 @@ html {
 }
 
 body {
-  @include monitor {
-    margin: 0;
-  }
-
-  @include mobile {
-    margin: 0 8px;
-  }
+  margin: 0;
 }
 
 $primary: #4597b8;
@@ -94,12 +88,14 @@ $tertiary: #b8b132;
 
     h1 {
       text-align: center;
+      margin-bottom: 0.5rem;
     }
 
     .profile {
       border-radius: 4px;
       border: 1px solid #aaa;
       box-shadow: 2px 2px 2px #ccc;
+      margin-bottom: 0.5rem 
     }
 
     .links img {
@@ -109,12 +105,18 @@ $tertiary: #b8b132;
 
     .email {
       position: relative;
-      bottom: 4px;
+      bottom: 5px;
     }
   }
 
   section {
     margin: 1rem 0;
+  }
+
+  @include mobile {
+    section, header {
+      padding: 0 1rem;
+    }
   }
 
   a[href],
@@ -126,13 +128,17 @@ $tertiary: #b8b132;
     }
   }
 
+  h2 {
+    border-bottom: 2px solid black;
+    padding-bottom: 0.5rem;
+  }
+
   .shaded {
     color: white;
     background: $primary;
 
     h2 {
       border-bottom: 2px solid white;
-      padding-bottom: 0.5rem;
     }
 
     a[href],
@@ -215,6 +221,7 @@ $tertiary: #b8b132;
   h2,
   h3 {
     font-family: "Expletus Sans", "Cabin", sans-serif;
+    letter-spacing: 0;
   }
 
   .publications {

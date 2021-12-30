@@ -258,9 +258,9 @@
     yargs "^17.3.0"
 
 "@nota-lang/nota-components@^0.2.11":
-  version "0.2.12"
-  resolved "https://registry.yarnpkg.com/@nota-lang/nota-components/-/nota-components-0.2.12.tgz#b7f829657387ddf4a15858e4f5fc40270ea48626"
-  integrity sha512-km3dRM5uoPwqR8X/RYOGIXFfUAXLMp9CN2W9zqZhCgT2PpfeAJpYeH2Ixma70thiS2L1x8Vo4BSJq9T+Rsco3g==
+  version "0.2.13"
+  resolved "https://registry.yarnpkg.com/@nota-lang/nota-components/-/nota-components-0.2.13.tgz#93aae39db852de7f86a11c7dced93520528be41f"
+  integrity sha512-ykkFR6aBJIWw6DjqJeYvnLpS7YkNsUQyOtHYvH5KZllAJuaYu3JwtCZb/s5CVjKgqMitqTwnnBLqRJjYsqralQ==
   dependencies:
     "@popperjs/core" "^2.9.2"
     katex "^0.15.1"
