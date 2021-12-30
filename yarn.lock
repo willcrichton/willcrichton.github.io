@@ -258,17 +258,17 @@
     yargs "^17.3.0"
 
 "@nota-lang/nota-components@^0.2.11":
-  version "0.2.11"
-  resolved "https://registry.yarnpkg.com/@nota-lang/nota-components/-/nota-components-0.2.11.tgz#f08df019dc99c7d56c948f24de925e62fcf06641"
-  integrity sha512-tDRQ9b/eKmbwOSDku+s1jjW8AofLgHcoRUkLJI1xqPFnWH7wWK3S8XUq9HT9e0Ewo/eLafSTPNQ2dxcAH5TAlA==
+  version "0.2.12"
+  resolved "https://registry.yarnpkg.com/@nota-lang/nota-components/-/nota-components-0.2.12.tgz#b7f829657387ddf4a15858e4f5fc40270ea48626"
+  integrity sha512-km3dRM5uoPwqR8X/RYOGIXFfUAXLMp9CN2W9zqZhCgT2PpfeAJpYeH2Ixma70thiS2L1x8Vo4BSJq9T+Rsco3g==
   dependencies:
     "@popperjs/core" "^2.9.2"
     katex "^0.15.1"
 
 "@nota-lang/nota-syntax@^0.2.11":
-  version "0.2.11"
-  resolved "https://registry.yarnpkg.com/@nota-lang/nota-syntax/-/nota-syntax-0.2.11.tgz#31d81d993ff284bd726b29483e8f7f3681dac27f"
-  integrity sha512-0+wLtoxZCVTWW4X5qFJUvNRipfqJklKxRX2M1iuP/fx4b4UtbQL4Da3xIsQib6df8RgDy+8Oo13b3I/OeHib0g==
+  version "0.2.12"
+  resolved "https://registry.yarnpkg.com/@nota-lang/nota-syntax/-/nota-syntax-0.2.12.tgz#25ddf3cd051e8f075aa8db7e555316f0c9f76f07"
+  integrity sha512-hX2s7SgBKRF76FpdgYpw70nKyawNSiZlvtpEU+njUj4uOxy2UgCjbldofQlCKAk/ecoq5eQ2vg/3lLpkJ8Xn4Q==
   dependencies:
     "@babel/standalone" "^7.16.4"
 
