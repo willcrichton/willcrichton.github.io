@@ -1,6 +1,7 @@
 import React from "react";
+import { TemplateProps } from "@nota-lang/esbuild-utils/dist/template";
 
-export let Template = ({ title, script, children }) => (
+let Template: React.FC<TemplateProps> = ({ title, script, children }) => (
   <>
     <head>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,3 +25,5 @@ export let Template = ({ title, script, children }) => (
     </body>
   </>
 );
+
+export default Template;

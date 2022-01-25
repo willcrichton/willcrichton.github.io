@@ -1,22 +1,12 @@
-$cutoff: 800px;
-@mixin mobile {
-  @media (max-width: ($cutoff - 1)) {
-    @content;
-  }
-}
-@mixin monitor {
-  @media (min-width: $cutoff) {
-    @content;
-  }
-}
+@use "@nota-lang/nota-common/dist/index" as *;
 
 html {
   @include monitor {
-    font-size: 18px;
+    font-size: $size-normal;
   }
 
   @include mobile {
-    font-size: 16px;
+    font-size: $size-small;
   }
 
   font-family: "Cabin", "Helvetica", sans-serif;

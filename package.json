@@ -6,6 +6,7 @@
   "devDependencies": {
     "@codemirror/basic-setup": "^0.19.1",
     "@nota-lang/esbuild-utils": "^0.2.11",
+    "@nota-lang/nota-common": "^0.3.3",
     "@nota-lang/nota-components": "^0.2.11",
     "@nota-lang/nota-syntax": "^0.2.11",
     "@types/react": "^17.0.38",
