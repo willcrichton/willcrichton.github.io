@@ -183,7 +183,7 @@
 ])
 
 %(let Publication = ({pub, index}) =>
-  @Definition[block][name=pub.name][Label=@{\[#index\]}]{@div[className="pub"]{
+  @Definition[block][name=pub.name][label=@{\[#index\]}]{@div[className="pub"]{
     @div[className="pub-title"]{
       @a[href=pub.paper]{#(pub.title).}
     }
