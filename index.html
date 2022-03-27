@@ -9,18 +9,18 @@
 <div class="grid gap-2rem">
 <div class="theories"><h2>Theories</h2>
 <div class="grid gap-1rem"><div><img src="/assets/img/theory-infoflow.jpg">
-<p>I developed an algorithm for using ownership types to statically / modularly analyze information flow, and proved its soundness as noninterference <span class="ref">[1]</span>.</p></div><div><img src="/assets/img/theory-memory.jpg">
-<p>I showed that working memory limits a person's ability to remember the value of variables while program tracing <span class="ref">[3]</span>.</p></div><div><img src="/assets/img/theory-docgen.jpg">
-<p>I articulated a design space for documentation generators based on a cognitive task analysis of how developers search through APIs <span class="ref">[6]</span>.</p></div><div><img src="/assets/img/theory-cluster.jpg">
-<p>I demonstrated that machine learning models can classify a program's high-level structure to a high degree of accuracy <span class="ref">[4]</span>.</p></div></div></div>
+<p>I developed an algorithm for using ownership types to statically / modularly analyze information flow, and proved its soundness as noninterference <a href="#def-infoflow" class="ref">[1]</a>.</p></div><div><img src="/assets/img/theory-memory.jpg">
+<p>I showed that working memory limits a person's ability to remember the value of variables while program tracing <a href="#def-tracing-wm" class="ref">[3]</a>.</p></div><div><img src="/assets/img/theory-docgen.jpg">
+<p>I articulated a design space for documentation generators based on a cognitive task analysis of how developers search through APIs <a href="#def-docgen-infovis" class="ref">[6]</a>.</p></div><div><img src="/assets/img/theory-cluster.jpg">
+<p>I demonstrated that machine learning models can classify a program's high-level structure to a high degree of accuracy <a href="#def-structure-classification" class="ref">[4]</a>.</p></div></div></div>
 
 
 <div class="projects"><h2>Systems</h2>
 <div class="grid gap-1rem"><div><img src="/assets/img/system-flowistry.jpg">
-<p>I built <a href="https://github.com/willcrichton/flowistry/">Flowistry</a>, an information flow analyzer for Rust, to help programmers identify code unrelated to their current task <span class="ref">[1]</span>.</p></div><div><img src="/assets/img/system-cs242.jpg">
-<p>I redesigned <a href="https://stanford-cs242.github.io/f19/">CS 242</a>, a graduate-level course on programming languages, to help students better understand how PL theory works in the real world <span class="ref">[11]</span>.</p></div><div><img src="/assets/img/system-rustdoc.jpg">
+<p>I built <a href="https://github.com/willcrichton/flowistry/">Flowistry</a>, an information flow analyzer for Rust, to help programmers identify code unrelated to their current task <a href="#def-infoflow" class="ref">[1]</a>.</p></div><div><img src="/assets/img/system-cs242.jpg">
+<p>I redesigned <a href="https://stanford-cs242.github.io/f19/">CS 242</a>, a graduate-level course on programming languages, to help students better understand how PL theory works in the real world <a href="#def-plclass" class="ref">[11]</a>.</p></div><div><img src="/assets/img/system-rustdoc.jpg">
 <p>I extended <a href="https://doc.rust-lang.org/rustdoc">Rustdoc</a> to <a href="https://twitter.com/wcrichton/status/1456112165744615426">automatically find examples</a> for documented functions, to help programmers find examples when learning a new API.</p></div><div><img src="/assets/img/system-nota.jpg">
-<p>I created <a href="https://nota-lang.org/">Nota</a>, a document language for the browser, to make a world where I never have to write LaTeX again <span class="ref">[2]</span>.</p></div></div></div></div></section><section class="publications"><h2>Publications</h2>
+<p>I created <a href="https://nota-lang.org/">Nota</a>, a document language for the browser, to make a world where I never have to write LaTeX again <a href="#def-nota" class="ref">[2]</a>.</p></div></div></div></div></section><section class="publications"><h2>Publications</h2>
 
 <h3>Conference publications</h3>
 
@@ -73,5 +73,5 @@ Anna Zeng,  and <span class="author-me">Will Crichton</span>.</p></div>
 
 <ul><li>It should be possible to build a garbage-collected programming language on top of a non-GC language, <em>and get the standard library for free!</em>
 For instance, there should be a version of OCaml built on Rust that doesn't need to reimplement <code>Vec</code> or <code>HashMap</code>. See <q><a href="https://willcrichton.net/notes/gradual-programming/">Gradual Programming</a></q>, <q><a href="/notes/rust-the-new-llvm/">Rust: The New LLVM</a></q> and <a href="https://github.com/willcrichton/lia">willcrichton/lia</a> for further inspiration.</li>
-<li>When a CS teacher gets 100 solutions to a new assignment, they should be able to explore the commonalities and differences between solutions. I worked on this a bit <span class="ref">[4]</span>, but there's a lot more to explore. See <a href="https://web.stanford.edu/~cpiech/bio/papers/generativeGrading.pdf">"Generative Grading: Neural Approximate Parsing for Automated Student Feedback"</a> for another cool concept in this space.</li>
+<li>When a CS teacher gets 100 solutions to a new assignment, they should be able to explore the commonalities and differences between solutions. I worked on this a bit <a href="#def-structure-classification" class="ref">[4]</a>, but there's a lot more to explore. See <a href="https://web.stanford.edu/~cpiech/bio/papers/generativeGrading.pdf">"Generative Grading: Neural Approximate Parsing for Automated Student Feedback"</a> for another cool concept in this space.</li>
 <li>Trait-based languages like Rust have a <a href="https://sdleffler.github.io/RustTypeSystemTuringComplete/">Turing-complete</a> logic-programming-esque computation model embedded into their type system. I built <a href="https://github.com/willcrichton/tyrade">Tyrade</a> to show that it's possible to translate a sensible functional language into traits. But the translation is limited and I never formally proved the kind of relationship between these languages.</li></ul></div></section><div class="logger"></div></div><div class="portal"></div></div></div><script src="./index.mjs" type="module"></script></body></html>

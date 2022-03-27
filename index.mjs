@@ -1,4 +1,4 @@
-import{a as I,b as d,c as g,d as P,e as f,f as w,g as i,h as y,i as v}from"./chunk-ZM3O5QAT.mjs";var h=d(g()),u=d(P());var p={};I(p,{default:()=>c,metadata:()=>S});var e=d(g());var S={title:"Will Crichton"},c=f(r=>(0,e.createElement)(y,{...r},...(()=>[`
+import{a as I,b as d,c as g,d as P,e as f,f as w,g as i,h as y,i as v}from"./chunk-EX5NVBKV.mjs";var h=d(g()),u=d(P());var p={};I(p,{default:()=>c,metadata:()=>S});var e=d(g());var S={title:"Will Crichton"},c=f(r=>(0,e.createElement)(y,{...r},...(()=>[`
 `,...(()=>[`
 `,...(()=>[`
 `,`
