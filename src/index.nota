@@ -1,7 +1,6 @@
 %(export let metadata = {
   title: "Will Crichton"
 })
-%(import "@nota-lang/nota-components/dist/index.css")
 %(import "../css/index.scss")
 
 @header{

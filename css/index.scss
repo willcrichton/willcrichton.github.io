@@ -1,4 +1,5 @@
 @use "@nota-lang/nota-common/dist/index" as *;
+@use "@nota-lang/nota-components/dist/index";
 
 html {
   @include monitor {
