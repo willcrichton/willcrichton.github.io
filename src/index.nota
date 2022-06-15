@@ -10,7 +10,8 @@
   }
   @div{
     @div[className="links"]{
-      @a[className="email"][href="mailto:wcrichto@cs.stanford.edu"]{wcrichto\@cs.stanford.edu}
+      @a[className="text"][href="mailto:wcrichto@cs.stanford.edu"]{wcrichto\@cs.stanford.edu}
+      @a[className="text"][href="/assets/pdf/WillCrichton_CV.pdf"]{CV}
       @a[href="https://twitter.com/wcrichton"]{@img[src="/assets/img/icon-twitter.png"]}
       @a[href="https://github.com/willcrichton/"]{@img[src="/assets/img/icon-github.png"]}
     }
