@@ -17,7 +17,7 @@
     }
     @div{
       @p{I am a computer scientist. My research combines cognitive psychology and programming language theory to understand how people program, and to design better tools for programmers.}
-      @p{I am a 6th year Ph.D. student at Stanford University advised by @a[href="https://graphics.stanford.edu/~hanrahan/"]{Pat Hanrahan} and @a[href="https://graphics.stanford.edu/~maneesh/"]{Maneesh Agrawala}. I am planning to start a postdoc at the beginning of the next academic year, and to ultimately seek a faculty position.}
+      @p{I am currently a postdoc at Brown University advised by @a[href="https://cs.brown.edu/~sk/"]{Shriram Krishnamurthi}. I am planning to go on the academic job market in the 2023-24 cycle.}
     }
   }
 }
