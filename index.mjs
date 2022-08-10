@@ -1,4 +1,4 @@
-import{a as I,b as d,c as g,d as C,e as f,f as w,g as i,h as y,i as v}from"./chunk-LOEFEVO7.mjs";var l=d(g()),u=d(C());var p={};I(p,{default:()=>c,metadata:()=>P});var e=d(g());var P={title:"Will Crichton"},c=f(o=>(0,e.createElement)(y,{...o},...(()=>[`
+import{a as I,b as d,c as g,d as P,e as f,f as w,g as i,h as y,i as v}from"./chunk-LOEFEVO7.mjs";var l=d(g()),u=d(P());var p={};I(p,{default:()=>c,metadata:()=>C});var e=d(g());var C={title:"Will Crichton"},c=f(o=>(0,e.createElement)(y,{...o},...(()=>[`
 `,...(()=>[`
 `,`
 `,(0,e.createElement)("header",{},(0,e.createElement)("div",{},(0,e.createElement)("div",{},(0,e.createElement)("h1",{},"Will Crichton")),`
@@ -8,7 +8,7 @@ import{a as I,b as d,c as g,d as C,e as f,f as w,g as i,h as y,i as v}from"./chu
 `,(0,e.createElement)("a",{href:"https://twitter.com/wcrichton"},(0,e.createElement)("img",{src:"/assets/img/icon-twitter.png"})),`
 `,(0,e.createElement)("a",{href:"https://github.com/willcrichton/"},(0,e.createElement)("img",{src:"/assets/img/icon-github.png"}))),`
 `,(0,e.createElement)("div",{},(0,e.createElement)("p",{},"I am a computer scientist. My research combines cognitive psychology and programming language theory to understand how people program, and to design better tools for programmers."),`
-`,(0,e.createElement)("p",{},"I am currently a postdoc at Brown University advised by ",(0,e.createElement)("a",{href:"https://cs.brown.edu/~sk/"},"Shriram Krishnamurthi"),". I am planning to go on the academic job market in the 2023-24 cycle.")))),`
+`,(0,e.createElement)("p",{},"I am currently a postdoc at Brown University advised by ",(0,e.createElement)("a",{href:"https://cs.brown.edu/~sk/"},"Shriram Krishnamurthi"),", working on making ",(0,e.createElement)("a",{href:"https://www.rust-lang.org/"},"Rust")," easier to learn. I completed my Ph.D. at Stanford University advised by ",(0,e.createElement)("a",{href:"https://graphics.stanford.edu/~hanrahan/"},"Pat Hanrahan")," and ",(0,e.createElement)("a",{href:"http://graphics.stanford.edu/~maneesh/"},"Maneesh Agrawala"),". I will be on the academic job market in the 2023-24 cycle.")))),`
 `,`
 `,(0,e.createElement)("section",{className:"portfolio shaded"},...(()=>{let n=({children:r,gap:t})=>(0,e.createElement)("div",{className:`grid gap-${t||"1rem"}`},r);return[`
 `,(0,e.createElement)("p",{},"In my research I build ",(0,e.createElement)("em",{},"theories")," and ",(0,e.createElement)("em",{},"systems")," about programming. A theory tries to understand a concept in a simplified setting where its properties can be identified via logical or statistical analysis. A system applies theory to a real-world setting where unexpected constraints and engineering concerns influence the theory's application."),`
