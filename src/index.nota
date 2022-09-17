@@ -228,7 +228,7 @@
 
 
 @section[className="ideas shaded"]{@div{
-  @h2{Good Ideas For Free}
+  @h2[id="good-ideas-for-free"]{Good Ideas For Free}
   @p[style={marginTop: '1rem'}]{Here are some ideas that I worked on a bit, but haven't had time to keep exploring. If any of them are exciting to you, please reach out and I would love to chat!}
   @ol{
     @li{It should be possible to build a garbage-collected programming language on top of a non-GC language, @em{and get the standard library for free!}
