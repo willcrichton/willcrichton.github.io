@@ -44,7 +44,7 @@ import{a as P,b as d,c as g,d as x,e as f,f as w,g as i,h as b,i as y,j as v}fro
 `,r.map((t,a)=>[t,a]).filter(([t])=>t.kind=="workshop").map(([t,a])=>(0,e.createElement)(o,{key:a,pub:t,index:a}))),`
 `,`
 `,`
-`,(0,e.createElement)("section",{className:"ideas shaded"},(0,e.createElement)("div",{},(0,e.createElement)("h2",{},"Good Ideas For Free"),`
+`,(0,e.createElement)("section",{className:"ideas shaded"},(0,e.createElement)("div",{},(0,e.createElement)("h2",{id:"good-ideas-for-free"},"Good Ideas For Free"),`
 `,(0,e.createElement)("p",{style:{marginTop:"1rem"}},"Here are some ideas that I worked on a bit, but haven't had time to keep exploring. If any of them are exciting to you, please reach out and I would love to chat!"),`
 `,(0,e.createElement)("ol",{},(0,e.createElement)("li",{},"It should be possible to build a garbage-collected programming language on top of a non-GC language, ",(0,e.createElement)("em",{},"and get the standard library for free!"),`
 `,"For instance, there should be a version of OCaml built on Rust that doesn't need to reimplement ",(0,e.createElement)("code",{},"Vec")," or ",(0,e.createElement)("code",{},"HashMap"),". See: ",(0,e.createElement)("q",{},(0,e.createElement)("a",{href:"https://willcrichton.net/notes/gradual-programming/"},"Gradual Programming")),", ",(0,e.createElement)("q",{},(0,e.createElement)("a",{href:"/notes/rust-the-new-llvm/"},"Rust: The New LLVM"))," and ",(0,e.createElement)("a",{href:"https://github.com/willcrichton/lia"},"willcrichton/lia"),"."),`
