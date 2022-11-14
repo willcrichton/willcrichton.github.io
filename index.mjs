@@ -3,7 +3,7 @@ import{a as P,b as d,c as g,d as x,e as f,f as w,g as i,h as b,i as y,j as v}fro
 `,`
 `,(0,e.createElement)("header",{},(0,e.createElement)("div",{},(0,e.createElement)("div",{},(0,e.createElement)("h1",{},"Will Crichton")),`
 `,(0,e.createElement)("div",{},(0,e.createElement)("img",{className:"profile",width:200,src:"/assets/img/headshot.jpg"}))),`
-`,(0,e.createElement)("div",{},(0,e.createElement)("div",{className:"links"},(0,e.createElement)("a",{className:"text",href:"mailto:wcrichto@cs.stanford.edu"},"wcrichto@brown.edu"),`
+`,(0,e.createElement)("div",{},(0,e.createElement)("div",{className:"links"},(0,e.createElement)("a",{className:"text",href:"mailto:wcrichto@brown.edu"},"wcrichto@brown.edu"),`
 `,(0,e.createElement)("a",{className:"text",href:"/assets/pdf/WillCrichton_CV.pdf"},"CV"),`
 `,(0,e.createElement)("a",{href:"https://twitter.com/wcrichton"},(0,e.createElement)("img",{src:"/assets/img/icon-twitter.png"})),`
 `,(0,e.createElement)("a",{href:"https://github.com/willcrichton/"},(0,e.createElement)("img",{src:"/assets/img/icon-github.png"}))),`
