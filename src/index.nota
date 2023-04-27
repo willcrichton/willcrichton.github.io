@@ -12,7 +12,7 @@
     @div[className="links"]{
       @a[className="text"][href="mailto:wcrichto@brown.edu"]{wcrichto\@brown.edu}
       @a[className="text"][href="/assets/pdf/WillCrichton_CV.pdf"]{CV}
-      @a[href="https://twitter.com/wcrichton"]{@img[src="/assets/img/icon-twitter.png"]}
+      @a[href="https://twitter.com/tonofcrates"]{@img[src="/assets/img/icon-twitter.png"]}
       @a[href="https://github.com/willcrichton/"]{@img[src="/assets/img/icon-github.png"]}
     }
     @div{
