@@ -5,7 +5,7 @@ import{a as P,b as d,c as g,d as x,e as f,f as w,g as i,h as b,i as y,j as v}fro
 `,(0,e.createElement)("div",{},(0,e.createElement)("img",{className:"profile",width:200,src:"/assets/img/headshot.jpg"}))),`
 `,(0,e.createElement)("div",{},(0,e.createElement)("div",{className:"links"},(0,e.createElement)("a",{className:"text",href:"mailto:wcrichto@brown.edu"},"wcrichto@brown.edu"),`
 `,(0,e.createElement)("a",{className:"text",href:"/assets/pdf/WillCrichton_CV.pdf"},"CV"),`
-`,(0,e.createElement)("a",{href:"https://twitter.com/wcrichton"},(0,e.createElement)("img",{src:"/assets/img/icon-twitter.png"})),`
+`,(0,e.createElement)("a",{href:"https://twitter.com/tonofcrates"},(0,e.createElement)("img",{src:"/assets/img/icon-twitter.png"})),`
 `,(0,e.createElement)("a",{href:"https://github.com/willcrichton/"},(0,e.createElement)("img",{src:"/assets/img/icon-github.png"}))),`
 `,(0,e.createElement)("div",{},(0,e.createElement)("p",{},"I am a computer scientist. My research combines cognitive psychology and programming language theory to understand how people program, and to design better tools for programmers."),`
 `,(0,e.createElement)("p",{},"I am currently a postdoc at Brown University advised by ",(0,e.createElement)("a",{href:"https://cs.brown.edu/~sk/"},"Shriram Krishnamurthi"),", working on making ",(0,e.createElement)("a",{href:"https://www.rust-lang.org/"},"Rust")," easier to learn. I completed my Ph.D. at Stanford University advised by ",(0,e.createElement)("a",{href:"https://graphics.stanford.edu/~hanrahan/"},"Pat Hanrahan")," and ",(0,e.createElement)("a",{href:"http://graphics.stanford.edu/~maneesh/"},"Maneesh Agrawala"),". I will be on the academic job market in the 2023-24 cycle.")))),`
