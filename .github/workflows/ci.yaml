@@ -9,7 +9,9 @@ jobs:
   github-pages:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          lfs: true
       - run: ./publish.sh
       - uses: peaceiris/actions-gh-pages@v3
         with:
