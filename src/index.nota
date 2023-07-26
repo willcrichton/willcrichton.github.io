@@ -17,12 +17,21 @@
     }
     @div{
       @p{
-        I am a computer scientist. My research combines cognitive psychology and programming language theory to understand how people program, and to design better tools for programmers.
+        I am a computer scientist that designs principled, practical systems to amplify the intelligence of programmers. My research spans programming languages and human-computer interaction with influences from system design, cognitive psychology, and learning science. Currently, I am making @a[href="https://rust-book.cs.brown.edu/"]{Rust easier to learn}.
       }
-      @p{I am currently a postdoc at Brown University advised by @a[href="https://cs.brown.edu/~sk/"]{Shriram Krishnamurthi}, working on making @a[href="https://www.rust-lang.org/"]{Rust} easier to learn. I completed my Ph.D. at Stanford University advised by @a[href="https://graphics.stanford.edu/~hanrahan/"]{Pat Hanrahan} and @a[href="http://graphics.stanford.edu/~maneesh/"]{Maneesh Agrawala}. I will be on the academic job market in the 2023-24 cycle.}
+      @p{I am currently a postdoc at Brown University advised by @a[href="https://cs.brown.edu/~sk/"]{Shriram Krishnamurthi}. I completed my Ph.D. at Stanford University advised by @a[href="https://graphics.stanford.edu/~hanrahan/"]{Pat Hanrahan} and @a[href="http://graphics.stanford.edu/~maneesh/"]{Maneesh Agrawala}.}
     }
   }
 }
+
+@section[className="callout-wrapper"]{@div[className="callout"]{
+  @strong{I am on the job market for a tenure-track research professorship.} You can read a draft of my 
+  @a[href="/assets/pdf/WillCrichton_ResearchStatement.pdf"]{research statement},
+  @a[href="/assets/pdf/WillCrichton_TeachingStatement.pdf"]{teaching statement},
+  @a[href="/assets/pdf/WillCrichton_DiversityStatement.pdf"]{diversity statement}, and
+  @a[href="/assets/pdf/WillCrichton_CV.pdf"]{curriculum vitae}.
+
+}}
 
 @section[className="portfolio shaded"]{
   %(let Grid = ({children, gap}) => @div[className=`grid gap-${gap || "1rem"}`]{#children})
@@ -62,11 +71,28 @@
   }
 }
 
-
-
-
 %(let pubs = [
   {
+    name: "design-patterns",
+    paper: "https://arxiv.org/abs/2307.07069",
+    title: "Typed Design Patterns for the Functional Era",
+    authors: ["Will Crichton"],
+    venue: "FUNARCH @ ICFP",
+    year: 2023,
+    kind: "workshop",
+    upcoming: true,
+  },
+  {
+    name: "aquascope",
+    github: "https://github.com/cognitive-engineering-lab/aquascope",
+    title: "A Grounded Conceptual Model for Ownership Types in Rust",
+    authors: ["Will Crichton", "Gavin Gray", "Shriram Krishnamurthi"],
+    venue: "OOPSLA",
+    year: 2023,
+    kind: "conference",
+    upcoming: true,
+  },
+  /*{
     name: "infoflow-apps",
     paper: "TODO",
     title: "Applying Information Flow to Program Comprehension",
@@ -74,7 +100,7 @@
     kind: "workshop",
     venue: "PLATEAU",
     year: 2021
-  },
+  },*/
   {
     name: "infoflow",
     paper: "https://arxiv.org/abs/2111.13662",
@@ -116,7 +142,7 @@
   },
   {
     title: "Analysis of Faces in a Decade of US Cable TV News",
-    paper: "https://jhong93.github.io/pdf/tvnews.pdf",
+    paper: "https://jhong93.github.io/pdf/tvnews-kdd21.pdf",
     site: "https://tvnews.stanford.edu",
     authors: "James Hong, Will Crichton, Haotian Zhang, Daniel Y. Fu, Jacob Ritchie, Jeremy Barenholtz, Ben Hannel, Xinwei Yao, Michaela Murray, Geraldine Moriba, Maneesh Agrawala, Kayvon Fatahalian".split(", "),
     venue: "KDD",
@@ -132,22 +158,22 @@
     year: 2020,
     kind: "workshop",
   },
-  {
+  /*{
     title: "The Usability of Ownership",
     paper: "https://arxiv.org/abs/2011.06171",
     authors: ["Will Crichton"],
     venue: "HATRA @ SPLASH",
     year: 2020,
     kind: "workshop",
-  },
-  {
+  },*/
+  /*{
     title: "Human-Centric Program Synthesis",
     paper: "https://arxiv.org/abs/1909.12281",
     authors: ["Will Crichton"],
     venue: "PLATEAU @ UIST",
     year: 2019,
     kind: "workshop",
-  },
+  },*/
   {
     title: "Scanner: Efficient Video Analysis at Scale",
     github: "https://github.com/scanner-research/scanner",
@@ -174,14 +200,14 @@
     year: 2019,
     kind: "workshop",
   },
-  {
+  /*{
     title: "Identifying Barriers to Adoption for Rust through Online Discourse",
     paper: "https://arxiv.org/abs/1901.01001",
     authors: ["Anna Zeng", "Will Crichton"],
     venue: "PLATEAU @ SPLASH",
     year: 2018,
     kind: "workshop",
-  }
+  }*/
 ])
 
 %(let Publication = ({pub, index}) =>
@@ -203,12 +229,12 @@
         })).
     }}
     @div{@p{
-      #(pub.venue ? @{#(pub.venue) #(pub.year)} : @{Under submission}).
+      #(pub.venue ? @{#(pub.venue) #(pub.year) #(pub.upcoming ? "(to appear)" : "")} : @{Under submission}).
     }}
   }})
 
 @section[className="publications"]{
-  @h2{Publications}
+  @h2{Selected Publications}
 
   @h3{Conference publications}
 
@@ -218,10 +244,7 @@
     .map(([pub, i]) => @Publication[key=i][pub=pub][index=i]))
 
   @h3{Workshop publications}
-  @p[style={marginBottom: '1rem', fontStyle: 'italic'}]{
-    I love workshops! I enjoy discussing my half-baked or weirdly-niche ideas with other researchers. @a[href="https://plateau-workshop.org/"]{PLATEAU} and @a[href="https://snapl.org/"]{SNAPL} were a big part of the reason I got into PL/HCI research.
-  }
-
+  
   #(pubs
     .map((pub, i) => [pub, i])
     .filter(([p]) => p.kind == "workshop")

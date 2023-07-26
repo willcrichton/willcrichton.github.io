@@ -262,3 +262,16 @@ $tertiary: #b8b132;
     }
   }
 }
+
+.callout-wrapper {
+  width: 100%;
+
+  .callout {
+    max-width: 506px;
+    margin: 0 auto;
+    padding: 10px;
+    background: #ffe4c5;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+}
