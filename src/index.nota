@@ -17,9 +17,9 @@
     }
     @div{
       @p{
-        I am a computer scientist that designs principled, practical systems to amplify the intelligence of programmers. My research spans programming languages and human-computer interaction with influences from system design, cognitive psychology, and learning science. Currently, I am making @a[href="https://rust-book.cs.brown.edu/"]{Rust easier to learn}.
+        I am a computer scientist that designs principled, practical systems to amplify the intelligence of programmers. My research spans programming languages (PL) and human-computer interaction (HCI) with influences from system design, cognitive psychology, and learning science.
       }
-      @p{I am currently a postdoc at Brown University advised by @a[href="https://cs.brown.edu/~sk/"]{Shriram Krishnamurthi}. I completed my Ph.D. at Stanford University advised by @a[href="https://graphics.stanford.edu/~hanrahan/"]{Pat Hanrahan} and @a[href="http://graphics.stanford.edu/~maneesh/"]{Maneesh Agrawala}.}
+      @p{I am currently a postdoc at Brown University advised by @a[href="https://cs.brown.edu/~sk/"]{Shriram Krishnamurthi}, working on making @a[href="https://rust-book.cs.brown.edu/"]{Rust easier to learn}. I completed my Ph.D. at Stanford University advised by @a[href="https://graphics.stanford.edu/~hanrahan/"]{Pat Hanrahan} and @a[href="http://graphics.stanford.edu/~maneesh/"]{Maneesh Agrawala}.}
     }
   }
 }
@@ -35,13 +35,13 @@
 
 @section[className="portfolio shaded"]{
   %(let Grid = ({children, gap}) => @div[className=`grid gap-${gap || "1rem"}`]{#children})
-  @p{In my research I build @em{theories} and @em{systems} about programming. A theory tries to understand a concept in a simplified setting where its properties can be identified via logical or statistical analysis. A system applies theory to a real-world setting where unexpected constraints and engineering concerns influence the theory's application.}
+  @p{In my research, I build @em{theories} and @em{systems} about programming. A theory examines a concept in a simplified setting where its properties can be identified via logical or statistical analysis. A system applies theory to a real-world setting where unexpected constraints and engineering concerns influence the theory's application.}
   @Grid[gap="2rem"]{
     %(let theories = [
-      ["infoflow", @p{I developed an algorithm for using ownership types to statically / modularly analyze information flow, and proved its soundness as noninterference @Ref{infoflow}.}],
+      ["infoflow", @p{I developed an algorithm for using ownership types to statically & modularly analyze information flow, and proved its soundness as noninterference @Ref{infoflow}.}],
       ["memory", @p{I showed that working memory limits a person's ability to remember the value of variables while program tracing @Ref{tracing-wm}.}],
-      ["docgen", @p{I articulated a design space for documentation generators based on a cognitive task analysis of how developers search through APIs @Ref{docgen-infovis}.}],
-      ["cluster", @p{I demonstrated that machine learning models can classify a program's high-level structure to a high degree of accuracy @Ref{structure-classification}.}]
+      ["docgen", @p{I articulated a design space for documentation generators based on the information needs of developers @Ref{docgen-infovis}.}],
+      ["cluster", @p{I demonstrated that machine learning models can accurately classify a program's high-level structure @Ref{structure-classification}.}]
     ])
     @div[className="theories"]{
       @h2{Theories}
@@ -56,7 +56,7 @@
     %(let systems = [
       ["flowistry", @p{I built @a[href="https://github.com/willcrichton/flowistry/"]{Flowistry}, an information flow analyzer for Rust, to help programmers identify code unrelated to their current task @Ref{infoflow}.}],
       ["cs242", @p{I redesigned @a[href="https://stanford-cs242.github.io/f19/"]{CS 242}, a graduate-level course on programming languages, to help students better understand how PL theory works in the real world @Ref{plclass}.}],
-      ["rustdoc", @p{I extended @a[href="https://doc.rust-lang.org/rustdoc"]{Rustdoc} to @a[href="https://twitter.com/wcrichton/status/1456112165744615426"]{automatically find examples} for documented functions, to help programmers find examples when learning a new API.}],
+      ["rustdoc", @p{I extended @a[href="https://doc.rust-lang.org/rustdoc"]{Rustdoc} to help programmers learn new APIs by @a[href="https://twitter.com/wcrichton/status/1456112165744615426"]{automatically linking documentation to code examples}.}],
       ["nota", @p{I created @a[href="https://nota-lang.org/"]{Nota}, a document language for the browser, to make a world where I never have to write LaTeX again @Ref{nota}.}]
     ])
     @div[className="projects"]{

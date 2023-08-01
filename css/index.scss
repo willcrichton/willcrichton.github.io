@@ -45,8 +45,11 @@ $tertiary: #b8b132;
 
     > div {
       @include monitor {
+        $container-size: 636px;  
+        $img-size: 200px;
+
         &:first-child {
-          width: 200px;
+          width: $img-size;
         }
 
         > div:first-child {
@@ -55,7 +58,7 @@ $tertiary: #b8b132;
         }
 
         &:last-child {
-          width: 650px - 200px;
+          width: $container-size - $img-size;
         }
 
         .links {
