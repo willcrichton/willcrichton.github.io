@@ -24,13 +24,15 @@
   }
 }
 
+%(let lp = "(")
+%(let rp = ")")
+
 @section[className="callout-wrapper"]{@div[className="callout"]{
   @strong{I am on the job market for a tenure-track research professorship.} You can read a draft of my 
-  @a[href="/assets/pdf/WillCrichton_ResearchStatement.pdf"]{research statement},
-  @a[href="/assets/pdf/WillCrichton_TeachingStatement.pdf"]{teaching statement},
-  @a[href="/assets/pdf/WillCrichton_DiversityStatement.pdf"]{diversity statement}, and
-  @a[href="/assets/pdf/WillCrichton_CV.pdf"]{curriculum vitae}.
-
+  research statement #lp@a[href="/assets/html/WillCrichton_ResearchStatement.html"]{html}, @a[href="/assets/pdf/WillCrichton_ResearchStatement.pdf"]{pdf}#rp,
+  teaching statement #lp@a[href="/assets/html/WillCrichton_TeachingStatement.html"]{html}, @a[href="/assets/pdf/WillCrichton_TeachingStatement.pdf"]{pdf}#rp,
+  diversity statement #lp@a[href="/assets/html/WillCrichton_DiversityStatement.html"]{html}, @a[href="/assets/pdf/WillCrichton_DiversitStatement.pdf"]{pdf}#rp,
+  and curriculum vitae #lp@a[href="/assets/pdf/WillCrichton_CV.pdf"]{pdf}#rp.
 }}
 
 @section[className="portfolio shaded"]{
@@ -72,6 +74,17 @@
 }
 
 %(let pubs = [
+  {
+    name: "document-calculus",
+    paper: "https://arxiv.org/abs/2310.04368",
+    github: "https://github.com/cognitive-engineering-lab/document-calculus",
+    title: "A Core Calculus for Documents",
+    authors: ["Will Crichton", "Shriram Krishnamurthi"],
+    venue: "POPL",
+    year: 2024,
+    kind: "conference",  
+    upcoming: true
+  },
   {
     name: "design-patterns",
     paper: "https://arxiv.org/abs/2307.07069",
