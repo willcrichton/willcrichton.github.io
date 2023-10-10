@@ -16,7 +16,7 @@ import{a as S,b as g,c as b,d as A,e as w,f as y,g as i,h as v,i as k,j as I}fro
 `,(0,e.createElement)("section",{className:"callout-wrapper"},(0,e.createElement)("div",{className:"callout"},(0,e.createElement)("strong",{},"I am on the job market for a tenure-track research professorship.")," You can read a draft of my ",`
 `,"research statement ",o,(0,e.createElement)("a",{href:"/assets/html/WillCrichton_ResearchStatement.html"},"html"),", ",(0,e.createElement)("a",{href:"/assets/pdf/WillCrichton_ResearchStatement.pdf"},"pdf"),r,",",`
 `,"teaching statement ",o,(0,e.createElement)("a",{href:"/assets/html/WillCrichton_TeachingStatement.html"},"html"),", ",(0,e.createElement)("a",{href:"/assets/pdf/WillCrichton_TeachingStatement.pdf"},"pdf"),r,",",`
-`,"diversity statement ",o,(0,e.createElement)("a",{href:"/assets/html/WillCrichton_DiversityStatement.html"},"html"),", ",(0,e.createElement)("a",{href:"/assets/pdf/WillCrichton_DiversitStatement.pdf"},"pdf"),r,",",`
+`,"diversity statement ",o,(0,e.createElement)("a",{href:"/assets/html/WillCrichton_DiversityStatement.html"},"html"),", ",(0,e.createElement)("a",{href:"/assets/pdf/WillCrichton_DiversityStatement.pdf"},"pdf"),r,",",`
 `,"and curriculum vitae ",o,(0,e.createElement)("a",{href:"/assets/pdf/WillCrichton_CV.pdf"},"pdf"),r,".")),`
 `,`
 `,(0,e.createElement)("section",{className:"portfolio shaded"},...(()=>{let s=({children:l,gap:t})=>(0,e.createElement)("div",{className:`grid gap-${t||"1rem"}`},l);return[`
