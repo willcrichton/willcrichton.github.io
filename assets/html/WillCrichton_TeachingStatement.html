@@ -4,7 +4,8 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Teaching Statement</title>
+  <title>Teaching Statement</title> 
+  <style></style>
   <style>
 /*
  * I add this to html files generated with pandoc.
@@ -117,8 +118,8 @@ hr {
 
 pre, code, kbd, samp {
   color: #000;
-  font-family: monospace, monospace;
-  _font-family: 'courier new', monospace;
+  font-family: Inconsolata, monospace;
+  /* _font-family: 'courier new', monospace; */
   font-size: 0.98em;
 }
 
@@ -341,7 +342,6 @@ h1 {
   text-align: center;
   margin-bottom: 1em;
 }
-
   </style>
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
@@ -349,7 +349,7 @@ h1 {
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">Teaching Statement &nbsp; &middot; &nbsp; Will Crichton</h1>
+<h1 class="title">Teaching Statement &nbsp; · &nbsp; Will Crichton</h1>
 </header>
 <p>To me, teaching is one of the great joys of academia. I love to guide
 students to a deep understanding of the fundamental ideas in computer
@@ -387,26 +387,26 @@ undergraduate teaching assistant at Carnegie Mellon. In that time, I was
 a TA for <em>Functional Programming</em>, <em>Parallel and Sequential
 Data Structures and Algorithms</em>, <em>Parallel Computer Architecture
 and Programming</em>, and <em>Compiler Design</em>. Through recitations
-I learned how to work one-on-on with students to debug their mental
+I learned how to work one-on-one with students to debug their mental
 models of course concepts. I also created a new mini-course, <em>Game
 Development on the Web</em>. This course taught me how to construct an
 informative and engaging curriculum under serious resource constraints
 like one hour of lecture per week.</p>
-<p>My crystallizing experience with teaching three quarters as a solo
-instructor at Stanford. In 2017, Stanford did not have a professor
+<p>My crystallizing experience with teaching was three quarters as a
+solo instructor at Stanford. In 2017, Stanford did not have a professor
 available to teach CS 242: Programming Languages, so I volunteered to
 take over the course. “From Theory to Systems: A Grounded Approach to
-Programming Language Education” <span class="citation"
+Programming Language Education” (SNAPL 2019,<span class="citation"
 data-cites="crichton:LIPIcs.SNAPL.2019.4"><sup>[<a
 href="#ref-crichton:LIPIcs.SNAPL.2019.4"
-role="doc-biblioref">4</a>]</sup></span> describes how I redesigned CS
+role="doc-biblioref">4</a>]</sup></span>) describes how I redesigned CS
 242 to make PL theory more accessible to the average CS student by
-teaching concepts in real-world contexts. The use of formal semantics is
-motivated with WebAssembly, the most widely-used programming language
-with a complete formal semantics <span class="citation"
+placing PL concepts in real-world contexts. The use of formal semantics
+was motivated with WebAssembly, the most widely-used programming
+language with a complete formal semantics <span class="citation"
 data-cites="haas20017wasm"><sup>[<a href="#ref-haas20017wasm"
 role="doc-biblioref">5</a>]</sup></span>. The ideas in the lambda
-calculus are motivated with Rust, a widely-used systems programming
+calculus were motivated with Rust, a widely-used systems programming
 language that combines functional and imperative programming. (Students
 even read Wadler’s paper on linear types <span class="citation"
 data-cites="wadler1990linear"><sup>[<a href="#ref-wadler1990linear"
@@ -437,32 +437,31 @@ heart, and I will continue iteratively improving on my teaching
 skills.</p>
 <h2 class="unnumbered" id="teaching-philosophy">Teaching Philosophy</h2>
 <p>My teaching philosophy starts with curricular design. I focus on
-balancing declarative (what is a concept) and procedural knowledge (how
-to use a concept). Traditional instruction often focuses too much on
-either declarative knowledge or rote procedural knowledge, such as CS1
-classes that teach the semantics of a for-loop, but do not teach how to
-debug programs involving a for-loop. I take inspiration from texts like
-<em>How to Design Programs</em> <span class="citation"
+balancing declarative knowledge (what is a concept) and procedural
+knowledge (how to use a concept). Traditional instruction often focuses
+too much on declarative knowledge and rote procedural knowledge, such as
+CS1 classes that teach the semantics of a for-loop, but do not teach how
+to debug programs involving a for-loop. I take inspiration from texts
+like <em>How to Design Programs</em> <span class="citation"
 data-cites="felleisen2018design"><sup>[<a
 href="#ref-felleisen2018design" role="doc-biblioref">7</a>]</sup></span>
-which articulate procedural knowledge as “recipes” for building
-software.</p>
+which offer procedural knowledge as “recipes” for writing software.</p>
 <p>As an example from CS 242, a traditional lesson on the lambda
 calculus will include declarative knowledge about concepts like
 substitution and alpha-renaming. Beyond explaining the mechanics of
 substitution, I will explain the procedural knowledge of how to use
-substitution in the design of a new language extension. I present lambda
-calculus extensions, show how to identify the binding structure of the
-feature, and describe both correct and incorrect ways to express the
-binding structure via substitution.</p>
+substitution in the design of a new language extension. I present a new
+extensions, then show how to identify the binding structure of the
+extension, and then describe both correct and incorrect ways to express
+the binding structure via substitution.</p>
 <p>Most learning happens outside the classroom, so I take assignment
 design seriously. I create assignments that have a plausible connection
 to the real world (no “foo”s and “bar”s). Each problem has an
-articulable learning goal. I used to just design programming problems,
+articulable learning goal. I used to only include programming problems,
 but I have since come to appreciate how written problems can surface
 student misconceptions that can be glossed over with auto-grading.</p>
-<p>To get a sense of how I lecture, I recommend skimming my Strange Loop
-2021 talk on “Type-Driven API Design in Rust”: <span><a
+<p>To get a sense of how I lecture, you can watch my Strange Loop 2021
+talk on “Type-Driven API Design in Rust”: <span><a
 href="https://www.youtube.com/watch?v=bnnacleqg6k"
 class="uri">https://www.youtube.com/watch?v=bnnacleqg6k</a></span></p>
 <h2 class="unnumbered"

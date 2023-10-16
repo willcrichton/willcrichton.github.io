@@ -4,7 +4,8 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Research Statement</title>
+  <title>Research Statement</title> 
+  <style></style>
   <style>
 /*
  * I add this to html files generated with pandoc.
@@ -79,11 +80,11 @@ h1 {
 }
 
 h2 {
-  font-size: 1.5em;
+  font-size: 1.75em;
 }
 
 h3 {
-  font-size: 1.25em;
+  font-size: 1.3em;
 }
 
 h4 {
@@ -117,8 +118,8 @@ hr {
 
 pre, code, kbd, samp {
   color: #000;
-  font-family: monospace, monospace;
-  _font-family: 'courier new', monospace;
+  font-family: Inconsolata, monospace;
+  /* _font-family: 'courier new', monospace; */
   font-size: 0.98em;
 }
 
@@ -333,14 +334,13 @@ table td {
   }
 }
 
-h1 {
-  text-align: center;
-}
-
 .hero {
   margin: 0.5em 0 2em;
 }
 
+h1 {
+  text-align: center;
+}
   </style>
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
@@ -348,9 +348,9 @@ h1 {
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">Research Statement &nbsp; &middot; &nbsp; Will Crichton</h1>
+<h1 class="title">Research Statement &nbsp; · &nbsp; Will Crichton</h1>
 </header>
-<img class="hero" src="research-statement.jpg" />
+<img class="hero" src="research-statement.jpg">
 <p>All people should be able to program, and all programmers should be
 able to build complex software. However, computational literacy today is
 like textual literacy in antiquity; just as reading was the exclusive
@@ -358,33 +358,33 @@ skill of the ancient privileged castes, so too is programming the
 exclusive skill of <span class="math inline">1%</span> of today’s
 population. The number of programmers who can build reliable software
 systems or analyze massive datasets is vanishingly small. My mission is
-to empower programmers to tackle problems at all levels of
+to empower people to tackle programming problems at all levels of
 complexity.</p>
-<p>My approach to this problem is to build systems that <em>amplify the
-intelligence of programmers</em>, in the sense used by computing
-pioneers like Bush <span class="citation" data-cites="bush1945"><sup>[<a
+<p>My approach is to build systems that <em>amplify the intelligence of
+programmers</em>, in the sense used by computing pioneers like
+Bush <span class="citation" data-cites="bush1945"><sup>[<a
 href="#ref-bush1945" role="doc-biblioref">1</a>]</sup></span>,
 Engelbart <span class="citation" data-cites="engelbart1962"><sup>[<a
 href="#ref-engelbart1962" role="doc-biblioref">2</a>]</sup></span>, and
 Licklider <span class="citation" data-cites="licklider1960"><sup>[<a
 href="#ref-licklider1960" role="doc-biblioref">3</a>]</sup></span>. I
 identify core cognitive tasks that are a challenging part of routine
-programming, and I design systems to support those tasks. To both ground
-my ideas and maximize my impact, I work within programmer communities
-that apply cutting-edge tools to design complex software, with my
-current focus being on the <a href="https://rust-lang.org/">Rust
-programming language</a>. Specifically, I have developed tools to help
-Rust programmers:</p>
+programming, and I design systems to support people in accomplishing
+those tasks. To both ground my ideas and maximize my impact, I work
+within programmer communities that apply cutting-edge tools to design
+complex software, with my current focus being on the <a
+href="https://rust-lang.org/">Rust programming language</a>.
+Specifically, I have developed tools to help Rust programmers:</p>
 <ul>
 <li><p>Find relevant code by visualizing dependencies in the IDE <span
 class="citation" data-cites="crichton2022flowistry"><sup>[<a
 href="#ref-crichton2022flowistry"
 role="doc-biblioref">4</a>]</sup></span> (top-right), used by 5,000+
 Rust developers.</p></li>
-<li><p>Learn programming languages with data-driven pedagogies <span
+<li><p>Learn Rust with novel conceptual models of its key features <span
 class="citation" data-cites="crichton2023aquascope"><sup>[<a
 href="#ref-crichton2023aquascope"
-role="doc-biblioref">5</a>]</sup></span> (center), used by 50,000+ Rust
+role="doc-biblioref">5</a>]</sup></span> (center), used by 60,000+ Rust
 learners.</p></li>
 <li><p>Link API documentation to relevant examples <span
 class="citation"
@@ -407,13 +407,13 @@ role="doc-biblioref">8</a>]</sup></span> (top-left), which motivated my
 work on visualizing dependencies to overcome working memory
 limitations.</p></li>
 <li><p>I formalized my static dependency analysis for Rust
-(bottom-right) and demonstrated its generality by proving a key theorem,
-termination-insensitive non-interference <span class="citation"
+(bottom-right) and demonstrated its correctness by proving a key
+theorem, termination-insensitive non-interference <span class="citation"
 data-cites="crichton2022flowistry"><sup>[<a
 href="#ref-crichton2022flowistry"
 role="doc-biblioref">4</a>]</sup></span>.</p></li>
 <li><p>I designed a formal semantics for document languages to provide a
-precise theoretical foundation for my ongoing work into designing a
+precise theoretical foundation for my ongoing work in designing a
 successor to LaTeX <span class="citation"
 data-cites="crichton2024documents"><sup>[<a
 href="#ref-crichton2024documents"
@@ -423,27 +423,27 @@ role="doc-biblioref">9</a>]</sup></span> (bottom-left).</p></li>
 id="overcoming-working-memory-limitations-with-information-flow-analysis">Overcoming
 Working Memory Limitations with Information Flow Analysis</h2>
 <p>Intelligence amplification requires an understanding of programmer
-intelligence. So my dissertation work started with a simple question:
-which psychological theories can make concrete predictions about
-programming tasks? After reviewing the literature on applied cognitive
-psychology, I found a common theme: <em>working memory</em>, or the
-cognitive capacity for holding and processing information in the
-short-term. The key finding is that working memory has a universally
-limited capacity of 7-ish “chunks” of information. I asked: how would a
+cognition. So my thesis work started with the question: which
+psychological theories can make concrete predictions about how people
+perform programming tasks? After reviewing the literature on applied
+cognitive psychology, I found a common theme: <em>working memory</em>,
+or the cognitive capacity for processing information in the short-term.
+The key finding is that working memory has a universally limited
+capacity of 7-ish “chunks” of information. I asked: how would a
 programmer’s working memory affect their ability to perform programming
 tasks?</p>
-<p>“The Role of Working Memory in Program Tracing” <span
+<p>“The Role of Working Memory in Program Tracing” (CHI 2021,<span
 class="citation" data-cites="crichton2021wm"><sup>[<a
-href="#ref-crichton2021wm" role="doc-biblioref">8</a>]</sup></span>
+href="#ref-crichton2021wm" role="doc-biblioref">8</a>]</sup></span>)
 reports on four experiments examining the limits of human performance in
 a straightforward programming task: <em>tracing</em>, or mentally
 simulating a program’s behavior. When given a simple program like
-<code>x=8; y=2; z=4</code> and then asked the value of <code>y</code>
+“<code>x=8; y=2; z=4</code>” and then asked the value of <code>y</code>
 (i.e., a paired-associate cued recall task), we found that most
 participants started to make errors after about 7 variables, consistent
 with working memory theory. More interestingly, we asked participants to
 trace a program with an accumulating dependency structure like
-<code>x=8; y=x+2; z=y-1; ..</code>. We provided an interface to track a
+“<code>x=8; y=x+2; z=y-1;</code> …”. We designed an interface to track a
 participant’s attention by blurring-out code not under the participant’s
 cursor. We found evidence for two distinct tracing strategies: reading
 “linearly” top-down and reading “on-demand” in reverse dependency order.
@@ -455,40 +455,40 @@ program state, and the nature of that state depends on the programmer’s
 chosen strategy.</p>
 <p>This result motivated the question: how can tools amplify a
 programmer’s working memory to overcome these limitations? IDEs provide
-limited support with “Jump to Definition”, but they provide no support
-for generally following the dependency structure of a computation. This
-task has historically been the domain of <em>program slicing</em> — yet
-despite decades of work, no slicer is in widespread use today. So I
+some support with features like “Jump to Definition”, but they provide
+no support for following the full dependency structure of a computation.
+This task has historically been the domain of <em>program slicing</em> —
+yet despite decades of work, no slicer is in widespread use today. So I
 focused on developing a new program slicer with two criteria: (1) the
 analysis is practical enough to run on large codebases, and (2) the
 interface provides cognitive support for program comprehension
 tasks.</p>
-<p>“Modular Information Flow through Ownership” <span class="citation"
-data-cites="crichton2022flowistry"><sup>[<a
+<p>“Modular Information Flow through Ownership” (PLDI 2022,<span
+class="citation" data-cites="crichton2022flowistry"><sup>[<a
 href="#ref-crichton2022flowistry"
-role="doc-biblioref">4</a>]</sup></span> describes a practical static
+role="doc-biblioref">4</a>]</sup></span>) describes a practical static
 slicer for Rust, or more generally for computing <em>information
-flow</em> (of which slicing is a special case). The key insight is that
-both alias analysis and mutation analysis can be made <em>modular</em>
-by careful use of the Rust type system. Our algorithm can analyze
-function calls only using ownership annotations on the type signature,
-without needing the function body itself. To evaluate soundness, we
-proved that this approximation satisfies termination-insensitive
-non-interference within a formal model of safe Rust. To evaluate
-precision, we analyzed <span class="math inline"> ≈ 400, 000</span>
-lines of Rust code and found that this approximation is equivalent to a
-whole-program analysis in 94% of cases, meaning that little precision is
-lost. The modular information flow algorithm is publicly available as
-the Flowistry tool  (<a
+flow</em> in Rust (of which slicing is a special case). The key insight
+is that both alias analysis and mutation analysis can be made
+<em>modular</em> by careful use of the Rust type system. Our algorithm
+can analyze function calls only using ownership annotations on the type
+signature, without needing the function body itself. To evaluate
+soundness, we proved that this approximation satisfies
+termination-insensitive non-interference within a formal model of safe
+Rust. To evaluate precision, we analyzed <span
+class="math inline"> ≈ 400, 000</span> lines of Rust code and found that
+this approximation is equivalent to a whole-program analysis in 94% of
+cases, meaning that little precision is lost. The modular information
+flow algorithm is publicly available as the Flowistry tool  (<a
 href="https://github.com/willcrichton/flowistry"></a>) .</p>
 <p>Flowistry is supporting two ongoing research projects. First, I
 developed an IDE tool that interactively visualizes Flowistry’s output
 as program slices, which has been used by over 5,000 Rust developers to
 date. I am running experiments to study how Flowistry influences a
 developer’s process of comprehending code. Second, I am working with
-colleagues at Brown to use Flowistry’s dependency analysis as the
-foundation for an information flow control system that can identify
-security and privacy violations in Rust codebases.</p>
+colleagues at Brown to use Flowistry as the foundation for Paralegal 
+(<a href="https://github.com/brownsys/paralegal"></a>) , an IFC system
+that can identify security violations in Rust codebases.</p>
 <h2 class="unnumbered" id="teaching-ownership-types-at-scale">Teaching
 Ownership Types at Scale</h2>
 <p>Another key cognitive task for all programmers is <em>learning</em> —
@@ -502,19 +502,19 @@ Programming Language</em>, the Rust community’s official textbook. The
 key idea is to embed interactive quizzes within the book. Learners
 benefit because the quizzes help them engage with the material. We
 benefit by collecting large quantities of data about which parts of Rust
-that people find most difficult. Over the last year, 50,000+ people have
+that people find most difficult. Over the last year, 60,000+ people have
 answered over 1,000,000 quiz questions using our platform.</p>
-<p>“A Grounded Conceptual Model for Ownership Types in Rust” <span
-class="citation" data-cites="crichton2023aquascope"><sup>[<a
+<p>“A Grounded Conceptual Model for Ownership Types in Rust” (OOPSLA
+2023,<span class="citation" data-cites="crichton2023aquascope"><sup>[<a
 href="#ref-crichton2023aquascope"
-role="doc-biblioref">5</a>]</sup></span> describes one part of this
-experiment focused on ownership types. We first ran a formative study
-with <span class="math inline"><em>N</em> = 36</span> Rust learners who
-answered open-ended problems about ownership. We found that learners
-could recognize the surface reason for why a program is rejected (e.g.
-there are two mutable references to the same data), but they could not
-articulate the underlying reason (e.g. with a particular input, the code
-would cause undefined behavior). We developed a new pedagogy of
+role="doc-biblioref">5</a>]</sup></span>) describes one part of this
+experiment focused on ownership. We first ran a formative study with
+<span class="math inline">36</span> Rust learners who answered
+open-ended problems about ownership. We found that learners could
+recognize the surface reason for why a program is rejected (e.g., there
+are two mutable references to the same data), but they could not
+articulate the underlying reason (e.g,. with a particular input, the
+code would cause undefined behavior). We developed a new pedagogy of
 ownership types to address this disconnect. At its heart is a conceptual
 model of ownership types as flow-sensitive <em>permissions</em> to read,
 write, or own data. We built a compiler plugin that takes a Rust program
@@ -522,13 +522,13 @@ and generates a diagram showing how each statement affects permissions.
 Finally, we wrote a replacement chapter on ownership for the Rust Book
 that uses these diagrams (<a
 href="https://rust-book.cs.brown.edu/ch04-02-references-and-borrowing.html">link</a>).</p>
-<p>To evaluate the permissions pedagogy, we deployed the Ownership
-Inventory in the Rust Book Experiment and gathered several weeks of data
-with the original ownership chapter from <em>The Rust Programming
-Language</em>. Then we deployed our new chapter, and gathered another
-several weeks of data. Across 18 questions on the Inventory, we found
-that the new chapter improved average quiz scores by 9% from 48% to 57%
-(<span class="math inline"><em>N</em> = 312</span>, <span
+<p>We evaluated the permissions pedagogy by comparing the learning
+outcomes of our new text versus the baseline chapter on ownership in
+<em>The Rust Programming Language</em>. To measure learning outcomes, we
+designed and deployed an instrument to evaluate learners’ understanding
+of ownership. An A/B test of the two texts found that our pedagogy
+improved average quiz scores by +9% from 48% to 57% (<span
+class="math inline"><em>N</em> = 312</span>, <span
 class="math inline"><em>p</em> &lt; 0.001</span>, <span
 class="math inline"><em>d</em> = 0.56</span>). More broadly, this
 experiment validated our hypothesis that gathering quiz data at scale
@@ -541,25 +541,29 @@ on.</p>
 successor to TeX?</h4>
 <p>The modern document uses teraflops of processing power and millions
 of pixels to… render stylized text on emulated <span
-class="math inline">8.5 × 11</span> pieces of paper. Absurd! That made
+class="math inline">8.5” × 11”</span> pieces of paper. Absurd! That made
 sense at the birth of TeX in 1978, but the future of communication needs
 better document technologies. I am interested in this problem from the
 cognitive and PL perspectives. First, which aspects of reading
 comprehension could be better facilitated by changes to the
 communication medium? For instance, “explorable explanations” are
-probably less cognitively useful compared to ideas like: all symbols
+probably less cognitively useful compared to ideas such as: all symbols
 should be linked back to their definition. All figures should be visible
-on-screen when a person is reading text about the figure. All text
-should come with machine-checkable comprehension questions to engage the
+on-screen when a person is reading text about a figure. All text should
+come with machine-checkable comprehension questions to engage the
 reader.</p>
 <p>But this begs the PL perspective: how should we design a document
-language to make the necessary cognitive augmentations practical for all
+language to make the necessary cognitive augmentations practical for
 authors, especially those without significant training in technical
 communication, education, psychology, and so on? How should document
 languages integrate content and computation with minimal syntactic and
 semantic overhead? My prototype system Nota  (<a
-href="https://nota-lang.org/"></a>) is one step in this direction, and I
-intend to continue exploring down this path.</p>
+href="https://nota-lang.org/"></a>) and my document calculus
+formalism <span class="citation"
+data-cites="crichton2024documents"><sup>[<a
+href="#ref-crichton2024documents"
+role="doc-biblioref">9</a>]</sup></span> represent my first steps in
+this direction.</p>
 <h4
 id="how-will-ai-programming-tools-change-the-nature-of-programming-expertise">How
 will AI programming tools change the nature of programming
@@ -574,28 +578,28 @@ machine as much a person? Psychology provides the useful framework of
 recall-oriented activity — programmers commit to memory the syntax and
 semantics of a language, and write programs by recalling that knowledge.
 AI shifts towards recognition — programmers ask for a program, and
-recognize whether the generated code is satisfactory. I’m interested in
+recognize whether the generated code is satisfactory. I am interested in
 the cognition of program recognition: how the features of a program and
-the nature of a person’s background affect help or hamper their ability
-to distinguish desirable from undesirable programs.</p>
+the aspects of a person’s background would help or hamper them in
+distinguishing desirable from undesirable programs.</p>
 <h4
 id="what-are-useful-lightweight-metrics-for-comparing-the-expressiveness-of-software-systems">What
 are useful, lightweight metrics for comparing the expressiveness of
 software systems?</h4>
 <p>Library developers love to market their software as being “easy to
-use” or “for humans”. Researchers claim that their systems are often
-“more expressive” than prior work. However, the singular metric that
-often justifies these claims is lines-of-code. Despite its imperfection
-as a metric, but no one has yet come up with an alternative besides “run
-a large-scale user study” or “deploy the tool in industry and see who
-adopts it.” So here’s a hypothesis: the length of the argument for why a
-program is correct (say, the size of a proof in a proof assistant) has a
-higher correlation with program comprehension effort than the length of
-the program itself. If this hypothesis could be experimentally
-validated, then that would be grounds for developing a new
-expressiveness metric. A system that lends itself to short proofs across
-a benchmark of reference tasks could be predicted as more usable (to an
-expert) than a system requiring longer proofs.</p>
+use” or “for humans”. Researchers often claim that their systems are
+often “more expressive” than prior work. However, the singular metric
+that often justifies these claims is lines-of-code. Despite its
+imperfection as a metric, no one has yet come up with an alternative
+besides “run a large-scale user study” or “deploy the tool in industry
+and see who adopts it.” So here’s a hypothesis: the length of the
+argument for why a program is correct (say, the size of a proof in a
+proof assistant) has a higher correlation with program comprehension
+effort than the length of the program itself. If this hypothesis could
+be experimentally validated, then that would be grounds for developing a
+new expressiveness metric. A system that lends itself to short proofs
+across a benchmark of reference tasks could be predicted as more usable
+(to an expert) than a system requiring longer proofs.</p>
 <div id="refs" class="references csl-bib-body hanging-indent"
 data-line-spacing="2" role="doc-bibliography">
 <div id="ref-bush1945" class="csl-entry" role="doc-biblioentry">
