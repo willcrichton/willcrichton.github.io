@@ -1,0 +1,6 @@
+filters:
+- pandoc-katex
+- pandoc-crossref
+
+metadata:
+  linkReferences: true
