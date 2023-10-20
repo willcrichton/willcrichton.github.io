@@ -590,12 +590,12 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="
 <li>Like with Python, we convert the flat data into hierarchical data
 with a hashmap and the <code>utils::group_by</code> helper. (Note that
 everywhere we refer to <code>HashMap</code> is actually an alias for <a
-href="https://docs.rs/fxhash/latest/fxhash/type.FxHashMap.html"><code>fxhash::FxHashMap</code></a>,
+href="https://docs.rs/fxhash/0.2.1/fxhash/type.FxHashMap.html"><code>fxhash::FxHashMap</code></a>,
 which is just <a
 href="https://doc.rust-lang.org/stable/std/collections/struct.HashMap.html"><code>std::collections::HashMap</code></a>
 with a more efficient hashing algorithm.)</li>
 <li>Then we iterate over all combinations of questions using the <a
-href="https://docs.rs/itertools/latest/itertools/trait.Itertools.html#method.combinations"><code>Itertools::combinations</code></a>
+href="https://docs.rs/itertools/0.11.0/itertools/trait.Itertools.html#method.combinations"><code>Itertools::combinations</code></a>
 method.</li>
 <li>In the inner loop, we iterate over all users via
 <code>all_grand_totals.iter()</code>.</li>
@@ -612,7 +612,7 @@ href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">Pearson’s
 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span></span></span></span></a>.</li>
 <li>We use <code>max_by_key</code> to get the questions with the highest
 correlation. We use <a
-href="https://docs.rs/float-ord/latest/float_ord/struct.FloatOrd.html"><code>FloatOrd</code></a>
+href="https://docs.rs/float-ord/0.3.2/float_ord/struct.FloatOrd.html"><code>FloatOrd</code></a>
 so we can compare floats.</li>
 </ul>
 <p>So how’s the performance? I used <a
@@ -647,9 +647,10 @@ that <code>Vec</code>. We could just use <code>usize</code> indices with
 the <code>Vec</code> type, but a better practice is to use newtypes to
 represent each kind of index. In fact, this problem comes up so often in
 my work that I’ve already made a crate for it, <a
-href="https://docs.rs/indexical/">Indexical</a> (which builds on the <a
-href="https://docs.rs/index_vec/">index_vec</a> crate). We define those
-index types like this:</p>
+href="https://docs.rs/indexical/0.6.0/indexical/index.html">Indexical</a>
+(which builds on the <a
+href="https://docs.rs/index_vec/0.1.3/index_vec/index.html">index_vec</a>
+crate). We define those index types like this:</p>
 <div class="sourceCode" id="cb7"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">struct</span> QuestionRef<span class="op">&lt;</span><span class="ot">&#39;a</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="op">&amp;</span><span class="ot">&#39;a</span> Question)<span class="op">;</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">struct</span> UserRef<span class="op">&lt;</span><span class="ot">&#39;a</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="op">&amp;</span><span class="ot">&#39;a</span> User)<span class="op">;</span></span>
@@ -670,7 +671,7 @@ with <code>QuestionRef</code> and <code>UserRef</code>. Those indices
 are represented as <code>u16</code> and a <code>u32</code>,
 respectively.</p>
 <p>Finally we update <code>k_corrset</code> to generate an <a
-href="https://docs.rs/indexical/latest/indexical/struct.IndexedDomain.html"><code>IndexedDomain</code></a>
+href="https://docs.rs/indexical/0.6.0/indexical/struct.IndexedDomain.html"><code>IndexedDomain</code></a>
 for questions and users, and then use the <code>QuestionIdx</code> and
 <code>UserIdx</code> types throughout the rest of the code:</p>
 <div class="sourceCode" id="cb8"><pre
@@ -712,8 +713,8 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb8-1"><a href="
 <p>Again, check out the <a
 href="https://github.com/willcrichton/corrset-benchmark/blob/main/src/inner/indexed.rs">GitHub</a>
 for the complete implementation, and check out the <a
-href="https://docs.rs/indexical/">indexical docs</a> for details on its
-API.</p>
+href="https://docs.rs/indexical/0.6.0/indexical/index.html">indexical
+docs</a> for details on its API.</p>
 <p>Once again we run our benchmark on the inner loop of the computation.
 The new inner loop runs in <strong>1.0 milliseconds</strong>, which is 4
 times faster than our last iteration, and 35 times faster than our
@@ -735,7 +736,7 @@ performance of key/value lookups (avoids hashing).</p>
 <p>We’re trying to fully optimize for performance, and given the scale
 of our dataset, we can afford to make the compute/memory trade-off. We
 will use Indexical which provides a <a
-href="https://docs.rs/indexical/latest/indexical/map/struct.DenseIndexMap.html"><code>DenseIndexMap&lt;K, V&gt;</code></a>
+href="https://docs.rs/indexical/0.6.0/indexical/map/struct.DenseIndexMap.html"><code>DenseIndexMap&lt;K, V&gt;</code></a>
 type that is internally implemented as a <code>Vec&lt;V&gt;</code> type
 indexed by <code>K::Index</code>.</p>
 <p>The main change to the <code>k_corrset</code> function is that we
@@ -839,7 +840,7 @@ href="https://en.wikipedia.org/wiki/Bit_array">bit-set</a>, which uses
 the individual bits of memory to represent whether an object is present
 or absent in a set. Indexical provides another abstraction for
 integratings bit-sets with our newtype indices: the <a
-href="https://docs.rs/indexical/latest/indexical/struct.IndexSet.html"><code>IndexSet</code></a>.</p>
+href="https://docs.rs/indexical/0.6.0/indexical/struct.IndexSet.html"><code>IndexSet</code></a>.</p>
 <p>Previously, our <code>q_to_score</code> data structure mapped from
 questions to a user-indexed vector of optional scores (that is,
 <code>UserMap&lt;'_, Option&lt;u32&gt;&gt;</code>). Now we will change
@@ -903,9 +904,9 @@ not fast enough. Let’s check back in with samply:</p>
 <p>Now we’re spending all our time in the bit-set intersection! That
 means we need to dig in to how the bit-set is implemented. The default
 bit-set library used by Indexical is <a
-href="https://docs.rs/bitvec/">bitvec</a>. As of 2023, the
-implementation of intersection within bitvec’s bit-set is roughly this
-code:</p>
+href="https://docs.rs/bitvec/1.0.1/bitvec/index.html">bitvec</a>. As of
+2023, the implementation of intersection within bitvec’s bit-set is
+roughly this code:</p>
 <div class="sourceCode" id="cb18"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> intersect(dst<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> BitSet<span class="op">,</span> src<span class="op">:</span> <span class="op">&amp;</span>BitSet) <span class="op">{</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (n1<span class="op">,</span> n2)<span class="op">:</span> (<span class="op">&amp;</span><span class="kw">mut</span> <span class="dt">u64</span><span class="op">,</span> <span class="op">&amp;</span><span class="dt">u64</span>) <span class="kw">in</span> dst<span class="op">.</span>iter_mut()<span class="op">.</span>zip(<span class="op">&amp;</span>src) <span class="op">{</span></span>
@@ -934,14 +935,15 @@ and under the hood, Rust emits a single SIMD instruction to perform the
 <code>&amp;=</code> operation that ANDs four <code>u64</code>s at a
 time.</p>
 <p>Where can we find a SIMD-accelerated bitset? <a
-href="https://docs.rs/bitvec/">bitvec</a> doesn’t support SIMD. There
-are a few on <a href="https://crates.io">crates.io</a>, and I tried out
-one called <a href="https://github.com/psiace/bitsvec">bitsvec</a>. It
-works well for fast intersection, but I found that its iterator which
-finds the indices of the 1-bits is actually quite slow. So I copied
-large portions of the bitsvec implementation and wrote a more efficient
-iterator, which you can check out in the <a
-href="https://github.com/willcrichton/indexical/blob/main/src/bitset/simd.rs">Indexical
+href="https://docs.rs/bitvec/1.0.1/bitvec/index.html">bitvec</a> doesn’t
+support SIMD. There are a few on <a
+href="https://crates.io">crates.io</a>, and I tried out one called <a
+href="https://github.com/psiace/bitsvec">bitsvec</a>. It works well for
+fast intersection, but I found that its iterator which finds the indices
+of the 1-bits is actually quite slow. So I copied large portions of the
+bitsvec implementation and wrote a more efficient iterator, which you
+can check out in the <a
+href="https://github.com/willcrichton/indexical/blob/913fbf5830f4d5acedd23e04841e453ed2659165/src/bitset/simd.rs">Indexical
 source</a> if you’re curious.</p>
 <p>Thanks to Indexical’s abstractions, swapping in the SIMD bitset only
 requires changing a type alias and no other modifications to the
@@ -1110,8 +1112,8 @@ loop substantively faster — let me know if you have any ideas. But we’ve
 left out one final, obvious trick: parallelism! This problem is
 embarassingly parallel, so we can trivially parallelize the inner loop
 over multiple cores. <a
-href="https://github.com/rayon-rs/rayon">Rayon</a> makes this a
-breeze:</p>
+href="https://docs.rs/rayon/1.8.0/rayon/index.html">Rayon</a> makes this
+a breeze:</p>
 <div class="sourceCode" id="cb21"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> all_qs <span class="op">=</span> questions<span class="op">.</span>indices()<span class="op">;</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>all_qs<span class="op">.</span>combinations(k)</span>
@@ -1159,7 +1161,7 @@ task assignment. That is, we can batch together many question
 combinations and pass them off to a thread all at once.</p>
 <p>For this task, I defined a quick-and-dirty batching iterator that
 uses an <a
-href="https://docs.rs/arrayvec/latest/arrayvec/struct.ArrayVec.html"><code>ArrayVec</code></a>
+href="https://docs.rs/arrayvec/0.7.4/arrayvec/struct.ArrayVec.html"><code>ArrayVec</code></a>
 to avoid allocation.</p>
 <div class="sourceCode" id="cb22"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">struct</span> Batched<span class="op">&lt;</span><span class="kw">const</span> N<span class="op">:</span> <span class="dt">usize</span><span class="op">,</span> I<span class="op">:</span> <span class="bu">Iterator</span><span class="op">&gt;</span> <span class="op">{</span></span>
