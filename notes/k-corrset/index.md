@@ -167,8 +167,8 @@ The key elements to understand:
 * We use `max_by_key` to get the questions with the highest correlation. We use [`FloatOrd`] so we can compare floats.
 
 So how's the performance? I used [Criterion] to benchmark the performance of the inner loop (the `filter_map`) with Criterion's default settings, using
-the same dataset as before. The new inner loop runs in **4.9 milliseconds**, which is about 8 times faster than the Python baseline! 
-But our full computation is still 134 days, which is too long. Now let's start really optimizing.
+the same dataset as before. The new inner loop runs in **4.2 milliseconds**, which is about 8 times faster than the Python baseline! 
+But our full computation is still 124 days, which is too long. Now let's start really optimizing.
 
 
 ## Indexed Data
@@ -305,7 +305,7 @@ Is now this:
 q_to_score[*q][u]
 ```
 
-Running the benchmark again, the new inner loop runs in **176 microseconds**, which is 6 times faster than our last iteration, and 204 times faster than our Python baseline. We're down to 5.2 days for the total computation.
+Running the benchmark again, the new inner loop runs in **181 microseconds**, which is 6 times faster than our last iteration, and 199 times faster than our Python baseline. We're down to 5.3 days for the total computation.
 
 
 ## Bounds Checks
@@ -336,7 +336,7 @@ let grand_total = unsafe { *all_grand_totals.get_unchecked(u) };
 
 It is unsafe without bounds-checks, so we have to mark these blocks as `unsafe`.
 
-Running the benchmark again, the new inner loop runs in **160 microseconds**, which is 1.1x faster than our last iteration, and 225 times faster than our Python baseline. We're down to 4.7 days for the total computation.
+Running the benchmark again, the new inner loop runs in **156 microseconds**, which is 1.16x faster than our last iteration, and 229 times faster than our Python baseline. We're down to 4.6 days for the total computation.
 
 ## Bit-sets
 
@@ -416,7 +416,7 @@ all_qs.combinations(k)
   // rest of the code is the same
 ```
 
-Running the benchmark again, the new inner loop runs in **47 microseconds**, which is 3.4 times faster than our last iteration, and 764 times faster than our Python baseline. We're down to 1.4 days for the total computation.
+Running the benchmark again, the new inner loop runs in **47 microseconds**, which is 3.4 times faster than our last iteration, and 769 times faster than our Python baseline. We're down to 1.4 days for the total computation.
 
 
 ## SIMD
@@ -457,7 +457,7 @@ you can check out in the [Indexical source][indexical-simd] if you're curious.
 
 Thanks to Indexical's abstractions, swapping in the SIMD bitset only requires changing a type alias and no other modifications to the `k_corrset` function. I experimented with different lane sizes and found `u64x16` is the most efficient on my machine for this dataset.
 
-Once more we run the benchmark, and the new inner loop runs in **1.37 microseconds**, which is 34 times faster than our last iteration, and 26,138 times faster than our Python baseline. We're down to 58 minutes for the total computation.
+Once more we run the benchmark, and the new inner loop runs in **1.35 microseconds**, which is 34 times faster than our last iteration, and 26,459 times faster than our Python baseline. We're down to 57 minutes for the total computation.
 
 
 ## Allocation
@@ -510,7 +510,7 @@ all_qs.combinations(k)
   })
 ```
 
-We run the benchmark again, and the new inner loop runs in **1.09 microseconds**, which is 1.25 times faster than our last iteration, and 32,746 times faster than our Python baseline. We're down to 46 minutes for the total computation.
+We run the benchmark again, and the new inner loop runs in **1.09 microseconds**, which is 1.24 times faster than our last iteration, and 32,940 times faster than our Python baseline. We're down to 46 minutes for the total computation.
 
 (As an aside, it's impressive that the heap allocator was fast enough to have such a small impact on our runtime!)
 
@@ -518,14 +518,14 @@ In summary, [Table @tbl:inner-speedup] shows the runtime, relative speedup, abso
 
 | Level     | Runtime   |   Speedup over previous level |   Speedup over Python | Est. completion time |
 |:----------|--------------:|--------------:|--------------:|--------------:|
-| python    | 35.85 ms      |               | 1.00×             | 2.88 years           |
-| 0_naive   | 4.57 ms       | 7.84×             | 7.84×             | 134.17 days          |
-| 1_indexed | 1.04 ms       | 4.41×             | 34.58×            | 30.43 days           |
-| 2_imap    | 175.85 μs     | 5.90×             | 203.86×           | 5.16 days            |
-| 3_bchecks | 159.56 μs     | 1.10×             | 224.68×           | 4.68 days            |
-| 4_bitset  | 46.95 μs      | 3.40×             | 763.56×           | 1.38 days            |
-| 5_simd    | 1.37 μs       | 34.23×            | 26,138.20×        | 57.96 min            |
-| 6_alloc   | 1.09 μs       | 1.25×             | 32,746.46×        | 46.27 min            |
+| python    | 35.85 ms      |              | 1.00×             | 2.88 years           |
+| 0_basic   | 4.24 ms       | 8.46×             | 8.46×             | 124.40 days          |
+| 1_indexed | 1.03 ms       | 4.11×             | 34.78×            | 30.25 days           |
+| 2_imap    | 180.52 μs     | 5.71×             | 198.60×           | 5.30 days            |
+| 3_bchecks | 156.23 μs     | 1.16×             | 229.47×           | 4.59 days            |
+| 4_bitset  | 46.60 μs      | 3.35×             | 769.26×           | 1.37 days            |
+| 5_simd    | 1.35 μs       | 34.40×            | 26,459.54×        | 57.26 min            |
+| 6_alloc   | 1.09 μs       | 1.24×             | 32,940.02×        | 45.99 min            |
 
 Table: Performance numbers for the inner loop. {#tbl:inner-speedup}
 
@@ -557,7 +557,7 @@ The `par_bridge` method takes a serial iterator and converts it into a parallel 
 
 We need a different benchmark to evaluate the outer loop. I used Criterion to run the outer loop over 5,000,000 question combinations in a single run with a given strategy. This is enough executions to reveal differences in each outer loop without waiting weeks for the benchmark to complete.
 
-Running this benchmark with the serial strategy over the fastest inner loop takes **7.0 seconds**. My Macbook Pro has 10 cores, so with Rayon we should expect to see close to a 10x speedup. After benchmarking the parallel strategy, we get... **4.2 seconds** to complete 5,000,000 combinations. That's only a 1.7x speedup! Shameful!
+Running this benchmark with the serial strategy over the fastest inner loop takes **6.8 seconds**. My Macbook Pro has 10 cores, so with Rayon we should expect to see close to a 10x speedup. After benchmarking the parallel strategy, we get... **4.2 seconds** to complete 5,000,000 combinations. That's only a 1.6x speedup! Shameful!
 
 
 ## Batching
@@ -611,13 +611,13 @@ all_qs.combinations(k)
     // same code as before
 ```
 
-Running the outer-loop benchmark again, the chunking iterator now completes 5,000,000 combinations in **994 milliseconds**. This is a 7.05x seedup over the serial approach, which is much better for our 10-core machine. Ideally we would get closer to 10x, but I think this post is long enough. In summary, our outer loop runtime numbers are in [Table @tbl:outer-loop].
+Running the outer-loop benchmark again, the chunking iterator now completes 5,000,000 combinations in **982 milliseconds**. This is a 6.9x speedup over the serial approach, which is much better for our 10-core machine. Ideally we would get closer to 10x, but I think this post is long enough. In summary, our outer loop runtime numbers are in [Table @tbl:outer-loop].
 
 | Level     | Runtime   |   Speedup over previous level |   Speedup over Python | Est. completion time |
 |:----------|--------------:|--------------:|--------------:|--------------:|
-| 0_serial   | 7.01 s        |             |               | 59.29 min            |
-| 1_parallel | 4.18 s        | 1.68×             | 1.68×             | 35.35 min            |
-| 2_batched  | 994.53 ms     | 4.21×             | 7.05×             | 8.41 min             |
+| 0_serial   | 6.80 s        |               | 26,342.63×        | 57.51 min            |
+| 1_parallel | 4.22 s        | 1.61×             | 42,439.31×        | 35.70 min            |
+| 2_batched  | 982.46 ms     | 4.30×             | 182,450.94×       | 8.30 min             |
 
 Table: Performance numbers for the outer loop. {#tbl:outer-loop}
 

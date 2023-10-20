@@ -633,9 +633,9 @@ so we can compare floats.</li>
 href="https://bheisler.github.io/criterion.rs/book/index.html">Criterion</a>
 to benchmark the performance of the inner loop (the
 <code>filter_map</code>) with Criterion’s default settings, using the
-same dataset as before. The new inner loop runs in <strong>4.9
+same dataset as before. The new inner loop runs in <strong>4.2
 milliseconds</strong>, which is about 8 times faster than the Python
-baseline! But our full computation is still 134 days, which is too long.
+baseline! But our full computation is still 124 days, which is too long.
 Now let’s start really optimizing.</p>
 <h2 id="indexed-data">Indexed Data</h2>
 <p>Rather than guess how to optimize the code, let’s run a profiler to
@@ -789,9 +789,9 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb10-1"><a href=
 <p>Is now this:</p>
 <div class="sourceCode" id="cb11"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>q_to_score[<span class="op">*</span>q][u]</span></code></pre></div>
-<p>Running the benchmark again, the new inner loop runs in <strong>176
+<p>Running the benchmark again, the new inner loop runs in <strong>181
 microseconds</strong>, which is 6 times faster than our last iteration,
-and 204 times faster than our Python baseline. We’re down to 5.2 days
+and 199 times faster than our Python baseline. We’re down to 5.3 days
 for the total computation.</p>
 <h2 id="bounds-checks">Bounds Checks</h2>
 <p>Another small performance hit comes every time we use the brackets
@@ -818,10 +818,10 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb13-1"><a href=
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> grand_total <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> <span class="op">*</span>all_grand_totals<span class="op">.</span>get_unchecked(u) <span class="op">};</span></span></code></pre></div>
 <p>It is unsafe without bounds-checks, so we have to mark these blocks
 as <code>unsafe</code>.</p>
-<p>Running the benchmark again, the new inner loop runs in <strong>160
-microseconds</strong>, which is 1.1x faster than our last iteration, and
-225 times faster than our Python baseline. We’re down to 4.7 days for
-the total computation.</p>
+<p>Running the benchmark again, the new inner loop runs in <strong>156
+microseconds</strong>, which is 1.16x faster than our last iteration,
+and 229 times faster than our Python baseline. We’re down to 4.6 days
+for the total computation.</p>
 <h2 id="bit-sets">Bit-sets</h2>
 <p>We’re currently at a 225x speedup, which means we still have three
 orders of magnitude left to go. To get there, we need to rethink the
@@ -909,7 +909,7 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb17-1"><a href=
 <span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>  <span class="co">// rest of the code is the same</span></span></code></pre></div>
 <p>Running the benchmark again, the new inner loop runs in <strong>47
 microseconds</strong>, which is 3.4 times faster than our last
-iteration, and 764 times faster than our Python baseline. We’re down to
+iteration, and 769 times faster than our Python baseline. We’re down to
 1.4 days for the total computation.</p>
 <h2 id="simd">SIMD</h2>
 <p>Our new computational structure is definitely helping, but it’s still
@@ -965,9 +965,9 @@ requires changing a type alias and no other modifications to the
 sizes and found <code>u64x16</code> is the most efficient on my machine
 for this dataset.</p>
 <p>Once more we run the benchmark, and the new inner loop runs in
-<strong>1.37 microseconds</strong>, which is 34 times faster than our
-last iteration, and 26,138 times faster than our Python baseline. We’re
-down to 58 minutes for the total computation.</p>
+<strong>1.35 microseconds</strong>, which is 34 times faster than our
+last iteration, and 26,459 times faster than our Python baseline. We’re
+down to 57 minutes for the total computation.</p>
 <h2 id="allocation">Allocation</h2>
 <p>At this point, we’re pretty close to peak performance. (You may not
 like it, but…) Let’s go back to the profile, this time looking at the
@@ -1023,8 +1023,8 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb20-1"><a href=
 <span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>    (<span class="op">!</span>r<span class="op">.</span>is_nan())<span class="op">.</span>then_some((qs<span class="op">,</span> r))</span>
 <span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>)</span></code></pre></div>
 <p>We run the benchmark again, and the new inner loop runs in
-<strong>1.09 microseconds</strong>, which is 1.25 times faster than our
-last iteration, and 32,746 times faster than our Python baseline. We’re
+<strong>1.09 microseconds</strong>, which is 1.24 times faster than our
+last iteration, and 32,940 times faster than our Python baseline. We’re
 down to 46 minutes for the total computation.</p>
 <p>(As an aside, it’s impressive that the heap allocator was fast enough
 to have such a small impact on our runtime!)</p>
@@ -1059,53 +1059,53 @@ completion time for each level of the benchmark.</p>
 <td style="text-align: right;">2.88 years</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">0_naive</td>
-<td style="text-align: right;">4.57 ms</td>
-<td style="text-align: right;">7.84×</td>
-<td style="text-align: right;">7.84×</td>
-<td style="text-align: right;">134.17 days</td>
+<td style="text-align: left;">0_basic</td>
+<td style="text-align: right;">4.24 ms</td>
+<td style="text-align: right;">8.46×</td>
+<td style="text-align: right;">8.46×</td>
+<td style="text-align: right;">124.40 days</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">1_indexed</td>
-<td style="text-align: right;">1.04 ms</td>
-<td style="text-align: right;">4.41×</td>
-<td style="text-align: right;">34.58×</td>
-<td style="text-align: right;">30.43 days</td>
+<td style="text-align: right;">1.03 ms</td>
+<td style="text-align: right;">4.11×</td>
+<td style="text-align: right;">34.78×</td>
+<td style="text-align: right;">30.25 days</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">2_imap</td>
-<td style="text-align: right;">175.85 μs</td>
-<td style="text-align: right;">5.90×</td>
-<td style="text-align: right;">203.86×</td>
-<td style="text-align: right;">5.16 days</td>
+<td style="text-align: right;">180.52 μs</td>
+<td style="text-align: right;">5.71×</td>
+<td style="text-align: right;">198.60×</td>
+<td style="text-align: right;">5.30 days</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">3_bchecks</td>
-<td style="text-align: right;">159.56 μs</td>
-<td style="text-align: right;">1.10×</td>
-<td style="text-align: right;">224.68×</td>
-<td style="text-align: right;">4.68 days</td>
+<td style="text-align: right;">156.23 μs</td>
+<td style="text-align: right;">1.16×</td>
+<td style="text-align: right;">229.47×</td>
+<td style="text-align: right;">4.59 days</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">4_bitset</td>
-<td style="text-align: right;">46.95 μs</td>
-<td style="text-align: right;">3.40×</td>
-<td style="text-align: right;">763.56×</td>
-<td style="text-align: right;">1.38 days</td>
+<td style="text-align: right;">46.60 μs</td>
+<td style="text-align: right;">3.35×</td>
+<td style="text-align: right;">769.26×</td>
+<td style="text-align: right;">1.37 days</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">5_simd</td>
-<td style="text-align: right;">1.37 μs</td>
-<td style="text-align: right;">34.23×</td>
-<td style="text-align: right;">26,138.20×</td>
-<td style="text-align: right;">57.96 min</td>
+<td style="text-align: right;">1.35 μs</td>
+<td style="text-align: right;">34.40×</td>
+<td style="text-align: right;">26,459.54×</td>
+<td style="text-align: right;">57.26 min</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">6_alloc</td>
 <td style="text-align: right;">1.09 μs</td>
-<td style="text-align: right;">1.25×</td>
-<td style="text-align: right;">32,746.46×</td>
-<td style="text-align: right;">46.27 min</td>
+<td style="text-align: right;">1.24×</td>
+<td style="text-align: right;">32,940.02×</td>
+<td style="text-align: right;">45.99 min</td>
 </tr>
 </tbody>
 </table>
@@ -1148,10 +1148,10 @@ a single run with a given strategy. This is enough executions to reveal
 differences in each outer loop without waiting weeks for the benchmark
 to complete.</p>
 <p>Running this benchmark with the serial strategy over the fastest
-inner loop takes <strong>7.0 seconds</strong>. My Macbook Pro has 10
+inner loop takes <strong>6.8 seconds</strong>. My Macbook Pro has 10
 cores, so with Rayon we should expect to see close to a 10x speedup.
 After benchmarking the parallel strategy, we get… <strong>4.2
-seconds</strong> to complete 5,000,000 combinations. That’s only a 1.7x
+seconds</strong> to complete 5,000,000 combinations. That’s only a 1.6x
 speedup! Shameful!</p>
 <h2 id="batching">Batching</h2>
 <p>Let’s go back to the profile to investigate our lack of scaling:</p>
@@ -1211,8 +1211,8 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb23-1"><a href=
 <span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>flatten()</span>
 <span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// same code as before</span></span></code></pre></div>
 <p>Running the outer-loop benchmark again, the chunking iterator now
-completes 5,000,000 combinations in <strong>994 milliseconds</strong>.
-This is a 7.05x seedup over the serial approach, which is much better
+completes 5,000,000 combinations in <strong>982 milliseconds</strong>.
+This is a 6.9x speedup over the serial approach, which is much better
 for our 10-core machine. Ideally we would get closer to 10x, but I think
 this post is long enough. In summary, our outer loop runtime numbers are
 in Table <a href="#tbl:outer-loop">2</a>.</p>
@@ -1238,24 +1238,24 @@ in Table <a href="#tbl:outer-loop">2</a>.</p>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">0_serial</td>
-<td style="text-align: right;">7.01 s</td>
+<td style="text-align: right;">6.80 s</td>
 <td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;">59.29 min</td>
+<td style="text-align: right;">26,342.63×</td>
+<td style="text-align: right;">57.51 min</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">1_parallel</td>
-<td style="text-align: right;">4.18 s</td>
-<td style="text-align: right;">1.68×</td>
-<td style="text-align: right;">1.68×</td>
-<td style="text-align: right;">35.35 min</td>
+<td style="text-align: right;">4.22 s</td>
+<td style="text-align: right;">1.61×</td>
+<td style="text-align: right;">42,439.31×</td>
+<td style="text-align: right;">35.70 min</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">2_batched</td>
-<td style="text-align: right;">994.53 ms</td>
-<td style="text-align: right;">4.21×</td>
-<td style="text-align: right;">7.05×</td>
-<td style="text-align: right;">8.41 min</td>
+<td style="text-align: right;">982.46 ms</td>
+<td style="text-align: right;">4.30×</td>
+<td style="text-align: right;">182,450.94×</td>
+<td style="text-align: right;">8.30 min</td>
 </tr>
 </tbody>
 </table>
