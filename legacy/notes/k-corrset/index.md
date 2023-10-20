@@ -1,5 +1,6 @@
 ---
 title: Analyzing Data 180,000x Faster with Rust
+description: How to hash, index, profile, multi-thread, and SIMD your way to incredible speeds.
 ---
 
 This note documents one of my recent adventures in performance optimization with Rust. 
