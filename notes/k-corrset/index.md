@@ -1,6 +1,8 @@
 ---
 title: Analyzing Data 180,000x Faster with Rust
 description: How to hash, index, profile, multi-thread, and SIMD your way to incredible speeds.
+date: October 20, 2023
+author: Will Crichton
 ---
 
 This note documents one of my recent adventures in performance optimization with Rust. 
