@@ -99,7 +99,6 @@ body {
 }
 
 p {
-  text-align: justify;
   hyphens: auto;
   overflow-wrap: anywhere;
 }
@@ -196,11 +195,11 @@ pre, code, kbd, samp {
   font-size: 0.98em;
 }
 
-pre {
+/* pre {
   white-space: pre;
   white-space: pre-wrap;
   word-wrap: break-word;
-}
+} */
 
 b, strong {
   font-weight: bold;
@@ -277,7 +276,8 @@ img {
 figure {
   display: block;
   text-align: center;
-  margin: 2em 3em;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 figure img {
@@ -335,13 +335,32 @@ table td {
   body {
     font-size: 18px;
   }
+
+  p {
+    text-align: justify;
+  }
 }
+
+@media only screen and (max-width: 768px) {
+  h1 {
+    margin-top: 0;
+  }
+
+  ul, ol {
+    padding-left: 1em;
+  }
+}
+
 @media only screen and (min-width: 1200px) {
   .hero {
     width: 1200px;
     max-width: none;
     position: relative;
     right: 200px;
+  }
+
+  figure {
+    margin: 2em 3em;
   }
 }
 @media print {
@@ -415,9 +434,10 @@ table td {
   margin: 0.5em 0 2em;
 }
 
-div.sourceCode, pre.text {
+div.sourceCode, pre {
   background: #fafafa;
   padding: 0.25em 0.5em;
+  overflow-x: auto;
 }
 
 p code, li code {
@@ -425,6 +445,10 @@ p code, li code {
   padding: 1px 2px;
 }
 
+figure, body > div {
+  max-width: 100%;
+  overflow-x: auto;
+}
 
 .center {
   display: block;
@@ -472,7 +496,7 @@ questions has the highest correlation with overall performance? We’ll
 call this the <strong>k-CorrSet problem</strong>. A simple brute-force
 algorithm for solving the k-CorrSet problem looks like this
 pseudocode:</p>
-<pre class="text"><code>func k_corrset($data, $k):
+<pre><code>func k_corrset($data, $k):
   $all_qs = all questions in $data
   for all $k-sized subsets $qs within $all_qs:
     $us = all users that answered every question in $qs

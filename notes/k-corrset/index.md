@@ -30,7 +30,7 @@ Note that each user only answered a subset of all possible questions, and all sc
 
 Here's the problem: given a size $k$, which set of $k$ questions has the highest correlation with overall performance? We'll call this the **k-CorrSet problem**. A simple brute-force algorithm for solving the k-CorrSet problem looks like this pseudocode:
 
-```text
+```
 func k_corrset($data, $k):
   $all_qs = all questions in $data
   for all $k-sized subsets $qs within $all_qs:
