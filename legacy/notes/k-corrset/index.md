@@ -645,6 +645,14 @@ I tried my best to make the SIMD bit-set implementation fast, so I don't know of
 Also if you know of an analytic solution to this problem, i.e., a smarter way to get an optimal answer without brute force, do let me know as well! Otherwise, I hope you learned a bit about performance engineering in Rust.
 
 
+## Addendum (10/30/23)
+
+This post generated a fair amount of engagement on [/r/rust](https://www.reddit.com/r/rust/comments/17cmmql/analyzing_data_180000x_faster_with_rust/) and [HN](https://news.ycombinator.com/item?id=37964161). I wanted to share a few things people have tried.
+
+* Sidney Radcliffe showed how to match Rust's performance using the [Numba] JIT with the Numba subset of Python. Check out the post ["Analyzing Data 170,000x Faster with Python"](https://sidsite.com/posts/python-corrset-optimization/). I added [corrset_numba.py](https://github.com/willcrichton/corrset-benchmark/blob/main/python/corrset_numba.py) to the `python/` directory of the benchmark.
+* katopz showed how to implement the Python example using the [polars] library (a Rust implementation of Pandas-like dataframes). A quick-and-dirty timing test suggests that the polars version is 3.5 times faster than the original Python baseline. I added [corrset_polars.py](https://github.com/willcrichton/corrset-benchmark/blob/main/python/corrset_polars.py) to the `python/` directory of the benchmark.
+* cjcormier [pointed out](https://github.com/willcrichton/corrset-benchmark/pull/2) a clever optimization: between the two combinations `[0, 1, 2, 3, 4]` and `[0, 1, 2, 3, 5]`, if we store the bit-set representing the intersection of `[0, 1, 2, 3]`, then we can compute the bit-set for `5` and `6` with only one intersection rather than five (or more generally, rather than $k$ intersections). Put another way, if we fuse the combinations iterator and the bit-set intersections, we can trade-off memory for performance. I implemented cjcormier's strategy in [fused.rs](https://github.com/willcrichton/corrset-benchmark/blob/main/src/fused.rs) and it achieves a **1.28x speedup** over my previous personal record, reducing the total computation time of k=5 from 10.3 minutes to 8.0 minutes. Thanks Chris!
+
 [Pandas]: https://pandas.pydata.org/
 [MultiIndex]: https://pandas.pydata.org/docs/user_guide/advanced.html
 [`time.time()`]: https://docs.python.org/3/library/time.html#time.time
@@ -674,3 +682,5 @@ Also if you know of an analytic solution to this problem, i.e., a smarter way to
 [`par_bridge` documentation]: https://docs.rs/rayon/1.8.0/rayon/iter/trait.ParallelBridge.html
 [`ArrayVec`]: https://docs.rs/arrayvec/0.7.4/arrayvec/struct.ArrayVec.html
 [`DenseIndexMap`]: https://docs.rs/indexical/0.6.0/indexical/map/struct.DenseIndexMap.html
+[Numba]: https://numba.pydata.org/
+[polars]: https://www.pola.rs/
