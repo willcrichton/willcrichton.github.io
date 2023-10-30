@@ -1316,5 +1316,41 @@ class="uri">https://github.com/willcrichton/corrset-benchmark</a></p>
 smarter way to get an optimal answer without brute force, do let me know
 as well! Otherwise, I hope you learned a bit about performance
 engineering in Rust.</p>
+<h2 id="addendum-103023">Addendum (10/30/23)</h2>
+<p>This post generated a fair amount of engagement on <a
+href="https://www.reddit.com/r/rust/comments/17cmmql/analyzing_data_180000x_faster_with_rust/">/r/rust</a>
+and <a href="https://news.ycombinator.com/item?id=37964161">HN</a>. I
+wanted to share a few things people have tried.</p>
+<ul>
+<li>Sidney Radcliffe showed how to match Rust’s performance using the <a
+href="https://numba.pydata.org/">Numba</a> JIT in the Numba subset of
+Python. Check out the post <a
+href="https://sidsite.com/posts/python-corrset-optimization/">“Analyzing
+Data 170,000x Faster with Python”</a>. I added <a
+href="https://github.com/willcrichton/corrset-benchmark/blob/main/python/corrset_numba.py">corrset_numba.py</a>
+to the <code>python/</code> directory of the benchmark.</li>
+<li>katopz showed how to implement the Python example using the <a
+href="https://www.pola.rs/">polars</a> library (a Rust implementation of
+Pandas-like dataframes). This implementation seems to be about 3.5 times
+faster than the original Python baseline. I added <a
+href="https://github.com/willcrichton/corrset-benchmark/blob/main/python/corrset_polars.py">corrset_polars.py</a>
+to the <code>python/</code> directory of the benchmark.</li>
+<li>cjcormier <a
+href="https://github.com/willcrichton/corrset-benchmark/pull/2">pointed
+out</a> a clever optimization: between the two combinations
+<code>[0, 1, 2, 3, 4]</code> and <code>[0, 1, 2, 3, 5]</code>, if we
+store the bit-set representing the intersection of
+<code>[0, 1, 2, 3]</code>, then we can compute the bit-set for
+<code>5</code> and <code>6</code> with only one intersection rather than
+five (or more generally, rather than
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span>
+intersections). Put another way, if we fuse the combinations iterator
+and the bit-set intersections, we can trade-off memory for performance.
+I implemented cjcormier’s strategy in <a
+href="https://github.com/willcrichton/corrset-benchmark/blob/main/src/fused.rs">fused.rs</a>
+and it achieves a <strong>1.28x speedup</strong> over my previous
+personal record, reducing the total computation time of k=5 from 10.3
+minutes to 8.0 minutes. Thanks Chris!</li>
+</ul>
 </body>
 </html>
