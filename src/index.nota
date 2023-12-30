@@ -75,6 +75,17 @@
 
 %(let pubs = [
   {
+    name: "rust-book-experiment",
+    // paper: "#",
+    github: "https://github.com/cognitive-engineering-lab/rust-book",
+    title: @{Profiling Programming Language Learning: A Case Study on @i{The Rust Programming Language}},
+    venue: "OOPSLA",
+    authors: ["Will Crichton", "Shriram Krishnamurthi"],
+    year: 2024,
+    kind: "conference",
+    upcoming: true
+  },
+  {
     name: "document-calculus",
     paper: "https://arxiv.org/abs/2310.04368",
     github: "https://github.com/cognitive-engineering-lab/document-calculus",
@@ -225,7 +236,7 @@
 %(let Publication = ({pub, index}) =>
   @Definition[block][name=pub.name][label=@{\[#index\]}]{@div[className="pub"]{
     @div[className="pub-title"]{
-      @a[href=pub.paper]{#(pub.title).}
+      #(pub.paper ? @a[href=pub.paper]{#(pub.title).} : @span[style={fontWeight:500}]{#(pub.title).})
     }
     @div{@p[className="pub-authors"]{
       %(let me = "Will Crichton")
@@ -236,7 +247,7 @@
         } else {
           return i == pub.authors.length - 1
             ? @{ and #author}
-            : @{#author, };
+            : pub.authors.length == 2 ? @{#author } : @{#author, };
           }
         })).
     }}

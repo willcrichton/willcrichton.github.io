@@ -11,7 +11,7 @@ let Template: React.FC<TemplateProps> = ({ title, script, children }) => (
         crossOrigin="true"
       />
       <link
-        href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400;0,700;1,400&family=Expletus+Sans:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400;0,500;0,700;1,400&family=Expletus+Sans:wght@400;700&display=swap"
         rel="stylesheet"
       />
       <link href="index.css" rel="stylesheet" />
