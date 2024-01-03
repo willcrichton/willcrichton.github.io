@@ -76,9 +76,9 @@
 %(let pubs = [
   {
     name: "rust-book-experiment",
-    // paper: "#",
+    paper: "https://arxiv.org/abs/2401.01257",
     github: "https://github.com/cognitive-engineering-lab/rust-book",
-    title: @{Profiling Programming Language Learning: A Case Study on @i{The Rust Programming Language}},
+    title: "Profiling Programming Language Learning",
     venue: "OOPSLA",
     authors: ["Will Crichton", "Shriram Krishnamurthi"],
     year: 2024,
