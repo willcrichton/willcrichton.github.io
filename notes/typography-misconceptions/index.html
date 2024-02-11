@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:creator" content="@tonofcrates" />  
+  <meta name="author" content="Will Crichton" />
+  <meta name="dcterms.date" content="2024-02-10" />
+  <meta name="description" content="TODO" />
+  <meta property="og:description" content="TODO" />
+  <meta property="og:title" content="Typography Misconceptions" />
+  <title>Typography Misconceptions</title> 
+  <style></style>
+  <style>
+/*
+ * I add this to html files generated with pandoc.
+ */
+
+ html {
+  font-size: 100%;
+  overflow-y: scroll;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  color: black;
+  font-family: Palatino, 'Palatino Linotype', Georgia, Times, 'Times New Roman', serif;
+  font-size: 14pt;
+  line-height: 1.5;
+  padding: 1em;
+  margin: auto;
+  max-width: 800px;
+  background: white;
+  text-wrap: pretty;
+}
+
+p {
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+
+a {
+  text-decoration-thickness: 1px;
+}
+
+/* 
+a {
+  color: #0645ad;
+}
+
+a:visited {
+  color: #0b0080;
+}
+
+a:hover {
+  color: #06e;
+}
+
+a:active {
+  color: #faa700;
+}
+
+a:focus {
+  outline: thin dotted;
+} */
+
+p {
+  margin: 1em 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #111;
+  line-height: 125%;
+  margin-top: 2em;
+  font-weight: normal;
+}
+
+h4, h5, h6 {
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 2.25em;
+}
+
+h2 {
+  font-size: 1.75em;
+}
+
+h3 {
+  font-size: 1.3em;
+}
+
+h4 {
+  font-size: 1.1em;
+}
+
+h5 {
+  font-size: 1em;
+}
+
+h6 {
+  font-size: 0.9em;
+}
+
+blockquote {
+  color: #666666;
+  margin: 0;
+  padding-left: 1em;
+  border-left: 0.5em #EEE solid;
+}
+
+hr {
+  display: block;
+  height: 2px;
+  border: 0;
+  border-top: 1px solid #aaa;
+  border-bottom: 1px solid #eee;
+  margin: 1em 0;
+  padding: 0;
+}
+
+pre, code, kbd, samp {
+  color: #000;
+  font-family: Inconsolata, monospace;
+  /* _font-family: 'courier new', monospace; */
+  font-size: 0.98em;
+}
+
+/* pre {
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+} */
+
+b, strong {
+  font-weight: bold;
+}
+
+dfn {
+  font-style: italic;
+}
+
+ins {
+  background: #ff9;
+  color: #000;
+  text-decoration: none;
+}
+
+mark {
+  background: #ff0;
+  color: #000;
+  font-style: italic;
+  font-weight: bold;
+}
+
+sub, sup {
+  font-size: 50%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.6em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+ul, ol {
+  margin: 1em 0;
+  padding: 0 0 0 2em;
+}
+
+li p:last-child {
+  margin-bottom: 0;
+}
+
+ul ul, ol ol {
+  margin: .3em 0;
+}
+
+dl {
+  margin-bottom: 1em;
+}
+
+dt {
+  font-weight: bold;
+  margin-bottom: .8em;
+}
+
+dd {
+  margin: 0 0 .8em 2em;
+}
+
+dd:last-child {
+  margin-bottom: 0;
+}
+
+img {
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+  vertical-align: middle;
+}
+
+figure {
+  display: block;
+  text-align: center;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+figure img {
+  border: none;
+  margin: 0 auto;
+}
+
+figcaption {  
+  margin: 0 0 .8em;
+}
+
+table {
+  margin-top: 2em;
+  margin-bottom: 2em;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+table th {
+  padding: .2em 1em;
+  background-color: #eee;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+}
+
+table td {
+  padding: .2em 1em;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  vertical-align: top;
+}
+
+header {
+  margin-bottom: 2em;
+}
+
+.author {
+  font-size: 1.2em;
+  text-align: center;  
+}
+
+.date {
+  margin-left: 2em;
+}
+
+#refs {
+  margin-top: 4em;
+}
+
+@media only screen and (min-width: 480px) {
+  body {
+    font-size: 12pt;
+  }
+}
+@media only screen and (min-width: 768px) {
+  body {
+    font-size: 14pt;
+  }
+
+  p {
+    text-align: justify;
+    word-spacing: -1pt;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  h1 {
+    margin-top: 0;
+  }
+
+  ul, ol {
+    padding-left: 1em;
+  }
+}
+
+@media only screen and (min-width: 1200px) {
+  .hero {
+    width: 1200px;
+    max-width: none;
+    position: relative;
+    right: 200px;
+  }
+
+  figure {
+    margin: 2em 3em;
+  }
+}
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    filter: none !important;
+    -ms-filter: none !important;
+  }
+
+  body {
+    font-size: 12pt;
+    max-width: 100%;
+  }
+
+  a, a:visited {
+    text-decoration: underline;
+  }
+
+  hr {
+    height: 1px;
+    border: 0;
+    border-bottom: 1px solid black;
+  }
+
+  a[href]:after {
+    content: " (" attr(href) ")";
+  }
+
+  abbr[title]:after {
+    content: " (" attr(title) ")";
+  }
+
+  .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after {
+    content: "";
+  }
+
+  pre, blockquote {
+    border: 1px solid #999;
+    padding-right: 1em;
+    page-break-inside: avoid;
+  }
+
+  tr, img {
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-width: 100% !important;
+  }
+
+  @page :left {
+    margin: 15mm 20mm 15mm 10mm;
+}
+
+  @page :right {
+    margin: 15mm 10mm 15mm 20mm;
+}
+
+  p, h2, h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  h2, h3 {
+    page-break-after: avoid;
+  }
+}
+
+.hero {
+  margin: 0.5em 0 2em;
+}
+
+div.sourceCode, pre {
+  background: #fafafa;
+  padding: 0.25em 0.5em;
+  overflow-x: auto;
+}
+
+p code, li code {
+  background: #f5f5f5;
+  padding: 1px 2px;
+}
+
+figure, body > div {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.center {
+  display: block;
+  margin: 0 auto;
+}
+
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Typography Misconceptions</h1>
+<span class="author">Will Crichton</span>
+<span class="date">February 10, 2024</span>
+</header>
+<style>
+  @font-face {
+    font-family: "Linux Libertine";
+    src: url("/assets/fonts/LinLibertine_R.woff2");
+  } 
+
+  body { 
+    font-family: "Linux Libertine", serif;
+    font-variant-numeric: oldstyle-nums;
+  }
+
+  .fonttable {
+    border: none;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .fonttable td {
+    border: none;
+    vertical-align: middle;
+  }
+
+  .fonttable td:last-child {
+    padding-left: 80px;
+  }
+
+  .fontsample {
+    font-size: 32pt;
+  }
+
+  .sc {
+    font-variant-caps: all-small-caps;
+  }
+
+  .slash {
+    position: relative;
+    top: 0.05em;
+    left: 0.03em;
+  }
+
+  abbr {
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.05em;
+  }
+</style>
+<p>Like most people, I have an intuitive conception of typography from
+my experience with reading and writing. But in my quest to <a
+href="https://willcrichton.net/notes/portable-epubs/">rethink document
+technologies</a>, I’ve been learning more about the different layers of
+document design. I just finished reading Robert Bringhurst’s excellent
+book, <a
+href="https://en.wikipedia.org/wiki/The_Elements_of_Typographic_Style"><em>The
+Elements of Typographic Style</em></a>. I wanted to share a few of my
+biggest misconceptions that were clarified by the book.</p>
+<h2 id="kerning-is-not-letterspacing">Kerning is not letterspacing</h2>
+<p>I used to believe that <em>kerning</em> meant <q>the spacing between
+letters.</q> That is incorrect – <em>letterspacing</em> is the spacing
+between letters. (…Of course.)</p>
+<table class="fonttable">
+<tr>
+<td>
+<div class="fontsample">
+LETTERSPACING
+</div>
+</td>
+<td>
+Normal letter spacing
+</td>
+</tr>
+<tr>
+<td>
+<div class="fontsample" style="letter-spacing: 0.16em">
+LETTERSPACING
+</div>
+</td>
+<td>
+<span class="sc">m<span class="slash">/</span>6</span> letter spacing
+</td>
+</tr>
+<tr>
+<td>
+<div class="fontsample" style="letter-spacing: 0.25em">
+LETTERSPACING
+</div>
+</td>
+<td>
+<span class="sc">m<span class="slash">/</span>4</span> letter spacing
+</td>
+</tr>
+</table>
+<p>Bringhurst recommends letterspacing for full-caps titles, like above,
+as well as for small-caps abbreviations like <abbr>HTML</abbr> or
+<abbr>CSS</abbr>. By contrast, kerning is more specific: it refers to
+special cases where pairs of adjacent characters are pushed towards each
+other.</p>
+<table class="fonttable">
+<tr>
+<td>
+<div class="fontsample">
+Wa
+</div>
+</td>
+<td>
+<div class="fontsample">
+To
+</div>
+</td>
+<td>
+<div class="fontsample">
+Av
+</div>
+</td>
+<td>
+<div class="fontsample">
+y.
+</div>
+</td>
+<td>
+Kerning enabled
+</td>
+</tr>
+<tr>
+<td>
+<div class="fontsample" style="font-kerning: none">
+Wa
+</div>
+</td>
+<td>
+<div class="fontsample" style="font-kerning: none">
+To
+</div>
+</td>
+<td>
+<div class="fontsample" style="font-kerning: none">
+Av
+</div>
+</td>
+<td>
+<div class="fontsample" style="font-kerning: none">
+y.
+</div>
+</td>
+<td>
+Kerning disabled
+</td>
+</tr>
+</table>
+<p>Observe that with kerning disabled, you could draw a vertical line in
+the middle of each pair without intersecting either letter. Also note
+that kerning is distinct from <i>ligatures</i>, where sequences of
+characters are replaced by an entirely bespoke glyph.</p>
+<table class="fonttable">
+<tr>
+<td>
+<div class="fontsample">
+ff
+</div>
+</td>
+<td>
+<div class="fontsample">
+tt
+</div>
+</td>
+<td>
+<div class="fontsample">
+Qu
+</div>
+</td>
+<td>
+Ligatures enabled
+</td>
+</tr>
+<tr>
+<td>
+<div class="fontsample" style="font-variant-ligatures: none">
+ff
+</div>
+</td>
+<td>
+<div class="fontsample" style="font-variant-ligatures: none">
+tt
+</div>
+</td>
+<td>
+<div class="fontsample" style="font-variant-ligatures: none">
+Qu
+</div>
+</td>
+<td>
+Ligatures disabled
+</td>
+</tr>
+</table>
+<p>If you dig around your font face, you can find some fun
+ligatures!</p>
+<table class="fonttable">
+<tr>
+<td>
+<div class="fontsample"
+style="font-variant-ligatures: common-ligatures discretionary-ligatures contextual historical-ligatures">
+tz
+</div>
+</td>
+<td>
+<div class="fontsample"
+style="font-variant-ligatures: common-ligatures discretionary-ligatures contextual historical-ligatures">
+ct
+</div>
+</td>
+<td>
+<div class="fontsample"
+style="font-variant-ligatures: common-ligatures discretionary-ligatures contextual historical-ligatures">
+st
+</div>
+</td>
+<td>
+All ligatures enabled
+</td>
+</tr>
+<tr>
+<td>
+<div class="fontsample">
+tz
+</div>
+</td>
+<td>
+<div class="fontsample">
+ct
+</div>
+</td>
+<td>
+<div class="fontsample">
+st
+</div>
+</td>
+<td>
+Normal ligatures enabled
+</td>
+</tr>
+</table>
+<h2 id="title-figures-are-not-text-figures">Title figures are not text
+figures</h2>
+<p>I used to think of numerals as not having a case like letters. That
+is incorrect – numerals (or <i>figures</i> in typography-speak) can be
+lower-case (<q>text figures</q>) or upper-case (<q>title
+figures</q>).</p>
+<table class="fonttable">
+<tr>
+<td>
+<div class="fontsample">
+The 1970s are 20<sup>th</sup> century.
+</div>
+</td>
+<td>
+Text figures
+</td>
+</tr>
+<tr>
+<td>
+<div class="fontsample" style="font-variant-numeric: normal">
+The 1970s are 20<sup>th</sup> century.
+</div>
+</td>
+<td>
+Title figures
+</td>
+</tr>
+</table>
+<p>The vast majority of modern fonts will render title figures by
+default, so I suspect most people (myself included) assumed that title
+figures were the canonical way of displaying numerals. The only common
+exception I know is the font
+<a href="https://en.wikipedia.org/wiki/Georgia_(typeface)">Georgia</a>,
+and I always assumed its numerals were a stylistic flourish.</p>
+<p>Bringhurst considers this a tragedy, since he recommends using text
+figures in body text. The aesthetic argument is that lower-case numerals
+fit more naturally in a flow of lower-case letters. Or as Bringhurst
+puts it (pp 47):</p>
+<blockquote>
+<p>[Text figures] are basic parts of typographic speech, and they are a
+sign of civilization: a sign that dollars are not really twice as
+important as ideas, and numbers are not afraid to consort on an equal
+footing with words.</p>
+</blockquote>
+<p>Part of the confusion is that unlike letters, the Unicode does not
+contain separate characters for upper-case and lower-case numerals.
+Fonts represent text and title figures as different variants of the same
+character. If you want to try using text figures on your web page, you
+can use the <a
+href="https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-numeric"><code>font-variant-numeric</code></a>
+property with the value <code>oldstyle-nums</code> (a loaded term that
+Bringhurst also disdains).</p>
+<h2 id="italic-is-not-oblique">Italic is not oblique</h2>
+<p>I used to think of italic as the <q>slanted style</q> of a font. That
+is… not wholly incorrect, but it misses some subtleties. In the common
+case, sans serif fonts and capital letters have an <em>oblique</em>
+style where the standard letterforms are slanted to the right. Oblique
+is distinct from italic, which is designed to mimic cursive writing and
+can therefore substantially change certain letterforms.</p>
+<table class="fonttable">
+<tr>
+<td>
+<div class="fontsample">
+fast yeti
+</div>
+</td>
+<td>
+<div class="fontsample" style="font-style: italic">
+fast yeti
+</div>
+</td>
+<td>
+Serif
+</td>
+</tr>
+<tr>
+<td>
+<div class="fontsample" style="font-variant: all-small-caps">
+fast yeti
+</div>
+</td>
+<td>
+<div class="fontsample"
+style="font-variant: all-small-caps; font-style: italic">
+fast yeti
+</div>
+</td>
+<td>
+Small caps serif
+</td>
+</tr>
+<tr>
+<td>
+<div class="fontsample"
+style="font-family: Arial, sans-serif; font-size: 30pt">
+fast yeti
+</div>
+</td>
+<td>
+<div class="fontsample"
+style="font-family: Arial, sans-serif; font-size: 30pt; font-style: italic">
+fast yeti
+</div>
+</td>
+<td>
+Sans serif
+</td>
+</tr>
+</table>
+<p>Observe that <q>fa</q> looks quite different in the italics serif
+than the normal serif. In the other fonts and variants, the oblique
+<q>fa</q> is just a slanted version of the original. Most font faces
+only provide either oblique or italic style. See the <a
+href="https://en.wikipedia.org/wiki/Oblique_type">Oblique type</a>
+Wikipedia page for an example of a font that contains both.</p>
+</body>
+</html>
