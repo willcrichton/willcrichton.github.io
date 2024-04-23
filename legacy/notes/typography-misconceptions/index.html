@@ -421,15 +421,26 @@ figure, body > div {
     src: url("/assets/fonts/LinLibertine_RI.woff2");
   }
 
+  @font-face {
+    font-family: "Linux Libertine Display";    
+    src: url("/assets/fonts/LinLibertine_DR.woff2");
+  }
+
   body { 
     font-family: "Linux Libertine", serif;
     font-variant-numeric: oldstyle-nums;
   }
 
+  figure {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
   .fonttable {
     border: none;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
+    border-collapse: separate; 
+    border-spacing: 0 1em;    
   }
 
   .fonttable td {
@@ -441,8 +452,15 @@ figure, body > div {
     padding-left: 80px;
   }
 
+  @media only screen and (max-width: 600px) {
+    .fonttable td:last-child {
+      padding-left: 40px;
+    }
+  }
+
   .fontsample {
     font-size: 32pt;
+    line-height: 1em;    
   }
 
   .sc {
@@ -459,13 +477,23 @@ figure, body > div {
     font-variant-caps: all-small-caps;
     letter-spacing: 0.05em;
   }
+
+  .display {
+    font-family: "Linux Libertine Display", serif;
+  }
+
+  .spacer {
+    width: 0.1em;
+    display: inline-block;
+  }
 </style>
 <p>Like most people, I have an intuitive conception of typography from
 my experience with reading and writing. But in my quest to <a
-href="https://willcrichton.net/notes/portable-epubs/">rethink document
-technologies</a>, I’ve been learning more about the different layers of
-document design. I just finished reading Robert Bringhurst’s excellent
-book, <a
+href="https://arxiv.org/abs/2310.04368">rethink</a> <a
+href="https://nota-lang.org/">document</a> <a
+href="https://willcrichton.net/notes/portable-epubs/">technologies</a>,
+I’ve been learning more about the different layers of document design. I
+just finished reading Robert Bringhurst’s excellent book, <a
 href="https://en.wikipedia.org/wiki/The_Elements_of_Typographic_Style"><em>The
 Elements of Typographic Style</em></a>. I wanted to share a few of my
 biggest misconceptions that were clarified by the book.</p>
@@ -473,6 +501,7 @@ biggest misconceptions that were clarified by the book.</p>
 <p>I used to believe that <em>kerning</em> meant <q>the spacing between
 letters.</q> That is incorrect – <em>letterspacing</em> is the spacing
 between letters. (…Of course.)</p>
+<figure>
 <table class="fonttable">
 <tr>
 <td>
@@ -505,11 +534,13 @@ LETTERSPACING
 </td>
 </tr>
 </table>
+</figure>
 <p>Bringhurst recommends letterspacing for full-caps titles, like above,
 as well as for small-caps abbreviations like <abbr>HTML</abbr> or
 <abbr>CSS</abbr>. By contrast, kerning is more specific: it refers to
 special cases where pairs of adjacent characters are pushed towards each
 other.</p>
+<figure>
 <table class="fonttable">
 <tr>
 <td>
@@ -562,10 +593,12 @@ Kerning disabled
 </td>
 </tr>
 </table>
+</figure>
 <p>Observe that with kerning disabled, you could draw a vertical line in
 the middle of each pair without intersecting either letter. Also note
 that kerning is distinct from <i>ligatures</i>, where sequences of
 characters are replaced by an entirely bespoke glyph.</p>
+<figure>
 <table class="fonttable">
 <tr>
 <td>
@@ -608,6 +641,7 @@ Ligatures disabled
 </td>
 </tr>
 </table>
+</figure>
 <p>If you dig around your font face, you can find some fun
 ligatures!</p>
 <table class="fonttable">
@@ -661,6 +695,7 @@ figures</h2>
 is incorrect – numerals (or <i>figures</i> in typography-speak) can be
 lower-case (<q>text figures</q>) or upper-case (<q>title
 figures</q>).</p>
+<figure>
 <table class="fonttable">
 <tr>
 <td>
@@ -683,6 +718,7 @@ Title figures
 </td>
 </tr>
 </table>
+</figure>
 <p>The vast majority of modern fonts will render title figures by
 default, so I suspect most people (myself included) assumed that title
 figures were the canonical way of displaying numerals. The only common
@@ -714,6 +750,7 @@ case, sans serif fonts and capital letters have an <em>oblique</em>
 style where the standard letterforms are slanted to the right. Oblique
 is distinct from italic, which is designed to mimic cursive writing and
 can therefore substantially change certain letterforms.</p>
+<figure>
 <table class="fonttable">
 <tr>
 <td>
@@ -764,11 +801,39 @@ Sans serif
 </td>
 </tr>
 </table>
+</figure>
 <p>Observe that <q>fa</q> looks quite different in the italics serif
 than the normal serif. In the other fonts and variants, the oblique
 <q>fa</q> is just a slanted version of the original. Most font faces
 only provide either oblique or italic style. See the <a
 href="https://en.wikipedia.org/wiki/Oblique_type">Oblique type</a>
 Wikipedia page for an example of a font that contains both.</p>
+<h2 id="display-font-is-not-fancy-font">Display font is not fancy
+font</h2>
+<p>I used to think that display fonts were the <q>fancy fonts</q>, that
+is, unusual-looking fonts intended for stylistic flourish. I thought
+this because many font websites like <a
+href="https://fonts.google.com/?classification=Display">Google Fonts</a>
+categorize eccentric fonts under <q>Display</q>. But really, display
+just means <q>appropriate for headings and not body text.</q></p>
+<p>In particular, a single font family can include both standard and
+display variants. If you want to show a font at a large size (e.g., for
+headings or logos), then you should use the display variant.</p>
+<figure>
+<div class="fontsample"
+style="font-size: 128pt; text-align: center; margin-top: -0.1em; line-height: 1.3em">
+E<span class="spacer"></span><span class="display">E</span> x<span
+class="spacer"></span><span class="display">x</span> p<span
+class="spacer"></span><span class="display">p</span>
+</div>
+<div style="text-align: center">
+<i>Above:</i> Linux Libertine at 128pt. Left character is normal
+variant, right character is display variant.
+</div>
+</figure>
+<p>Observe that the normal variant is thicker than the display variant.
+The normal variant is less elegant — notice the chunky serifs. The extra
+thickness is desirable at small font sizes like 18pt (i.e., body text)
+so the serifs remain legible, but it is undesirable at larger sizes.</p>
 </body>
 </html>
