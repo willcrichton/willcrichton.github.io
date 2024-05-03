@@ -1,0 +1,285 @@
+@article{cgk:ownership-conceptual-model,
+  author = {Crichton, Will and Gray, Gavin and Krishnamurthi, Shriram},
+  title = {A Grounded Conceptual Model for Ownership Types in Rust},
+  year = {2023},
+  issue_date = {October 2023},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {7},
+  number = {OOPSLA},
+  url = {https://doi.org/10.1145/3622841},
+  doi = {10.1145/3622841},
+  journal = {Proc. ACM Program. Lang.},
+  month = {oct},
+  articleno = {265},
+  numpages = {29},
+  keywords = {program state visualization, Rust, concept inventory, ownership types},
+  eprint = {2309.04134},
+  abstract = {Programmers learning Rust struggle to understand ownership types, Rust’s core mechanism for ensuring memory safety without garbage collection. This paper describes our attempt to systematically design a pedagogy for ownership types. First, we studied Rust developers’ misconceptions of ownership to create the Ownership Inventory, a new instrument for measuring a person’s knowledge of ownership. We found that Rust learners could not connect Rust’s static and dynamic semantics, such as determining why an ill-typed program would (or would not) exhibit undefined behavior. Second, we created a conceptual model of Rust’s semantics that explains borrow checking in terms of flow-sensitive permissions on paths into memory. Third, we implemented a Rust compiler plugin that visualizes programs under the model. Fourth, we integrated the permissions model and visualizations into a broader pedagogy of ownership by writing a new ownership chapter for The Rust Programming Language, a popular Rust textbook. Fifth, we evaluated an initial deployment of our pedagogy against the original version, using reader responses to the Ownership Inventory as a point of comparison. Thus far, the new pedagogy has improved learner scores on the Ownership Inventory by an average of 9% (N = 342, d = 0.56).},
+  artifact = {https://zenodo.org/records/8317948},
+  github = {https://github.com/cognitive-engineering-lab/aquascope/},
+  video = {https://www.youtube.com/watch?v=NtQYUwf6mas},
+}
+
+@inproceedings{zc:rust-discourse,
+  author = {Anna Zeng and Will Crichton},
+  title = {Identifying Barriers to Adoption for {Rust} through Online Discourse},
+  booktitle = {Proceedings of the 9th Workshop on Evaluation and Usability of Programming Languages and Tools},
+  year = {2018},
+  eprint = {1901.01001},
+  series = {PLATEAU 2018},
+  abstract = {Rust is a low-level programming language known for its unique approach to memory-safe systems programming and for its steep learning curve. To understand what makes Rust difficult to adopt, we surveyed the top Reddit and Hacker News posts and comments about Rust; from these online discussions, we identified three hypotheses about Rust's barriers to adoption. We found that certain key features, idioms, and integration patterns were not easily accessible to new users.}
+}
+
+@phdthesis{c:dissertation,
+  author = {Will Crichton},
+  title = {Revisiting Program Slicing with Ownership-based Information Flow},
+  school = {Stanford University},
+  address = {Stanford, CA},
+  year = {2022},
+  month = {Sep},
+  url = {https://willcrichton.net/assets/pdf/dissertation.pdf},
+  abstract = {Program slicing is the technique of automatically identifying the subset of a program that is relevant to a particular piece of code. In theory, slicing addresses one of the core challenges of modern-day programming: sorting through large quantities of information to find what is relevant to the task at hand. However, very little is known about how people would actually use a slicer while programming. This dearth of evidence is compounded by the fact that no practical program slicer exists for programmers to use today.
+  
+  This dissertation contributes to the theoretical and practical foundations of program slicing in three ways. First, I provide evidence for the cognitive basis of slicing. I report on a series of experiments that demonstrate how a person’s working memory significantly limits their ability to remember information about a program while engaging in a variety of comprehension tasks. These experiments support the design of tools to reduce working memory load while programming, such as program slicing. 
+  
+  Second, I describe the theory and implementation of a modular program slicer for the Rust programming language. This slicer is based on a novel information flow analysis, Flowistry, that leverages Rust’s type system, namely ownership types, to approximate the behavior of unknown code solely from its static type. With these approximations, code can be analyzed more efficiently (no whole-program analysis) and robustly (no library source code needed). I show that this approximation is provably sound and reasonably precise in practice. 
+  
+  Finally, I describe the design of a new program slicing interface, Focus Mode, that interactively visualizes slices as the user changes their focus in a program. I report on a user study of Rust developers debugging programs with Focus Mode.},
+  video = {https://www.youtube.com/watch?v=BrVk97PhWmM}
+}
+
+@mastersthesis{c:lantern,
+  title = {Lantern: A Query Language for Visual Concept Retrieval},
+  year = {2016},
+  type = {Bachelor's Thesis},
+  author = {Crichton, Will},
+  school = {Carnegie Mellon University},
+  address = {Pittsburgh, PA},
+  url = {http://willcrichton.net/assets/pdf/thesis.pdf},
+  abstract = {I present Lantern, a query language and database for finding spatiotemporal visual concepts in large datasets of images and video. Lantern addresses a rapidly growing need to
+efficiently explore and mine massive visual datasets for information, tasks like locating people in a video or determining similarity between images. A number of recent top-performing
+computer vision tools for these tasks rely on machine learning methods, specifically end-toend training and evaluation which can take days or weeks to learn effective concept detectors.
+The language provides an abstraction, the spatial concept hierarchy, for combining existing vision algorithms with coarse grained rules for quickly developing new queries and interactively
+exploring visual data. Lantern compiles queries into operations on distributed collections to
+enable rapid execution on large clusters. I demonstrate the use of Lantern by building an interactive system for exploration of visual datasets, an object detector error analysis platform, and
+a tool to blur faces in videos. I show Lantern queries running across a cluster and heterogeneous hardware within a node. In each case, Lantern enabled me to rapidly construct queries
+and retrieve visual concepts on large visual datasets.}
+}
+
+@inproceedings{cah:wm-tracing,
+  author = {Crichton, Will and Agrawala, Maneesh and Hanrahan, Pat},
+  title = {The Role of Working Memory in Program Tracing},
+  year = {2021},
+  isbn = {9781450380966},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3411764.3445257},
+  doi = {10.1145/3411764.3445257},
+  booktitle = {Proceedings of the 2021 CHI Conference on Human Factors in Computing Systems},
+  articleno = {56},
+  numpages = {13},
+  keywords = {Program tracing, working memory, program comprehension, restricted focus viewing},
+  location = {Yokohama, Japan},
+  series = {CHI '21},
+  eprint = {2101.06305},
+  abstract = {Program tracing, or mentally simulating a program on concrete inputs, is an important part of general program comprehension. Programs involve many kinds of virtual state that must be held in memory, such as variable/value pairs and a call stack. In this work, we examine the influence of short-term working memory (WM) on a person's ability to remember program state during tracing. We first confirm that previous findings in cognitive psychology transfer to the programming domain: people can keep about 7 variable/value pairs in WM, and people will accidentally swap associations between variables due to WM load. We use a restricted focus viewing interface to further analyze the strategies people use to trace through programs, and the relationship of tracing strategy to WM. Given a straight-line program, we find half of our participants traced a program from the top-down line-by-line (linearly), and the other half start at the bottom and trace upward based on data dependencies (on-demand). Participants with an on-demand strategy made more WM errors while tracing straight-line code than with a linear strategy, but the two strategies contained an equal number of WM errors when tracing code with functions. We conclude with the implications of these findings for the design of programming tools: first, programs should be analyzed to identify and refactor human-memory-intensive sections of code. Second, programming environments should interactively visualize variable metadata to reduce WM load in accordance with a person's tracing strategy. Third, tools for program comprehension should enable externalizing program state while tracing.},
+  video = {https://www.youtube.com/watch?v=-C1gQg07Jis}
+}
+
+
+@inproceedings{cpah:ownership-infoflow,
+  author = {Crichton, Will and Patrignani, Marco and Agrawala, Maneesh and Hanrahan, Pat},
+  title = {Modular Information Flow through Ownership},
+  year = {2022},
+  isbn = {9781450392655},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3519939.3523445},
+  doi = {10.1145/3519939.3523445},
+  booktitle = {Proceedings of the 43rd ACM SIGPLAN International Conference on Programming Language Design and Implementation},
+  pages = {1–14},
+  numpages = {14},
+  keywords = {ownership types, information flow, rust},
+  location = {San Diego, CA, USA},
+  series = {PLDI 2022},
+  eprint = {2111.13662},
+  abstract = {Statically analyzing information flow, or how data influences other data within a program, is a challenging task in imperative languages. Analyzing pointers and mutations requires access to a program's complete source. However, programs often use pre-compiled dependencies where only type signatures are available. We demonstrate that ownership types can be used to soundly and precisely analyze information flow through function calls given only their type signature. From this insight, we built Flowistry, a system for analyzing information flow in Rust, an ownership-based language. We prove the system's soundness as a form of noninterference using the Oxide formal model of Rust. Then we empirically evaluate the precision of Flowistry, showing that modular flows are identical to whole-program flows in 94% of cases drawn from large Rust codebases. We illustrate the applicability of Flowistry by using it to implement prototypes of a program slicer and an information flow control system.},
+  github = {https://github.com/willcrichton/flowistry/},
+  artifact = {https://zenodo.org/records/6327882},
+  video = {https://www.youtube.com/watch?v=M5_M_wSeaaA}
+}
+
+@article{ck:document-calculus,
+  author = {Crichton, Will and Krishnamurthi, Shriram},
+  title = {A Core Calculus for Documents},
+  subtitle = {Or, Lambda: The Ultimate Document},
+  year = {2024},
+  issue_date = {January 2024},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {8},
+  number = {POPL},
+  url = {https://doi.org/10.1145/3632865},
+  doi = {10.1145/3632865},
+  abstract = {Passive documents and active programs now widely comingle. Document languages include Turing-complete programming elements, and programming languages include sophisticated document notations. However, there are no formal foundations that model these languages. This matters because the interaction between document and program can be subtle and error-prone. In this paper we describe several such problems, then taxonomize and formalize document languages as levels of a document calculus. We employ the calculus as a foundation for implementing complex features such as reactivity, as well as for proving theorems about the boundary of content and computation. We intend for the document calculus to provide a theoretical basis for new document languages, and to assist designers in cleaning up the unsavory corners of existing languages.},
+  journal = {Proc. ACM Program. Lang.},
+  month = {jan},
+  articleno = {23},
+  numpages = {28},
+  keywords = {document languages, markup, templates},
+  eprint = {2310.04368},
+  artifact = {https://zenodo.org/records/8409115},
+  github = {https://github.com/cognitive-engineering-lab/document-calculus},
+}
+
+@inproceedings{c:rust-design-patterns,
+  author = {Crichton, Will},
+  title = {Typed Design Patterns for the Functional Era},
+  year = {2023},
+  isbn = {9798400702976},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3609025.3609477},
+  doi = {10.1145/3609025.3609477},
+  abstract = {This paper explores how design patterns could be revisited in the era of mainstream functional programming languages. I discuss the kinds of knowledge that ought to be represented as functional design patterns: architectural concepts that are relatively self-contained, but whose entirety cannot be represented as a language-level abstraction. I present four concrete examples embodying this idea: the Witness, the State Machine, the Parallel Lists, and the Registry. Each pattern is implemented in Rust to demonstrate how careful use of a sophisticated type system can better model each domain construct and thereby catch user mistakes at compile-time.},
+  booktitle = {Proceedings of the 1st ACM SIGPLAN International Workshop on Functional Software Architecture},
+  pages = {40–48},
+  numpages = {9},
+  keywords = {design patterns, domain-driven design, rust},
+  location = {<conf-loc>, <city>Seattle</city>, <state>WA</state>, <country>USA</country>, </conf-loc>},
+  series = {FUNARCH 2023},
+  eprint = {2307.07069},
+}
+
+@inproceedings{c:docgen-infoviz,
+  author = {Crichton, Will},
+  title = {Documentation Generation as Information Visualization},
+  year = {2020},
+  url = {http://reports-archive.adm.cs.cmu.edu/anon/isr2020/CMU-ISR-20-115E.pdf},
+  series = {PLATEAU 2020},
+  eprint = {2011.05600},
+  abstract = {Automatic documentation generation tools, or auto docs, are widely used to visualize information about APIs. However, each auto doc tool comes with its own unique representation of API information. In this paper, I use an information visualization analysis of auto docs to generate potential design principles for improving their usability. Developers use auto docs as a reference by looking up relevant API primitives given partial information, or leads, about its name, type, or behavior. I discuss how auto docs can better support searching and scanning on these leads, e.g. by providing more information-dense visualizations of method signatures.},
+  video = {https://www.youtube.com/watch?v=WIfuYjLq300},
+}
+
+@inproceedings{c:pl-course,
+  author = {Crichton, Will},
+  title = {From Theory to Systems: A Grounded Approach to Programming Language Education},
+  year = {2019},
+  url = {http://dagstuhl.sunsite.rwth-aachen.de/volltexte/2019/10547/pdf/LIPIcs-SNAPL-2019-4.pdf},
+  booktitle = {Proceedings of the 3rd Summit on Advanced in Programming Languages},
+  series = {SNAPL 2019},
+  eprint = {1904.06750},
+  abstract = {I present a new approach to teaching a graduate-level programming languages course focused on using systems programming ideas and languages like WebAssembly and Rust to motivate PL theory. Drawing on students' prior experience with low-level languages, the course shows how type systems and PL theory are used to avoid tricky real-world errors that students encounter in practice. I reflect on the curricular design and lessons learned from two years of teaching at Stanford, showing that integrating systems ideas can provide students a more grounded and enjoyable education in programming languages. The curriculum, course notes, and assignments are freely available: https://stanford-cs242.github.io/f19/}
+}
+
+@inproceedings{c:pl-medium,
+  author = {Crichton, Will},
+  title = {A New Medium for Communicating Research on Programming Languages},
+  year = {2021},
+  url = {https://willcrichton.net/nota/},
+  series = {HATRA 2021},
+  abstract = {Papers about programming languages involve complex notations, systems, and proofs. Static PDFs offer little support in understanding such concepts. I describe Nota, a framework for academic papers that uses the browser's interactive capabilities to support comprehension in context. Nota uses hover effects, tooltips, expandable sections, toggleable explanations, and other interactions to help readers understand a language's syntax and semantics. I demonstrate the use of Nota by rewriting a PL paper using its primitives, and also by writing this paper in Nota.}
+}
+
+@inproceedings{csh:classifying-plans,
+  author = {Crichton, Will and Sampaio, Georgia Gabriela and Hanrahan, Pat},
+  title = {Automating Program Structure Classification},
+  year = {2021},
+  isbn = {9781450380621},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3408877.3432358},
+  doi = {10.1145/3408877.3432358},
+  abstract = {When students write programs, their program structure provides insight into their learning process. However, analyzing program structure by hand is time-consuming, and teachers need better tools for computer-assisted exploration of student solutions. As a first step towards an education-oriented program analysis toolkit, we show how supervised machine learning methods can automatically classify student programs into a predetermined set of high-level structures. We evaluate two models on classifying student solutions to the Rainfall problem: a nearest-neighbors classifier using syntax tree edit distance and a recurrent neural network. We demonstrate that these models can achieve 91\% classification accuracy when trained on 108 programs. We further explore the generality, trade-offs, and failure cases of each model.},
+  booktitle = {Proceedings of the 52nd ACM Technical Symposium on Computer Science Education},
+  pages = {1177–1183},
+  numpages = {7},
+  keywords = {machine learning, neural networks, program classification},
+  location = {Virtual Event, USA},
+  series = {SIGCSE '21},
+  eprint = {2101.10087},
+  video = {https://www.youtube.com/watch?v=yJ6mMGJWSTY}
+}
+
+@inproceedings{h+:tvnews,
+  author = {Hong, James and Crichton, Will and Zhang, Haotian and Fu, Daniel Y. and Ritchie, Jacob and Barenholtz, Jeremy and Hannel, Ben and Yao, Xinwei and Murray, Michaela and Moriba, Geraldine and Agrawala, Maneesh and Fatahalian, Kayvon},
+  title = {Analysis of Faces in a Decade of US Cable TV News},
+  year = {2021},
+  isbn = {9781450383325},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3447548.3467134},
+  doi = {10.1145/3447548.3467134},
+  abstract = {Cable (TV) news reaches millions of US households each day. News stakeholders such as communications researchers, journalists, and media monitoring organizations are interested in the visual content of cable news, especially who is on-screen. Manual analysis, however, is labor intensive and limits the size of prior studies. We conduct a large-scale, quantitative analysis of the faces in a decade of cable news video from the top three US cable news networks (CNN, FOX, and MSNBC), totaling 244,038 hours between January 2010 and July 2019. Our work uses technologies such as automatic face and gender recognition to measure the "screen time" of faces and to enable visual analysis and exploration at scale. Our analysis method gives insight into a broad set of socially relevant topics. For instance, male-presenting faces receive much more screen time than female-presenting faces (2.4x in 2010, 1.9x in 2019). To make our dataset and annotations accessible, we release a public interface at https://tvnews.stanford.edu that allows the general public to write queries and to perform their own analyses.},
+  booktitle = {Proceedings of the 27th ACM SIGKDD Conference on Knowledge Discovery \& Data Mining},
+  pages = {3011–3021},
+  numpages = {11},
+  keywords = {visual analysis at scale, screen time, cable news},
+  location = {Virtual Event, Singapore},
+  series = {KDD '21},
+  eprint = {2008.06007}
+}
+
+@article{pchf:scanner,
+  author = {Poms, Fait and Crichton, Will and Hanrahan, Pat and Fatahalian, Kayvon},
+  title = {Scanner: Efficient Video Analysis at Scale},
+  year = {2018},
+  issue_date = {August 2018},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {37},
+  number = {SIGGRAPH},
+  issn = {0730-0301},
+  url = {https://doi.org/10.1145/3197517.3201394},
+  doi = {10.1145/3197517.3201394},
+  abstract = {A growing number of visual computing applications depend on the analysis of large video collections. The challenge is that scaling applications to operate on these datasets requires efficient systems for pixel data access and parallel processing across large numbers of machines. Few programmers have the capability to operate efficiently at these scales, limiting the field's ability to explore new applications that leverage big video data. In response, we have created Scanner, a system for productive and efficient video analysis at scale. Scanner organizes video collections as tables in a data store optimized for sampling frames from compressed video, and executes pixel processing computations, expressed as dataflow graphs, on these frames. Scanner schedules video analysis applications expressed using these abstractions onto heterogeneous throughput computing hardware, such as multi-core CPUs, GPUs, and media processing ASICs, for high-throughput pixel processing. We demonstrate the productivity of Scanner by authoring a variety of video processing applications including the synthesis of stereo VR video streams from multi-camera rigs, markerless 3D human pose reconstruction from video, and data-mining big video datasets such as hundreds of feature-length films or over 70,000 hours of TV news. These applications achieve near-expert performance on a single machine and scale efficiently to hundreds of machines, enabling formerly long-running big video data analysis tasks to be carried out in minutes to hours.},
+  journal = {ACM Trans. Graph.},
+  month = {jul},
+  articleno = {138},
+  numpages = {13},
+  keywords = {large-scale video processing},
+  eprint = {1805.07339},
+  github = {https://github.com/scanner-research/scanner},
+  video = {https://www.youtube.com/watch?v=TUnVznAnbWU},
+}
+
+@inproceedings{c:ownership-usability,
+  author = {Crichton, Will},
+  title = {The Usability of Ownership},
+  year = {2020},  
+  series = {HATRA 2020},
+  abstract = {Ownership is the concept of tracking aliases and mutations to data, useful for both memory safety and system design. The Rust programming language implements ownership via the borrow checker, a static analyzer that extends the core type system. The borrow checker is a notorious learning barrier for new Rust users. In this paper, I focus on the gap between understanding ownership in theory versus its implementation in the borrow checker. As a sound and incomplete analysis, compiler errors may arise from either ownership-unsound behavior or limitations of the analyzer. Understanding this distinction is essential for fixing ownership errors. But how are users actually supposed to make the correct inference? Drawing on my experience with using and teaching Rust, I explore the many challenges in interpreting and responding to ownership errors. I also suggest educational and automated interventions that could improve the usability of ownership.},
+  eprint = {2011.06171}
+}
+
+@inproceedings{f+:rekall,
+  author = {Fu, Daniel Y. and Crichton, Will and Hong, James and Yao, Xinwei and Zhang, Haotian and Truong, Anh and Narayan, Avanika and Agrawala, Maneesh and Ré, Christopher and Fatahalian, Kayvon},
+  title={Rekall: Specifying Video Events using Compositions of Spatiotemporal Labels},
+  year={2019},
+  eprint={1910.02993},
+  series = {AI Systems 2019},
+  abstract={Many real-world video analysis applications require the ability to identify domain-specific events in video, such as interviews and commercials in TV news broadcasts, or action sequences in film. Unfortunately, pre-trained models to detect all the events of interest in video may not exist, and training new models from scratch can be costly and labor-intensive. In this paper, we explore the utility of specifying new events in video in a more traditional manner: by writing queries that compose outputs of existing, pre-trained models. To write these queries, we have developed Rekall, a library that exposes a data model and programming model for compositional video event specification. Rekall represents video annotations from different sources (object detectors, transcripts, etc.) as spatiotemporal labels associated with continuous volumes of spacetime in a video, and provides operators for composing labels into queries that model new video events. We demonstrate the use of Rekall in analyzing video from cable TV news broadcasts, films, static-camera vehicular video streams, and commercial autonomous vehicle logs. In these efforts, domain experts were able to quickly (in a few hours to a day) author queries that enabled the accurate detection of new events (on par with, and in some cases much more accurate than, learned approaches) and to rapidly retrieve video clips for human-in-the-loop tasks such as video content curation and training data curation. Finally, in a user study, novice users of Rekall were able to author queries to retrieve new events in video given just one hour of query development time.}
+}
+
+@article{ck:profiling-learning,
+  author = {Crichton, Will and Krishnamurthi, Shriram},
+  title = {Profiling Programming Language Learning},
+  year = {2024},
+  issue_date = {April 2024},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {8},
+  number = {OOPSLA},
+  url = {https://doi.org/10.1145/3649812},
+  doi = {10.1145/3649812},
+  abstract = {This paper documents a year-long experiment to “profile” the process of learning a programming language: gathering data to understand what makes a language hard to learn, and using that data to improve the learning process. We added interactive quizzes to The Rust Programming Language, the official textbook for learning Rust. Over 13 months, 62,526 readers answered questions 1,140,202 times. First, we analyze the trajectories of readers. We find that many readers drop-out of the book early when faced with difficult language concepts like Rust’s ownership types. Second, we use classical test theory and item response theory to analyze the characteristics of quiz questions. We find that better questions are more conceptual in nature, such as asking why a program does not compile vs. whether a program compiles. Third, we performed 12 interventions into the book to help readers with difficult questions. We find that on average, interventions improved quiz scores on the targeted questions by +20},
+  journal = {Proc. ACM Program. Lang.},
+  month = {apr},
+  articleno = {95},
+  numpages = {26},
+  keywords = {digital textbooks, item response theory, rust education},
+  eprint = {2401.01257},
+  artifact = {https://zenodo.org/records/10798571}
+}

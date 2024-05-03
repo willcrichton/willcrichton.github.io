@@ -1,0 +1,54 @@
+import { Ref, GardenSection, CollapsibleAside } from "../components";
+
+<GardenSection
+   id="sec-cognition"
+  summary={<h3>A cognitive theory of computational abstractions</h3>}>
+<section>
+
+#### Motivation
+
+Programmers and <abbr>CS</abbr> researchers often claim that a language or system is <q>intuitive</q> or <q>for humans</q>. Our field rests on assumptions like <q> structured programming is preferable to <code>GOTO</code>s </q> and <q>static typing is better for large teams than dynamic typing.</q> And fundamentally we all believe that our choice of tools&mdash;our choice of computational abstractions&mdash;has a significant impact on our productivity, and on the correctness and performance of our programs. Would you choose to program a large system in assembly instead of C? I expect not!
+
+This raises the question: how can we justify these beliefs? How can I argue that one set of abstractions is better than another? What are the key variables (task, programmer, environment, etc.) that affect this judgment? Programmers will often use metrics like lines-of-code, but [we need better metrics][loc-paper]. And while it's important to answer these questions for our existing beliefs, the longer term goal is to help programmers <em>make predictions</em> about the human factors of future systems <em>before the systems are deployed</em>. I am advocating for a predictive cognitive theory of abstraction, as opposed to the iterative design methods [predominant in <abbr>HCI</abbr>][iterative-design].
+
+</section>
+<section>
+
+#### My angle
+
+I approach this problem from the lens of *cognitive psychology*: using cognitive theories (e.g., working memory, perception, planning) and cognitive experimental methods (e.g., free recall, eye tracking, thinkalouds) to build an understanding of the cognitive aspects of programming. I focus on two angles:
+
+1. **How does an abstraction influence a person's ability to decompose programming problems?** A central task in programming is to take a problem (<q>build a website to do <i>X</i></q>, <q>analyze <i>Y</i> feature of a dataset</q>) and break it down into pieces that correspond to features of the language or library at hand (e.g., for loops or <code>List.map</code>). I think a key issue is understanding what it means to <q>think with</q> an abstraction, so one could argue why an abstraction would be better or worse for decomposition.
+
+   - <p>An interesting domain to study is tabular data analytics, because there are dozens of meaningfully different ways to express the same concept. I wrote the [Expressiveness Benchmark] (2020) as a side project to experiment with different metrics for comparing the expressiveness of analytics languages and <abbr>API</abbr>s.</p>
+  
+2. **How do abstractions affect the load on cognitive resources during different programming tasks?** People have low-level cognitive resources like *perception*, *working memory*, and *long-term memory* that contribute to the higher-level process of conscious thought. Abstractions can influence code's perceptual structure (e.g., reading order or visual salience) and mnemonic structure (e.g., how many facts are needed to understand a piece of code).
+
+   - <p>In <q><Ref id="cah:wm-tracing">The Role of Working Memory in Program Tracing</Ref></q> (<abbr>CHI</abbr> 2021), I looked at how the most primitive abstractions of programming (variables, arithmetic) relate to working memory. I would love to continue this work with higher-level abstractions!</p>
+ 
+<CollapsibleAside summary={<>But why am I, a computer scientist, doing psychology research?</>}>
+
+Disciplinary boundaries are artificial inventions that should never stop you from doing good work! But that aside, psychology as a field prefers to deal with universal psychological phenomena (i.e., aspects of cognition that *everyone* experiences) over domain-specific psychological phenomena. The kinds of questions I'm asking only affect a small number of experienced programmers, so it's not commonly studied in psychological research. Hence, we computer scientists have to help out!
+
+Additionally, I am interested in *design-relevant* psychology&mdash;ideas that can meaningfully influence the decisions made by programmers. Psychologists are generally not thinking about the design-relevance of their research, even if they analyze programmer behavior.
+
+</CollapsibleAside>
+</section>
+<section>
+
+#### Project ideas
+
+These ideas are suitable for a strong programmer with a deep interest in psychology, cognition, and human-centered design of programs. You should (a) have enough programming experience to have a good intuition for what makes programming hard, (b) have enough experience with <abbr>UI</abbr> tools to productively implement experimental interfaces, and (c) be prepared to read a lot of psychology books and papers.
+
+1. **What is a better metric than lines-of-code for comparing the expressiveness / brevity / quality of languages or libraries?** Here's a hypothesis: a proxy for the complexity of a program is the complexity of the argument for why the program is correct. You could operationalize this idea in a proof assistant: is the size-of-proof-of-correctness a better correlate for code complexity than lines-of-code?
+
+2. **What are the principles of good examples for illustrating an abstraction?** It is broadly true that abstract concepts are best explained through concrete examples, at least at first. But there is an infinite space of examples&mdash;how should a teacher (could be a person or an ML model) sample from this space? How should sequences of examples be used to progressively build a mental model of the abstraction in the learner's mind?
+
+3. **Is the Sapir-Whorf hypothesis true for programming languages?** That is, to what extent does learning a programming language affect how a person thinks about programming problems, *even if they're using a different language?* For example, if I learn about list processing primitives (map, filter, fold) and then go write for-loops in C, will I approach the same tasks differently?
+
+</section>
+</GardenSection>
+
+[loc-paper]: https://dl.acm.org/doi/10.1145/3426428.3426921
+[iterative-design]: https://ieeexplore.ieee.org/document/7503516
+[Expressiveness Benchmark]: https://willcrichton.net/expressiveness-benchmark

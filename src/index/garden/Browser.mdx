@@ -1,0 +1,66 @@
+import { Ref, GardenSection } from "../components";
+
+<GardenSection id="sec-browser" summary={<h3>Reactive interfaces in the browser</h3>}>
+<section>
+    
+#### Motivation
+    
+Building user interfaces is not easy. Human perception and cognition do not fit neatly into computer-friendly abstractions. It is a fundamental challenge in computer science to design <abbr>UI</abbr> programming models that scale, i.e., that help people perform complex tasks. Today, the most powerful <abbr>UI</abbr> infrastructure is the browser (i.e., <abbr>HTML</abbr> + <abbr>CSS</abbr> + <abbr>JS</abbr>). The last 20 years have seen an unending parade of browser-based <abbr>UI</abbr> programming models: [jQuery], [Backbone], [React], [Solid], and [Svelte], just to name a few.
+ 
+Despite this progress, it is still way too difficult to express even simple interfaces! And it's high time to bring <abbr>UI</abbr> programming back into academia. Besides [Flapjax] ([<abbr>OOPSLA</abbr> 2009][flapjax-paper]), [D<span className="upper">3</span>][d3] ([<abbr>VIS</abbr> 2011][d3-paper]) and [Elm] ([<abbr>PLDI</abbr> 2013][elm-paper]), most recent progress on <abbr>UI</abbr> programming has been made within industry. Yet, <abbr>UI</abbr> programming is a fascinating topic at the intersection of <abbr>PL</abbr> and <abbr>HCI</abbr>, because it forces us to evaluate the correctness of programs in fundamentally human-centered terms. We cannot rely on the traditional <abbr>PL</abbr> vocabulary of type safety and undefined behavior to tell us if an interface is unusable. But I also don't think we must throw up our hands and say <q>welp, humans are too complicated, <abbr>UI</abbr> programming just has to be <i>ad hoc</i>.</q> 
+    
+</section>
+<section>
+
+#### My angle
+
+I have been doing frontend web development since 2010, when I was first employed by a [web design firm][webspec] in my hometown of Des Moines, Iowa. I view the browser as a magnificent (if messy) achievement, and I view Javascript as an increasingly unnecessary evil. Nonetheless, I maintain a [Javascript build tool orchestrator][depot].
+
+I have only begun approaching <abbr>UI</abbr> programming as a research topic recently, so I'm keeping an open mind on which direction to take. But these are my preliminary angles:
+
+1. **How can <abbr>PL</abbr> techniques improve <abbr>UI</abbr> programming models?** That is, how can we use compilation, program analysis, and type systems to design better <abbr>UI</abbr> programming models compared to just working at the library-level? [Elm] and [Svelte] are good preliminary examples of this idea, but I want to go farther around ideas like dependency analysis and formal verification.
+
+   - <p>I formalized the computational aspects of templating languages in <q><Ref id="document-calculus">A Core Calculus for Documents</Ref></q> (<abbr>POPL 24</abbr>). I hope to use the language described here as the basis for future research on <abbr>UI</abbr> programming.</p>
+          
+2. **How can layout algorithms be more extensible and composable?** Layout algorithms largely exist in silos that don't work together and can't be easily modified. For instance, I can't easily compose a graph layout algorithm like [Graphviz] with a reactive <abbr>UI</abbr> framework like [React]. If I don't like how my browser justifies text, I can't easily reach into the internals and tweak its parameters. I am interested in systems like [Penrose] ([<abbr>SIGGRAPH</abbr> 2020][penrose-paper]) and [Bluefish] ([2023][bluefish-paper]) that provide more extensible and compositional layout primitives.
+
+</section>
+<section>
+
+#### Project ideas
+
+These ideas are suitable for students who are strong <abbr>UI</abbr> programmers, especially those with an interest in <abbr>PL</abbr> theory. For example, you should be able to implement a React-like library from scratch.
+
+1. **How can a <abbr>UI</abbr> programming language generate reactive updates equivalent to hand-written code?** The main issue addressed by newer <abbr>UI</abbr> frameworks is the <em>performance of reactivity.</em> That is, when the program's state changes, how efficiently can that change propagate to the <abbr>UI</abbr>? React provides an execeptionally clean and expressive model for reactivity, but it comes at a cost: its [reconciliation algorithm][react-reconciliation] can be [tricky to optimize][react-perf]. Later frameworks like Solid and Svelte limit expressiveness in exchange for performance, but they still use dynamic dependency analysis (i.e., [signals][solid-signals] or [runes][svelte-runes]) to which components depend on which state.
+          
+   What if you built a <abbr>UI</abbr> language specifically around *static* dependency analysis? I think you could generate <abbr>UI</abbr>s that react more efficiently than any framework today. The key question is whether such a language would be expressive enough to permit a wide range of <abbr>UI</abbr>s.
+
+2. **How can dynamic visual representations be formally verified?** Say you are generating an interface, a document, or a diagram. Assume this visual object is dynamic in some way: perhaps it changes based on the reader's screen size, or permits customization (different fonts or font sizes), or allows for interactivity. The author cannot physically look at the artifact's appearance under all possible reading conditions. This is a perfect use case for formal verification &mdash; can we check whether the visual artifact satisfies important properties under all possible conditions?
+        
+   If this interests you, ask me about my Lean prototype of a formally verified document layout engine.
+        
+</section>
+</GardenSection>
+
+[jQuery]: https://jquery.com/
+[Backbone]: https://backbonejs.org/
+[React]: https://react.dev/
+[Solid]: https://www.solidjs.com/
+[Svelte]: https://svelte.dev/
+[Flapjax]: https://www.flapjax-lang.org/
+[flapjax-paper]: https://dl.acm.org/doi/10.1145/1639949.1640091
+[d3]: https://d3js.org/
+[d3-paper]: https://ieeexplore.ieee.org/abstract/document/6064996
+[Elm]: https://elm-lang.org/
+[elm-paper]: https://dl.acm.org/doi/abs/10.1145/2499370.2462161
+[webspec]: https://www.webspec.com/
+[depot]: https://github.com/cognitive-engineering-lab/depot
+[Graphviz]: https://graphviz.org/
+[Penrose]: https://penrose.cs.cmu.edu/
+[penrose-paper]: https://dl.acm.org/doi/10.1145/3386569.3392375
+[Bluefish]: https://bluefishjs.org/
+[bluefish-paper]: https://arxiv.org/abs/2307.00146
+[react-reconciliation]: https://legacy.reactjs.org/docs/reconciliation.html
+[react-perf]: https://legacy.reactjs.org/docs/optimizing-performance.html
+[solid-signals]: https://www.solidjs.com/tutorial/introduction_signals
+[svelte-runes]: https://svelte.dev/blog/runes

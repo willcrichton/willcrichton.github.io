@@ -1,0 +1,65 @@
+import { Ref, GardenSection, CollapsibleAside } from "../components";
+
+<GardenSection id="sec-proofs" summary={<h3>Proof-oriented programming with Lean and F*</h3>}>
+<section>
+
+#### Motivation
+
+The [F* tutorial] describes proof-oriented programming as:
+
+> <q>a paradigm in which one co-designs programs and proofs to provide mathematical guarantees about various aspects of a program's behavior, including properties like functional correctness (precisely characterizing the input/output behavior of a program), security properties (e.g., ensuring that a program never leaks certain secrets), and bounds on resource usage.</q>
+
+I think proof-oriented programming is crucial to advancing computer science as a field. Proofs provide guarantees that techniques like unit testing and fuzzing cannot, improving the reliability of software. More broadly, proofs require us to actually understand every piece of our software &mdash; a proof does not permit hand-waving.
+
+Proof-oriented programming is just now becoming possible. Older proof assistants like [Coq] paved the way as shown by systems like [CompCert] ([2008][compcert-paper]). Newer proof assistants like [Lean] and [F*] are providing better devtools and compilation strategies, supporting ambitious research like [Project Everest].
+
+However, these languages are extremely difficult to use. Implementing a large system would generally be considered the realm of open research, not mundane engineering. The most interesting work here is often done by people with PhDs in programming language theory. As with Rust, I do not believe these techniques will truly advance the field until they can be adopted en masse.
+
+<CollapsibleAside
+  summary={<>What about Agda / Idris / Isabelle / Dafny / Liquid Haskell / etc.?</>}>
+
+I am emphasizing Lean and F* because I am most excited about the potential of these languages. I am more excited about languages:
+
+- ...with interactive theorem proving (Lean / F* / Agda / Idris / Isabelle) than automated theorem proving (Dafny / Liquid Haskell)
+- ...with tactics (Lean / F* / Idris / Isabelle) than those without (Agda).
+- ...that are used to implement systems (Lean / F* / Idris) rather than just prove theorems (Isabelle).
+- ...that are commercially backed (Lean / F*) rather than independently backed (Idris).
+
+The last point is a little sad, but in practice it means the tools are more likely to get the engineering necessary to succeed.
+
+</CollapsibleAside>
+</section>
+<section>
+
+#### My angle
+
+
+I have been experimenting mostly with Lean in the last year or two. I am not an expert on proof assistants (although luckily we do have [an expert at Brown][rob-lewis]!), so I am mostly bringing my <abbr>HCI</abbr> lens to this area. These are two big questions on my mind:
+
+1. **How can we best scaffold the complexity of a proof assistant during the learning process?** Making effective use of a proof assistant relies on a broad base of knowledge. A user should ideally know functional programming, monadic effects, the Curry-Howard correspondence, constructive logic, computability theory, abstract algebra. The proof assistant itself comes with a giant standard library consisting of thousands of theorems and dozens of tactics. I'm interested in how we can slowly ramp up users into this complexity, while still ensuring that users can accomplish useful tasks along the way.
+
+2. **How can users have a rich conversation with the proof assistant?** When authoring a proof, users need to understand the context of the proof and the actions of the assistant. The goal pane interface is one good step in this direction. But users should be able to better understand tactics (why did they succeed or failed? what was tried?), theorems (which ones could be relevant to a given goal?), and type classes (why can a given instance be found or not found?).
+
+</section>
+<section>
+
+#### Project ideas
+
+These ideas are suitable for students who have a strong background in <abbr>PL</abbr> theory and at least moderate experience with a proof assistant, along with an interest (but not necessarily significant experience) in human factors research.
+
+1. Given a proof goal, how can a tool automatically deduce the set of relevant tools and learning resources to writing the proof? How should this information be presented to the user?
+
+2. What would a query language for theorems look like? What is the [Hoogle] equivalent for Lean or F*?
+
+[F* tutorial]: https://www.fstar-lang.org/tutorial/proof-oriented-programming-in-fstar.pdf
+[Coq]: https://coq.inria.fr/
+[CompCert]: https://compcert.org/
+[compcert-paper]: https://xavierleroy.org/publi/compcert-CACM.pdf
+[Lean]: https://lean-lang.org/
+[F*]: https://www.fstar-lang.org/
+[Project Everest]: https://project-everest.github.io/
+[rob-lewis]: https://robertylewis.com/
+[Hoogle]: https://hoogle.haskell.org/
+
+</section>
+</GardenSection>

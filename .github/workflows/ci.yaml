@@ -12,8 +12,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           lfs: true
-      - run: ./publish.sh
+      - name: Install Depot
+        run: curl https://raw.githubusercontent.com/cognitive-engineering-lab/depot/main/scripts/install.sh | sh -s e92a63edcb17cf156e399587b79192369911560e
+      - name: Publish
+        run: ./publish.sh
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: dist
+          publish_dir: dist/client

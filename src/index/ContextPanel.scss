@@ -1,0 +1,56 @@
+@use "../mixins.scss" as *;
+
+.window {
+  position: fixed;
+  left: calc(66ch + 8rem);
+  top: 2rem;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 1rem;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.context-link {  
+  > summary {
+    list-style-position: outside;
+    padding-left: 5px;
+    margin-left: -5px;
+
+    @include mobile {
+      list-style-position: inside;
+
+      > div {
+        display: inline;
+      }
+    }
+  }
+
+  .inline-content {
+    padding: 1px 0.5rem;
+    background: #f8f8f8;
+  }
+}
+
+.context-anchor {
+  display: block;  
+  text-decoration: underline #ccc;
+  cursor: pointer;
+
+  &.selected {  
+    background-color: rgb(255, 255, 194);
+  }
+
+  @include mobile {
+    display: inline;
+
+    > * {
+      display: inline;
+    }
+  }
+}

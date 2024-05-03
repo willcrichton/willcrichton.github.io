@@ -1,0 +1,75 @@
+import { Ref, GardenSection } from "../components";
+
+<GardenSection
+   id="sec-rust"
+  summary={<h3>A new era of systems programming with Rust</h3>}>
+<section>
+
+#### Motivation
+
+Rust is one of the most exciting developments in programming languages in the last 15 years. This is for two reasons:
+
+1. Rust <q>solves</q> the issue of memory safety without garbage collection. This makes both <abbr>PL</abbr> theorists and security engineers happy.
+
+2. *Way more importantly,* Rust makes both systems programming and functional programming accessible to a broad audience. This is true because (a) Rust is an extremely practical language with great tooling, (b) Rust avoids much of the accumulated complexity of C++, and (c) Rust was designed by someone who cares about <abbr>PL</abbr>{" "} theory.
+
+Rust is taking great ideas in <abbr>PL</abbr> (e.g., type classes, algebraic data types, expression-oriented programming) that have been stewing for 30+ years in languages like OCaml and Haskell, and Rust is finally bringing these concepts into the limelight. As a result, people are using Rust to totally rethink the design of systems: [game engines][bevy], [web servers][rocket], [<abbr>2D</abbr> graphics][xilem], [cryptography][rustls], [linear algebra][nalgebra], [serialization][serde], [parsing][nom], even [string <abbr>API</abbr>s][string] (just to name a few!).
+  
+</section>
+
+<section>
+
+#### My angle
+
+I have been working with Rust since 2014. I am deeply embedded in the Rust community: I [contribute to the toolchain][scrape-examples], [give talks][strange-loop-talk] [about Rust][rustconf-talk], and tens of thousands of people have used my [experimental Rust textbook][rust-book]. I have main two research angles on Rust:
+  
+1. **How can people learn and use Rust more effectively?** Rust is a complex language. People need help to both ramp up into that complexity when learning, and to manage that complexity when programming.
+  
+   - I have been running a long-term experiment on [a fork of the Rust Book][rust-book] to evaluate methods for teaching Rust. <q><Ref id="ownership-conceptual-model">A Grounded Conceptual Model for Ownership Types in Rust</Ref></q> (<abbr>OOPSLA</abbr> 2023) describes a new way to think about Rust's ownership system as embodied in the [Aquascope visualizer][aquascope]. <q><Ref id="profiling-learning">Profiling Programming Language Learning</Ref></q>(<abbr>OOPSLA</abbr> 2024) describes how we embedded quizzes into the book to both figure out which concepts were hardest for learners, and to evaluate interventions in the book.
+    
+   - I created the [Flowistry program slicer][flowistry] for Rust. Flowistry helps Rust programmers read complex code by visualizing which code depends on a given expression. <q><Ref id="flowistry">Modular Information Flow through Ownership</Ref></q> (<abbr>PLDI</abbr> 2022) describes how Flowistry uses Rust's ownership types in a clever way to understand how functions induce dependencies just by their type signature.
+
+2. **How can we use Rust's features to design systems that are safer, faster, more correct, and more usable?** Because Rust's feature set is so different from traditional <abbr>OOP</abbr> languages, it's a big open question how systems should be architected in Rust.
+  
+   - I want to systematize the process of mapping from conceptual objects to concrete APIs. What kinds of concepts should you encode as traits? As enums? And so on. I wrote <q><Ref id="rust-design-patterns">Typed Design Patterns for the Functional Era</Ref></q> (<abbr>FUNARCH @ ICFP</abbr> 2023) as a first step in this direction.
+        
+   - Not really for research, but I've built a lot of Rust <abbr>API</abbr>s like [indexed collections][indexical], [browser-based logging][web-logger], and [lock-free data structures][rlu].
+
+</section>
+
+<section>
+
+#### Project ideas
+
+These ideas are suitable for students who are strong systems programmers, especially those (a) interested in <abbr>PL</abbr> or <abbr>HCI</abbr>, and (b) with Rust experience. For instance, you should be able to understand and contribute to a complex system (100K+ LOC).
+
+1. Could you design a higher-level language on top of Rust (imagine OCaml or Javascript), but automatically lift the entire Rust library ecosystem into the higher level? How much of Rust could you get <q>for free</q> rather than reimplementing everything from scratch?
+    
+2. How can you teach people to design Rustic systems from first principles? Once people understand the mechanisms of Rust, how can you build on that knowledge to think architecturally?
+
+3. If you understood the full dependency graph within a Rust codebase (e.g., using [Flowistry][flowistry]), how could a developer use the dependency graph as a devtool? For instance, could you automatically propose refactorings of messy code by analyzing the dependency graph?
+
+4. What would a better debugger than `println` or `gdb` look like for Rust? How could you make use of a more powerful <abbr>UI</abbr> toolkit than the terminal?
+
+5. How can we help the Rust developers make more informed design decisions about the future of the language? How should we be designing surveys or user studies or codebase analyses to test claims about prospective language features?
+
+</section>
+</GardenSection>
+
+[bevy]: https://bevyengine.org/
+[rocket]: https://rocket.rs/
+[xilem]: https://github.com/linebender/xilem
+[rustls]: https://github.com/rustls/rustls
+[nalgebra]: https://docs.rs/nalgebra/latest/nalgebra/
+[serde]: http://serde.rs/
+[nom]: https://lib.rs/crates/nom
+[string]: https://doc.rust-lang.org/std/string/struct.String.html
+[scrape-examples]: https://github.com/rust-lang/rfcs/blob/master/text/3123-rustdoc-scrape-examples.md
+[strange-loop-talk]: https://www.youtube.com/watch?v=bnnacleqg6k
+[rustconf-talk]: https://www.youtube.com/watch?v=x5EbGrgmXKw
+[rust-book]: https://rust-book.cs.brown.edu
+[aquascope]: https://cognitive-engineering-lab.github.io/aquascope
+[flowistry]: https://github.com/willcrichton/flowistry/
+[indexical]: https://github.com/willcrichton/indexical
+[web-logger]: https://github.com/willcrichton/web-logger
+[rlu-rs]: https://github.com/willcrichton/rlu-rs

@@ -1,0 +1,9 @@
+.bib-entry {
+  margin-block: 0.5rem;
+}
+
+.bib-authors {
+  .author:not(:last-child):after {
+    content: ", "
+  }
+}

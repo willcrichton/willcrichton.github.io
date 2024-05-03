@@ -1,0 +1,11 @@
+$mobile-cutoff: 1400px;
+
+:root {
+  --mobile-cutoff: #{$mobile-cutoff};
+}
+
+@mixin mobile {
+  @media screen and (max-width: $mobile-cutoff) {
+    @content;
+  }
+}

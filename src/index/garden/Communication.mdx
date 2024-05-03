@@ -1,0 +1,72 @@
+import { GardenSection, Ref } from "../components";
+
+<GardenSection
+   id="sec-communication"
+   summary={<h3>Technical foundations of technical communication</h3>}
+      >                 
+<section>
+
+#### Motivation
+
+Technical communication today (textbooks, academic papers, documentation, etc.) largely looks the same as it did a century ago: plain words wrapping static figures. This is a tragedy. Computers have the capacity to significantly improve technical communication in two ways:
+
+1. **Multimodal representations of information.** Prose is just one of many representations: charts, diagrams, audio, and video can be more cognitively effective for communicating information (depending on the task and reader). Computers have the capacity to both  *present* and *generate* multimodal representations in ways that traditional documents cannot.
+
+2. **Dynamic interfaces into information.** Unlike a book, a computer can talk back. A person can interactively explore complex topics and receive explanations contextualized to their background. This offers a way out of the one-size-fits-all style of communication that is standard today.
+
+In fact, computers have been able to do both of these things for decades. That raises the question: *why don't we do these things more often?* My thesis is that constructing multimodal dynamic documents (<q>rich documents</q>) is simply too much effort. It is the domain of radically talented individuals like [Grant Sanderson] (<span className="upper">3Blue1Brown</span>), [Bartosz Ciechanowski], and [Bret Victor]. Case in point, when machine learning researchers tried to produce such articles at [Distill], they stopped because it was [too much damn work][distill-hiatus]:
+
+> <p><q>We don't believe \[anymore\] that having a venue is the primary bottleneck to authors producing more Distill-style articles. Instead, we believe the primary bottleneck is the amount of effort it takes to produce these articles and the unusual combination of scientific and design expertise required.</q></p>
+
+</section>
+<section>
+  
+#### My angle
+
+I think we need to simultaneously make progress at each layer of the stack of document technologies:
+
+1. **What are the most important capabilities of rich documents to design for?** That is, if you could make one change to every document in the world, what would have the biggest impact in improving our ability to communicate? First, this means distinguishing flashy features from real cognitive impact. For example, [animations are not always better than static pictures][tversky-animation]. Second, this means weighing the different trade-offs in document design. How much training do readers need in a given feature? How hard is it to for authors to work with? Can it be rendered in the browser, on a phone, or on a Kindle?
+
+   - <p>For example, I first got thinking about documents because I was deeply dissatisfied with my ability to use LaTeX for basic kinds of readability improvements. I rewrote one of my <abbr>PL</abbr> papers as a website to try out different concepts for improving the academic paper format: <q><Ref id="nota">A New Medium for Communicating Research on Programming Languages</Ref></q> (<abbr>HATRA @ SPLASH</abbr> 2022).</p>
+
+2. **What is a stable format for reading and sharing rich documents?** <abbr>PDF</abbr> has served us well for 30+ years, but it's time for something better. However, while the web technology stack (<abbr>HTML</abbr> + <abbr>CSS</abbr> + <abbr>JS</abbr>) can effectively implement most rich documents, it does not have a stable format for reading and sharing. I cannot easily download a rich document, read it offline, send it to a friend, upload it for peer review, and so on.
+
+   - <p>I implemented a small prototype of web-based document format based on the [<abbr>EPUB</abbr>][epub-spec] file format. See: <q>[Portable <abbr>EPUB</abbr>s][portable-epubs].</q></p>
+
+3. **How can we combine the brevity of document languages with the power of programming languages?** Or put another way, what is the LaTeX / Markdown of the future? Raw <abbr>HTML</abbr> is not a pleasant format in which to hand-write documents, rich or otherwise. I want a document programming language that both (a) makes prose and common document elements easy to write, and (b) provides powerful and modern mechanisms for computation (i.e., not unhygienic macros à la TeX).
+
+    - In <q><Ref id="document-calculus">A Core Calculus for Documents</Ref></q> (<abbr>POPL</abbr> 2024) I laid out a basic formalism for describing what computation means within a document.
+
+    - [Nota] is a document programming language that I have been tinkering on for some time.
+
+</section>
+<section>
+
+#### Project ideas
+
+These ideas are suitable for someone with deep experience in browser technologies and an interest in document design, reading comprehension, or knowledge systems.
+
+1. **What are technical mechanisms that can make academic papers easier to understand?** For example, take an impactful paper in your field that's considered difficult to understand. What is the *optimal* presentation of the paper to most effectively communicate its information to the reader? See: <q>[Scientific Communication as Sequential Art][sci-comm-victor]</q>.
+
+2. **How can we compare the different notations and mechanisms of document languages?** For example, what would a [7GUIs] or [Rosetta Code] or [TodoMVC] look like for documents? Can we more rigorously compare new document language designs on what documents they make *possible* or *easy*?
+
+3. **Make <abbr>EPUB</abbr> a viable alternative to <abbr>PDF</abbr>.** [Take this prototype and get it to work for real.][portable-epubs] How can you address all the needs of a rich document format: layout, accessibility, security, and so on? (Alternatively: design your own format!)
+
+3. **Make Nota a viable successor to LaTeX / Markdown.** [Take this prototype and get it to work for real.][Nota] What would a good editing experience (e.g., Overleaf) look like for Nota? (Alternatively: design your own language!)
+
+</section>
+</GardenSection>
+
+[Grant Sanderson]: https://www.3blue1brown.com/
+[Bartosz Ciechanowski]: https://ciechanow.ski/
+[Bret Victor]: https://worrydream.com/
+[Distill]: https://distill.pub/
+[distill-hiatus]: https://distill.pub/2021/distill-hiatus
+[tversky-animation]: https://www.sciencedirect.com/science/article/pii/S1071581902910177
+[portable-epubs]: https://willcrichton.net/notes/portable-epubs/
+[epub-spec]: https://www.w3.org/TR/epub-33/
+[Nota]: https://nota-lang.org/
+[sci-comm-victor]: https://worrydream.com/ScientificCommunicationAsSequentialArt/
+[7GUIs]: https://eugenkiss.github.io/7guis/
+[Rosetta Code]: https://rosettacode.org/wiki/Rosetta_Code
+[TodoMVC]: https://todomvc.com/

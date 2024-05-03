@@ -1,0 +1,74 @@
+import { GardenSection, CollapsibleAside, Ref } from "../components";
+
+<GardenSection
+   id="sec-teaching"
+   summary={<h3>Radical teaching tools</h3>}
+>                 
+<section>
+
+#### Motivation
+
+The field of <q>ed-tech</q> has largely failed to deliver technologies that meaningfully improve education beyond logistics. Technology may have even had a net harm on education through [student surveillance][proctorio], [<abbr>AI</abbr> grading][ai-grading], and [attention-grabbing money holes][charisma-machine]. This is a tragedy.
+
+Yet, I remain optimistic that computers have a significant untapped capacity to improve the quality of education. I am not interested in making education *easy*. Learning new things will always require struggle. I am interested in making that struggle as *productive as possible*, by combining what we know about cognition and computing to create radical teaching tools.
+
+My thesis is that the vast majority of education is essentially <i>ad hoc</i>. Whether it's a teacher designing an assignment for their class, or a developer writing a code comment to explain a tricky concept, or a <abbr>UI</abbr> designer deciding what help text to put on a button &mdash; all these decisions rest on a [folk psychology] of pedagogy.
+
+<CollapsibleAside summary={<>Also, education is more than just schooling...</>}>
+When I talk about teaching tools, I don't just mean tech for the classroom. Education happens everywhere. Any time a person needs to learn a new skill, figure out a new system, or even just assemble a piece of furniture &mdash; there's education involved!
+</CollapsibleAside>
+
+</section>
+<section>
+
+#### My angle
+
+I want to build computational tools that systematize education by [embodying theories of what makes education effective][theory-nexus], especially for computer science education. I have three broad interests:
+
+1. **What are representations of concepts that better faciliate comprehension?** The form of a concept (prose, diagram, video, etc.) significantly affects a person's ability to understand that concept. See: <q>[The Humane Representation of Thought][victor-humane]</q> (2014), [*Things That Make us Smart*][ttmus] (1994), <q>[Why a Diagram is (Sometimes) Worth Ten Thousand Words][diagram-10kwords]</q> (1987). I am interested in all kinds of representational design, especially related to programming such as type systems and runtime state.
+
+   - <p>The [Aquascope visualizer for Rust][aquascope] is a good example of a new form of visual representation for flow-sensitive types, as described in <q><Ref id="ownership-conceptual-model">A Grounded Conceptual Model for Ownership Types in Rust</Ref></q> (<abbr>OOPSLA</abbr> 2023).</p>
+
+2. **How can focused skill training achieve better learning outcomes than general practice?** Simply practicing a skill can be less effective than doing training exercises targeted at specific learning outcomes. See: <q>[Perceptual Learning Modules in Mathematics][plm] (2010)</q>, <q>[Sexing Day Old Chicks][chicks]</q> (1987), <q>[The Role of Deliberate Practice in the Acquisition of Expert Performance][deliberate-practice]</q> (1993). I am interested in creative ways that computers can provide training environments that are not feasible with just standard physical materials (the Perceptual Learning Modules is a good example).
+
+
+3. **How can we reliably create assessments that are valid measures of skill?** Performance on a test should ideally correlate to performance on a real-world skill that we care about, but such <q>validated instruments</q> are difficult and time-consuming to create. I am interested in methods for computationally generating assessments grounded in data that improves the validity of the questions. See: [Quizius][quizius] (2019).
+
+   - <p>In <q><Ref id="profiling-learning">Profiling Programming Language Learning</Ref></q> (<abbr>OOPSLA</abbr> 2024), we used psychometrics to analyze quiz data in the [Rust Book Experiment]. Specifically, we used question discrimination to measure the <q>quality</q> of questions based on their correlation to overall quiz scores.</p>
+
+</section>
+<section>
+
+#### Project ideas
+
+These ideas are suitable for someone with both software engineering and data analysis skills, as well as a significant interest in education.
+
+1. **What is a visual representation for explaining the behavior of a program over time?** Program state visualizations like [Python Tutor] can show a program state at a given point in time, but effective comprehension can sometimes rely on seeing behaviors unfold in time. What is a visual notation for compactly representing changes in program state over time? See: [CrossCode] (<abbr>UIST</abbr> 2023) and [Log-It] (<abbr>CHI</abbr> 2023).
+
+2. **How can you teach someone debugging more effectively than just having them debug?** Debugging is an essential computer science skill. Yet, <abbr>CS</abbr> programs usually expect students to learn debugging by simple practice: encounter a bug, then fix it, rinse and repeat. Are there training regimens that could help students acquire the elements of debugging expertise more quickly? For instance, could you design something a [perceptual learning module][plm] for reading error messages or StackOverflow answers?
+
+3. **Can we generate assessments of programmer expertise based on a computational cognitive model?** An assessment is trying to figure out what you know about a subject. Usually the relationship between the questions and the subject is implicit in the mind of the question writer. But if we have an explicit cognitive model of the subject, then in theory we could generate questions designed to learn information about the model. See: <q>[WatChat: Explaining Perplexing Programs by Debugging Mental Models][watchat]</q>. (2024)
+
+</section>
+</GardenSection>
+
+[proctorio]: https://www.theguardian.com/education/2024/apr/18/us-schools-anti-cheating-software-proctorio
+[ai-grading]: https://www.vice.com/en/article/pa7dj9/flawed-algorithms-are-grading-millions-of-students-essays
+[charisma-machine]: https://mitpress.mit.edu/9780262537445/the-charisma-machine/
+[folk psychology]: https://en.wikipedia.org/wiki/Folk_psychology
+[theory-nexus]: https://dl.acm.org/doi/10.1145/67449.67452
+[victor-humane]: https://vimeo.com/115154289
+[diagram-10kwords]: https://www.sciencedirect.com/science/article/pii/S0364021387800265
+[ttmus]: https://www.nngroup.com/books/things-that-make-us-smart/
+[aquascope]: https://cognitive-engineering-lab.github.io/aquascope/
+[plm]: https://onlinelibrary.wiley.com/doi/full/10.1111/j.1756-8765.2009.01053.x
+[chicks]: https://psycnet.apa.org/record/1988-03299-001
+[deliberate-practice]: https://psycnet.apa.org/record/1993-40718-001
+[stanford-acuity]: https://ojs.aaai.org/index.php/AAAI/article/view/5384
+[quizius]: https://dl.acm.org/doi/abs/10.1145/3287324.3287504
+[Rust Book Experiment]: https://rust-book.cs.brown.edu/
+[theia]: https://dl.acm.org/doi/abs/10.1145/3358711.3361625
+[Python Tutor]: https://pythontutor.com/
+[CrossCode]: https://dl.acm.org/doi/10.1145/3544548.3581390
+[Log-It]: https://dl.acm.org/doi/10.1145/3544548.3581403
+[watchat]: https://arxiv.org/abs/2403.05334

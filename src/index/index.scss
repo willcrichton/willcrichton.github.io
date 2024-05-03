@@ -1,0 +1,128 @@
+@use "../mixins.scss" as *;
+
+.frame {
+  margin-left: 2rem;
+
+  @include mobile {
+    margin-left: 0;
+  }
+  
+  > div {
+    max-width: 66ch;    
+  }
+}
+
+.main > section {
+  margin-top: 4rem;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;  
+
+  .name {
+    font-size: 280%;
+    line-height: 1em;
+
+    .first {
+      position: relative;
+      right: 0.1em;
+    }
+  }
+
+  .title {
+    font-size: 130%;
+  }
+
+  .headshot {
+    position: relative;
+    // margin-left: -1em;
+
+    > img {
+      height: 120px;
+      border-radius: 50%;
+    }
+
+    a {
+      font-size: 20px;
+      text-decoration: none;
+      text-shadow: 0 0 1px #333;
+      position: absolute;
+      
+      img {
+        height: 20px;
+      }
+
+      span {
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+.research-garden {  
+  h1 {
+    margin-top: 0;
+
+    button {
+      background: none;
+      border: none;
+      font-size: 70%;
+      position: relative;
+      bottom: 2px;
+      cursor: pointer;
+    }
+  } 
+
+  > section {
+    margin-block-start: 1rem;
+
+    > div {
+      h2 {
+        display: inline-block;
+      }
+      
+      > span::before {
+          content: "•";
+          padding: 0 10px;          
+      }
+    }
+  }
+}
+
+.garden-header {
+  .garden-content {
+    background-color: #f8f8f8;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+}
+
+.garden-content {
+  > section:first-child h4 {
+    margin-top: 0;
+
+    & + p::first-letter {
+      font-size: 310%;
+      line-height: 1em;
+      float: left;
+      padding-right: 0.05em;   
+      margin-top: -0.1em;   
+      margin-bottom: -0.425em;
+    }
+  }
+}
+
+.selected-publications {
+  h1 button {
+    font-weight: bold;
+  }
+
+  > section {
+    margin-top: 2.25rem;
+  }
+}
