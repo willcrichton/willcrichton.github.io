@@ -35,7 +35,7 @@ const linkDefs: React.FC<React.HTMLAttributes<HTMLAnchorElement>>[] = [
     </a>
   ),
   props => (
-    <a {...props} href="https://twitter.com/tonofcrates">
+    <a {...props} href="https://willcrichton.net/assets/pdf/WillCrichton_CV.pdf">
       <span>
         <abbr>CV</abbr>
       </span>
