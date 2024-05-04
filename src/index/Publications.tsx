@@ -82,6 +82,7 @@ let BibMeta = ({ entry }: { entry: BibtexEntry }) => {
             {author}
           </span>
         ))}
+        .
       </div>
       <div className="bib-meta">
         {entry.isDissertation() ? (

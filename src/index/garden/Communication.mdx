@@ -27,7 +27,7 @@ I think we need to simultaneously make progress at each layer of the stack of do
 
 1. **What are the most important capabilities of rich documents to design for?** That is, if you could make one change to every document in the world, what would have the biggest impact in improving our ability to communicate? First, this means distinguishing flashy features from real cognitive impact. For example, [animations are not always better than static pictures][tversky-animation]. Second, this means weighing the different trade-offs in document design. How much training do readers need in a given feature? How hard is it to for authors to work with? Can it be rendered in the browser, on a phone, or on a Kindle?
 
-   - <p>For example, I first got thinking about documents because I was deeply dissatisfied with my ability to use LaTeX for basic kinds of readability improvements. I rewrote one of my <abbr>PL</abbr> papers as a website to try out different concepts for improving the academic paper format: <q><Ref id="nota">A New Medium for Communicating Research on Programming Languages</Ref></q> (<abbr>HATRA @ SPLASH</abbr> 2022).</p>
+   - <p>For example, I first got thinking about documents because I was deeply dissatisfied with my ability to use LaTeX for basic kinds of readability improvements. I rewrote one of my <abbr>PL</abbr> papers as a website to try out different concepts for improving the academic paper format: <q><Ref id="c:pl-medium">A New Medium for Communicating Research on Programming Languages</Ref></q> (<abbr>HATRA @ SPLASH</abbr> 2022).</p>
 
 2. **What is a stable format for reading and sharing rich documents?** <abbr>PDF</abbr> has served us well for 30+ years, but it's time for something better. However, while the web technology stack (<abbr>HTML</abbr> + <abbr>CSS</abbr> + <abbr>JS</abbr>) can effectively implement most rich documents, it does not have a stable format for reading and sharing. I cannot easily download a rich document, read it offline, send it to a friend, upload it for peer review, and so on.
 
@@ -35,7 +35,7 @@ I think we need to simultaneously make progress at each layer of the stack of do
 
 3. **How can we combine the brevity of document languages with the power of programming languages?** Or put another way, what is the LaTeX / Markdown of the future? Raw <abbr>HTML</abbr> is not a pleasant format in which to hand-write documents, rich or otherwise. I want a document programming language that both (a) makes prose and common document elements easy to write, and (b) provides powerful and modern mechanisms for computation (i.e., not unhygienic macros à la TeX).
 
-    - In <q><Ref id="document-calculus">A Core Calculus for Documents</Ref></q> (<abbr>POPL</abbr> 2024) I laid out a basic formalism for describing what computation means within a document.
+    - In <q><Ref id="ck:document-calculus">A Core Calculus for Documents</Ref></q> (<abbr>POPL</abbr> 2024) I laid out a basic formalism for describing what computation means within a document.
 
     - [Nota] is a document programming language that I have been tinkering on for some time.
 

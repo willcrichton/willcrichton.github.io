@@ -25,13 +25,13 @@ I have been working with Rust since 2014. I am deeply embedded in the Rust commu
   
 1. **How can people learn and use Rust more effectively?** Rust is a complex language. People need help to both ramp up into that complexity when learning, and to manage that complexity when programming.
   
-   - I have been running a long-term experiment on [a fork of the Rust Book][rust-book] to evaluate methods for teaching Rust. <q><Ref id="ownership-conceptual-model">A Grounded Conceptual Model for Ownership Types in Rust</Ref></q> (<abbr>OOPSLA</abbr> 2023) describes a new way to think about Rust's ownership system as embodied in the [Aquascope visualizer][aquascope]. <q><Ref id="profiling-learning">Profiling Programming Language Learning</Ref></q>(<abbr>OOPSLA</abbr> 2024) describes how we embedded quizzes into the book to both figure out which concepts were hardest for learners, and to evaluate interventions in the book.
+   - I have been running a long-term experiment on [a fork of the Rust Book][rust-book] to evaluate methods for teaching Rust. <q><Ref id="cgk:ownership-conceptual-model">A Grounded Conceptual Model for Ownership Types in Rust</Ref></q> (<abbr>OOPSLA</abbr> 2023) describes a new way to think about Rust's ownership system as embodied in the [Aquascope visualizer][aquascope]. <q><Ref id="ck:profiling-learning">Profiling Programming Language Learning</Ref></q>(<abbr>OOPSLA</abbr> 2024) describes how we embedded quizzes into the book to both figure out which concepts were hardest for learners, and to evaluate interventions in the book.
     
-   - I created the [Flowistry program slicer][flowistry] for Rust. Flowistry helps Rust programmers read complex code by visualizing which code depends on a given expression. <q><Ref id="flowistry">Modular Information Flow through Ownership</Ref></q> (<abbr>PLDI</abbr> 2022) describes how Flowistry uses Rust's ownership types in a clever way to understand how functions induce dependencies just by their type signature.
+   - I created the [Flowistry program slicer][flowistry] for Rust. Flowistry helps Rust programmers read complex code by visualizing which code depends on a given expression. <q><Ref id="cpah:ownership-infoflow">Modular Information Flow through Ownership</Ref></q> (<abbr>PLDI</abbr> 2022) describes how Flowistry uses Rust's ownership types in a clever way to understand how functions induce dependencies just by their type signature.
 
 2. **How can we use Rust's features to design systems that are safer, faster, more correct, and more usable?** Because Rust's feature set is so different from traditional <abbr>OOP</abbr> languages, it's a big open question how systems should be architected in Rust.
   
-   - I want to systematize the process of mapping from conceptual objects to concrete APIs. What kinds of concepts should you encode as traits? As enums? And so on. I wrote <q><Ref id="rust-design-patterns">Typed Design Patterns for the Functional Era</Ref></q> (<abbr>FUNARCH @ ICFP</abbr> 2023) as a first step in this direction.
+   - I want to systematize the process of mapping from conceptual objects to concrete APIs. What kinds of concepts should you encode as traits? As enums? And so on. I wrote <q><Ref id="c:rust-design-patterns">Typed Design Patterns for the Functional Era</Ref></q> (<abbr>FUNARCH @ ICFP</abbr> 2023) as a first step in this direction.
         
    - Not really for research, but I've built a lot of Rust <abbr>API</abbr>s like [indexed collections][indexical], [browser-based logging][web-logger], and [lock-free data structures][rlu].
 
@@ -41,7 +41,7 @@ I have been working with Rust since 2014. I am deeply embedded in the Rust commu
 
 #### Project ideas
 
-These ideas are suitable for students who are strong systems programmers, especially those (a) interested in <abbr>PL</abbr> or <abbr>HCI</abbr>, and (b) with Rust experience. For instance, you should be able to understand and contribute to a complex system (100K+ LOC).
+These ideas are suitable for students who are strong systems programmers, especially those (a) interested in <abbr>PL</abbr> or <abbr>HCI</abbr>, and (b) with Rust experience. For instance, you should be able to understand and contribute to a complex system (<abbr>100K+</abbr> <abbr>LOC</abbr>).
 
 1. Could you design a higher-level language on top of Rust (imagine OCaml or Javascript), but automatically lift the entire Rust library ecosystem into the higher level? How much of Rust could you get <q>for free</q> rather than reimplementing everything from scratch?
     
