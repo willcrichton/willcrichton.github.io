@@ -73,6 +73,7 @@ p {
   word-spacing: -0.05em;
 
   @include mobile {
+    hyphens: manual;
     text-align: left;
     word-spacing: normal;
   }
@@ -138,7 +139,7 @@ pre, code {
 details {
   margin-block: 1em 0;  
 
-  > summary::marker {
+  > summary::marker, > summary::-webkit-details-marker {
     font-size: 60%;
   }
 }
@@ -173,3 +174,17 @@ aside details {
     }
   }
 } 
+
+button {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid #ccc;
+  background-color: #efefef;
+  padding: 0 0.3em;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: #e5e5e5;
+    border-color: #aaa;
+  }
+}

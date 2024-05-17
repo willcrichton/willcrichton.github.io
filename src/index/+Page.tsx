@@ -128,7 +128,7 @@ let Header = () => (
         fields to make programming more usable, learnable, and powerful.
       </p>
       <p>
-        I am starting as an assistant professor in Summer 2025.{" "}
+        I am starting as an assistant professor at Brown in Summer 2025.{" "}
         <strong>I am recruiting PhD students!</strong> If you are considering my
         group, then talk to me in-person at either <abbr>OOPSLA</abbr> 2024 or{" "}
         <abbr>UIST</abbr> 2024, or you can contact me over email.
