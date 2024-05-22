@@ -14,6 +14,7 @@ import {
 } from "./Publications";
 import headshotUrl from "./assets/headshot-mini.jpg?url";
 import githubIconUrl from "./assets/icon-github.png?url";
+import mastodonIconUrl from "./assets/icon-mastodon.svg?url";
 import twitterIconUrl from "./assets/icon-twitter.png?url";
 import { ResearchGarden } from "./garden/Garden";
 import "./index.scss";
@@ -35,7 +36,15 @@ const linkDefs: React.FC<React.HTMLAttributes<HTMLAnchorElement>>[] = [
     </a>
   ),
   props => (
-    <a {...props} href="https://willcrichton.net/assets/pdf/WillCrichton_CV.pdf">
+    <a {...props} href="https://mastodon.social/@tonofcrates">
+      <img src={mastodonIconUrl} />
+    </a>
+  ),
+  props => (
+    <a
+      {...props}
+      href="https://willcrichton.net/assets/pdf/WillCrichton_CV.pdf"
+    >
       <span>
         <abbr>CV</abbr>
       </span>
@@ -61,7 +70,7 @@ let Headshot = () => {
 
   let iconSize = 20;
   let r = 60 + iconSize / 2 + 7;
-  let spacing = Math.PI / 6;
+  let spacing = Math.PI / 8;
   let minTheta = centerTheta - ((linkDefs.length - 1) / 2) * spacing;
   let centerX = 60;
   let centerY = 60;
@@ -120,10 +129,10 @@ let Header = () => (
 
     <div>
       <p>
-        I want to empower people to use the full potential of computers, which
-        today means through programming. To reach that potential, we need to
-        combine a science of programming with a science of people. For me, these
-        sciences are <em>programming language theory</em> and{" "}
+        My goal is to empower people to use the full potential of computers
+        through programming. To reach that potential, we need to combine a
+        science of programming with a science of people. For me, these sciences
+        are <em>programming language theory</em> and{" "}
         <em>cognitive psychology</em>, respectively. My research draws on these
         fields to make programming more usable, learnable, and powerful.
       </p>
@@ -169,8 +178,17 @@ let PublicationsView = () => {
         Publications
       </h1>
       <p>
-        Click the button above to see {showAll ? "a selected set" : "all"} of my
-        publications.
+        {showAll ? (
+          <>
+            This is an exhaustive list of my publications. Click the button
+            above to see a selected subset.
+          </>
+        ) : (
+          <>
+            This is a representative set of my publications. Click the button
+            above to see an exhaustive list.
+          </>
+        )}
       </p>
       <section>
         <h2>Conference Papers</h2>

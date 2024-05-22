@@ -20,11 +20,6 @@
 }
 
 @font-face {
-  font-family: "Linux Libertine Display";
-  src: url("./fonts/LinLibertine_DR.woff2");
-}
-
-@font-face {
   font-family: "Linux Biolinum";  
   src: url("./fonts/LinBiolinum_R.woff2");
 }
@@ -71,9 +66,9 @@ p {
   text-wrap: pretty;
   text-align: justify;
   word-spacing: -0.05em;
+  hyphenate-limit-chars: auto 4 4;
 
   @include mobile {
-    hyphens: manual;
     text-align: left;
     word-spacing: normal;
   }
@@ -98,8 +93,7 @@ abbr {
   letter-spacing: 0.04em;
 }
 
-h1, h2, h3, h4, h5 {
-  font-family: "Linux Libertine Display", "Linux Libertine", serif;
+h1, h2, h3, h4, h5 {  
   margin-block-start: 0.75em;
   margin-block-end: 0;  
   line-height: 1em;

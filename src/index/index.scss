@@ -19,14 +19,18 @@
 header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   column-gap: 1rem;
   row-gap: 2rem;
   flex-wrap: wrap;
   margin-bottom: 2rem;  
 
+  @include mobile {
+    justify-content: center;
+  }
+
   .name {
-    font-size: 280%;
+    font-size: 260%;
     line-height: 1em;
 
     .first {
@@ -36,7 +40,7 @@ header {
   }
 
   .title {
-    font-size: 130%;
+    font-size: 120%;
   }
 
   .headshot {
