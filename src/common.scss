@@ -61,17 +61,19 @@ body {
   font-variant-numeric: normal;
 }
 
-p {
-  hyphens: auto;
-  text-wrap: pretty;
-  text-align: justify;
-  word-spacing: -0.05em;
-  hyphenate-limit-chars: auto 4 4;
-
-  @include mobile {
-    text-align: left;
-    word-spacing: normal;
-  }
+@supports (hyphenate-limit-chars: auto 4 4) {
+  p {
+    hyphenate-limit-chars: auto 4 4;  
+    hyphens: auto;
+    text-align: justify;
+    word-spacing: -0.05em;
+    text-wrap: pretty;
+  
+    @include mobile {
+      text-align: left;
+      word-spacing: normal;
+    }
+  }  
 }
 
 p a, a.body {
@@ -134,7 +136,7 @@ details {
   margin-block: 1em 0;  
 
   > summary::marker, > summary::-webkit-details-marker {
-    font-size: 60%;
+    font-size: 70%;
   }
 }
 

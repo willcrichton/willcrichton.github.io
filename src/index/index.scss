@@ -100,6 +100,10 @@ header {
 }
 
 .garden-header {
+  html.safari & summary h3 {
+    margin-top: 0;    
+  }
+  
   .garden-content {
     background-color: #f8f8f8;
     padding: 1rem;
