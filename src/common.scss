@@ -61,13 +61,16 @@ body {
   font-variant-numeric: normal;
 }
 
+p {
+  text-wrap: pretty;
+}
+
 @supports (hyphenate-limit-chars: auto 4 4) {
   p {
     hyphenate-limit-chars: auto 4 4;  
     hyphens: auto;
-    text-align: justify;
-    word-spacing: -0.05em;
-    text-wrap: pretty;
+    // text-align: justify;
+    // word-spacing: -0.05em;    
   
     @include mobile {
       text-align: left;
@@ -183,4 +186,8 @@ button {
     background-color: #e5e5e5;
     border-color: #aaa;
   }
+}
+
+.nobr {
+  white-space: nowrap;
 }

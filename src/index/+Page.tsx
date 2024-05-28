@@ -16,6 +16,7 @@ import headshotUrl from "./assets/headshot-mini.jpg?url";
 import githubIconUrl from "./assets/icon-github.png?url";
 import mastodonIconUrl from "./assets/icon-mastodon.svg?url";
 import twitterIconUrl from "./assets/icon-twitter.png?url";
+import { Ref } from "./components";
 import { ResearchGarden } from "./garden/Garden";
 import "./index.scss";
 
@@ -137,7 +138,32 @@ let Header = () => (
         fields to make programming more usable, learnable, and powerful.
       </p>
       <p>
-        I am starting as an assistant professor at Brown in Summer 2025.{" "}
+        I am a <q>full-stack</q> <abbr>CS</abbr> researcher working primarily
+        between <abbr title="Programming Languages">PL</abbr> and{" "}
+        <abbr title="Human-Computer Interaction">HCI</abbr>. I build systems
+        like{" "}
+        <a href="https://github.com/willcrichton/flowistry/">program slicers</a>
+        , <a href="https://nota-lang.org/">document languages</a>, and{" "}
+        <a href="https://cognitive-engineering-lab.github.io/aquascope/">
+          type system visualizers
+        </a>
+        . I develop theories like{" "}
+        <Ref id="cah:wm-tracing">working memory for programmers</Ref>,{" "}
+        <Ref id="ck:profiling-learning">
+          psychometrics for programming languages
+        </Ref>
+        , and{" "}
+        <Ref id="ck:document-calculus">
+          type-safe templates for <span className="nobr">System F</span>
+        </Ref>
+        . I work on systems languages like <Ref id="sec-rust">Rust</Ref>, proof
+        assistants like <Ref id="sec-proofs">Lean</Ref>, and <abbr>UI</abbr>{" "}
+        tools like <Ref id="sec-browser">the browser</Ref>. My Rust research has been
+        used by over 100,000 developers to date. My research garden (below) explains my
+        current interests in greater detail.
+      </p>
+      <p>
+        I am starting as an assistant professor at Brown in Fall 2025.{" "}
         <strong>I am recruiting PhD students!</strong> If you are considering my
         group, then talk to me in-person at either <abbr>OOPSLA</abbr> 2024 or{" "}
         <abbr>UIST</abbr> 2024, or you can contact me over email.

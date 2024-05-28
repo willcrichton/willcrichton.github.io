@@ -2,7 +2,7 @@ import classNames from "classnames";
 import exenv from "exenv";
 import { action, makeAutoObservable } from "mobx";
 import { observer } from "mobx-react";
-import React, { useContext, useMemo, useRef } from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 
 import "./ContextPanel.scss";
@@ -14,9 +14,18 @@ export class ContextPanel {
     makeAutoObservable(this);
   }
 
-  toggle = action((key: string) => {
+  toggle(key: string, changeHash: boolean) {
+    if (changeHash) {
+      let url = new URL(window.location.toString());
+      let newHash = `#${key}`;
+      if (url.hash !== newHash) {
+        url.hash = newHash;
+        window.history.pushState(null, "", url);
+      }
+    }
+
     this.selected = this.selected === key ? null : key;
-  });
+  }
 
   isSelected = (key: string | null) =>
     this.selected !== null && this.selected === key;
@@ -51,7 +60,7 @@ export let ContextAnchor: React.FC<React.PropsWithChildren<{ id: string }>> =
     let mobileCutoff = useMemo(() => getMobileCutoff(), []);
     let onClick: React.MouseEventHandler = () => {
       if (window.innerWidth <= mobileCutoff) return;
-      ctx.toggle(id!);
+      ctx.toggle(id!, true);
     };
     let selected = ctx.isSelected(id);
     return (
@@ -84,9 +93,25 @@ export let ContextLink: React.FC<
     if (e.target instanceof HTMLElement && e.target.closest("a") !== null)
       return;
     e.preventDefault();
-    if (e.target instanceof HTMLElement && e.target === summaryRef.current!)
-      ctx.toggle(contextId);
+    if (e.target instanceof HTMLElement && e.target === summaryRef.current!) {
+      ctx.toggle(contextId, true);
+    }
   };
+
+  useEffect(() => {
+    let onHashChange = (event: HashChangeEvent) => {
+      let oldUrl = new URL(event.oldURL);
+      let newUrl = new URL(event.newURL);
+      if (newUrl.hash.slice(1) === contextId) ctx.toggle(contextId, false);
+      else if (
+        oldUrl.hash.slice(1) === contextId &&
+        newUrl.hash.slice(1).length == 0
+      )
+        ctx.toggle(contextId, false);
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, [contextId]);
 
   return (
     <details {...attrs} className={classNames("context-link", attrs.className)}>
