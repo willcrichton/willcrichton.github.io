@@ -22,7 +22,7 @@ import "./index.scss";
 
 const linkDefs: React.FC<React.HTMLAttributes<HTMLAnchorElement>>[] = [
   props => (
-    <a {...props} href="mailto:wcrichto@brown.edu">
+    <a {...props} href="mailto:crichton.will@gmail.com">
       <span>✉️</span>
     </a>
   ),
