@@ -8,7 +8,7 @@ import {
 } from "./ContextPanel";
 import {
   BibEntryView,
-  BibtexEntry,
+  type BibtexEntry,
   Publications,
   PublicationsContext,
 } from "./Publications";
@@ -28,17 +28,17 @@ const linkDefs: React.FC<React.HTMLAttributes<HTMLAnchorElement>>[] = [
   ),
   props => (
     <a {...props} href="https://github.com/willcrichton/">
-      <img src={githubIconUrl} />
+      <img alt="Github" src={githubIconUrl} />
     </a>
   ),
   props => (
     <a {...props} href="https://twitter.com/tonofcrates">
-      <img src={twitterIconUrl} />
+      <img alt="Twitter" src={twitterIconUrl} />
     </a>
   ),
   props => (
     <a {...props} href="https://mastodon.social/@tonofcrates">
-      <img src={mastodonIconUrl} />
+      <img alt="Mastodon" src={mastodonIconUrl} />
     </a>
   ),
   props => (
@@ -61,7 +61,7 @@ let Headshot = () => {
     let req: number;
     function update() {
       let delta = new Date().getTime() - mouseOver!;
-      centerTheta += Math.pow(delta, 1.6) / 1e8;
+      centerTheta += delta ** 1.6 / 1e8;
       setCenterTheta(centerTheta);
       req = requestAnimationFrame(update);
     }
@@ -93,6 +93,7 @@ let Headshot = () => {
   return (
     <div className="headshot">
       <img
+        alt="A headshot of Will"
         src={headshotUrl}
         onMouseEnter={() => setMouseOver(new Date().getTime())}
         onMouseLeave={() => setMouseOver(null)}
@@ -158,9 +159,9 @@ let Header = () => (
         </Ref>
         . I work on systems languages like <Ref id="sec-rust">Rust</Ref>, proof
         assistants like <Ref id="sec-proofs">Lean</Ref>, and <abbr>UI</abbr>{" "}
-        tools like <Ref id="sec-browser">the browser</Ref>. My Rust research has been
-        used by over 100,000 developers to date. My research garden (below) explains my
-        current interests in greater detail.
+        tools like <Ref id="sec-browser">the browser</Ref>. My Rust research has
+        been used by over 100,000 developers to date. My research garden (below)
+        explains my current interests in greater detail.
       </p>
       <p>
         I am starting as an assistant professor at Brown in Fall 2025.{" "}
@@ -198,7 +199,7 @@ let PublicationsView = () => {
   return (
     <section className="selected-publications">
       <h1>
-        <button onClick={() => setShowAll(!showAll)}>
+        <button type="button" onClick={() => setShowAll(!showAll)}>
           {showAll ? "All" : "Selected"}
         </button>{" "}
         Publications
@@ -270,6 +271,6 @@ export default () => {
     }
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [key]);
+  }, [key, cutoff]);
   return <Index key={key} />;
 };

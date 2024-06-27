@@ -22,8 +22,10 @@ export class BibtexEntry {
     this.citationKey = entry.citationKey;
     this.type = entry.entryType;
     this.tags = _.fromPairs(
-      Object.entries(entry.entryTags).map(([k, v]) => [k, stripTex(v)])
-    ) as any;
+      Object.entries(entry.entryTags).map(([k, v]) => [k, stripTex(v)]),
+    ) as
+      // biome-ignore lint: lint/suspicious/noExplicitAny
+      any;
     this.authors = this.tags.author
       ? this.tags.author
           .split(" and ")
@@ -31,14 +33,14 @@ export class BibtexEntry {
       : [];
     this.venue = this.isDissertation()
       ? this.tags.school
-      : entry.entryType == "inproceedings"
-      ? this.tags.series.split(" ").slice(0, -1).join(" ")
-      : this.tags.number;
-    this.year = parseInt(this.tags.year);
+      : entry.entryType === "inproceedings"
+        ? this.tags.series.split(" ").slice(0, -1).join(" ")
+        : this.tags.number;
+    this.year = Number.parseInt(this.tags.year);
   }
 
   isDissertation() {
-    return this.type == "phdthesis" || this.type == "mastersthesis";
+    return this.type === "phdthesis" || this.type === "mastersthesis";
   }
 
   isWorkshop() {
@@ -61,12 +63,12 @@ export class Publications {
     this.entries = _.orderBy(
       this.entries,
       entry => [entry.year, entry.tags.title],
-      ["desc", "asc"]
+      ["desc", "asc"],
     );
   }
 
   entry(key: string): BibtexEntry {
-    let entry = this.entries.find(entry => entry.citationKey == key);
+    let entry = this.entries.find(entry => entry.citationKey === key);
     if (!entry) throw new Error(`Could not find entry with key: ${key}`);
     return entry;
   }
@@ -177,5 +179,5 @@ export let BibEntryView = ({ entry }: { entry: BibtexEntry }) => {
 };
 
 export let PublicationsContext = React.createContext<Publications | undefined>(
-  undefined
+  undefined,
 );

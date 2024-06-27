@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import exenv from "exenv";
-import { action, makeAutoObservable } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { observer } from "mobx-react";
 import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
@@ -35,7 +35,7 @@ export class ContextPanel {
 }
 
 export let PanelContext = React.createContext<ContextPanel | undefined>(
-  undefined
+  undefined,
 );
 
 export let ContextPanelView = observer(() => {
@@ -43,22 +43,22 @@ export let ContextPanelView = observer(() => {
   let style = {
     display: ctx.selected !== null ? "block" : "none",
   };
-  return <div ref={ctx.panelRef} className="window" style={style}></div>;
+  return <div ref={ctx.panelRef} className="window" style={style} />;
 });
 
 export let getMobileCutoff = () => {
   if (!exenv.canUseDOM) return 0;
   let cutoffStr = getComputedStyle(document.body).getPropertyValue(
-    "--mobile-cutoff"
+    "--mobile-cutoff",
   );
-  return parseFloat(cutoffStr.replace(/px$/, ""));
+  return Number.parseFloat(cutoffStr.replace(/px$/, ""));
 };
 
 export let ContextAnchor: React.FC<React.PropsWithChildren<{ id: string }>> =
   observer(({ children, id }) => {
     let ctx = useContext(PanelContext)!;
     let mobileCutoff = useMemo(() => getMobileCutoff(), []);
-    let onClick: React.MouseEventHandler = () => {
+    let toggle = () => {
       if (window.innerWidth <= mobileCutoff) return;
       ctx.toggle(id!, true);
     };
@@ -66,7 +66,10 @@ export let ContextAnchor: React.FC<React.PropsWithChildren<{ id: string }>> =
     return (
       <div
         id={id}
-        onClick={onClick}
+        onClick={() => toggle()}
+        onKeyDown={e => {
+          if (e.key === "Enter") toggle();
+        }}
         className={classNames("context-anchor", { selected })}
       >
         {children}
@@ -105,7 +108,7 @@ export let ContextLink: React.FC<
       if (newUrl.hash.slice(1) === contextId) ctx.toggle(contextId, false);
       else if (
         oldUrl.hash.slice(1) === contextId &&
-        newUrl.hash.slice(1).length == 0
+        newUrl.hash.slice(1).length === 0
       )
         ctx.toggle(contextId, false);
     };
@@ -115,6 +118,7 @@ export let ContextLink: React.FC<
 
   return (
     <details {...attrs} className={classNames("context-link", attrs.className)}>
+      {/* biome-ignore lint: lint/a11y/useKeyWithClickEvents */}
       <summary ref={summaryRef} onClick={onClickSummary}>
         {summary}
       </summary>
@@ -123,7 +127,7 @@ export let ContextLink: React.FC<
           <>
             {contextTitle}
             {children}
-          </>
+          </>,
         )
       ) : (
         <div className="inline-content">{children}</div>
