@@ -166,8 +166,7 @@ let Header = () => (
       <p>
         I am starting as an assistant professor at Brown in Fall 2025.{" "}
         <strong>I am recruiting PhD students!</strong> If you are considering my
-        group, then talk to me in-person at either <abbr>OOPSLA</abbr> 2024 or{" "}
-        <abbr>UIST</abbr> 2024, or you can contact me over email.
+        group, then talk to me in-person at either <abbr>OOPSLA</abbr> 2024, or you can contact me over email.
       </p>
     </div>
   </>

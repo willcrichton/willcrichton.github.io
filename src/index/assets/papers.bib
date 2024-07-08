@@ -14,8 +14,9 @@
   articleno = {265},
   numpages = {29},
   keywords = {program state visualization, Rust, concept inventory, ownership types},
+  archivePrefix = {arXiv},
   eprint = {2309.04134},
-  abstract = {Programmers learning Rust struggle to understand ownership types, Rust’s core mechanism for ensuring memory safety without garbage collection. This paper describes our attempt to systematically design a pedagogy for ownership types. First, we studied Rust developers’ misconceptions of ownership to create the Ownership Inventory, a new instrument for measuring a person’s knowledge of ownership. We found that Rust learners could not connect Rust’s static and dynamic semantics, such as determining why an ill-typed program would (or would not) exhibit undefined behavior. Second, we created a conceptual model of Rust’s semantics that explains borrow checking in terms of flow-sensitive permissions on paths into memory. Third, we implemented a Rust compiler plugin that visualizes programs under the model. Fourth, we integrated the permissions model and visualizations into a broader pedagogy of ownership by writing a new ownership chapter for The Rust Programming Language, a popular Rust textbook. Fifth, we evaluated an initial deployment of our pedagogy against the original version, using reader responses to the Ownership Inventory as a point of comparison. Thus far, the new pedagogy has improved learner scores on the Ownership Inventory by an average of 9% (N = 342, d = 0.56).},
+  abstract = {Programmers learning Rust struggle to understand ownership types, Rust’s core mechanism for ensuring memory safety without garbage collection. This paper describes our attempt to systematically design a pedagogy for ownership types. First, we studied Rust developers’ misconceptions of ownership to create the Ownership Inventory, a new instrument for measuring a person’s knowledge of ownership. We found that Rust learners could not connect Rust’s static and dynamic semantics, such as determining why an ill-typed program would (or would not) exhibit undefined behavior. Second, we created a conceptual model of Rust’s semantics that explains borrow checking in terms of flow-sensitive permissions on paths into memory. Third, we implemented a Rust compiler plugin that visualizes programs under the model. Fourth, we integrated the permissions model and visualizations into a broader pedagogy of ownership by writing a new ownership chapter for The Rust Programming Language, a popular Rust textbook. Fifth, we evaluated an initial deployment of our pedagogy against the original version, using reader responses to the Ownership Inventory as a point of comparison. Thus far, the new pedagogy has improved learner scores on the Ownership Inventory by an average of 9\% (N = 342, d = 0.56).},
   artifact = {https://zenodo.org/records/8317948},
   github = {https://github.com/cognitive-engineering-lab/aquascope/},
   video = {https://www.youtube.com/watch?v=NtQYUwf6mas},
@@ -26,6 +27,7 @@
   title = {Identifying Barriers to Adoption for {Rust} through Online Discourse},
   booktitle = {Proceedings of the 9th Workshop on Evaluation and Usability of Programming Languages and Tools},
   year = {2018},
+  archivePrefix = {arXiv},
   eprint = {1901.01001},
   series = {PLATEAU 2018},
   abstract = {Rust is a low-level programming language known for its unique approach to memory-safe systems programming and for its steep learning curve. To understand what makes Rust difficult to adopt, we surveyed the top Reddit and Hacker News posts and comments about Rust; from these online discussions, we identified three hypotheses about Rust's barriers to adoption. We found that certain key features, idioms, and integration patterns were not easily accessible to new users.}
@@ -82,6 +84,7 @@ and retrieve visual concepts on large visual datasets.}
   keywords = {Program tracing, working memory, program comprehension, restricted focus viewing},
   location = {Yokohama, Japan},
   series = {CHI '21},
+  archivePrefix = {arXiv},
   eprint = {2101.06305},
   abstract = {Program tracing, or mentally simulating a program on concrete inputs, is an important part of general program comprehension. Programs involve many kinds of virtual state that must be held in memory, such as variable/value pairs and a call stack. In this work, we examine the influence of short-term working memory (WM) on a person's ability to remember program state during tracing. We first confirm that previous findings in cognitive psychology transfer to the programming domain: people can keep about 7 variable/value pairs in WM, and people will accidentally swap associations between variables due to WM load. We use a restricted focus viewing interface to further analyze the strategies people use to trace through programs, and the relationship of tracing strategy to WM. Given a straight-line program, we find half of our participants traced a program from the top-down line-by-line (linearly), and the other half start at the bottom and trace upward based on data dependencies (on-demand). Participants with an on-demand strategy made more WM errors while tracing straight-line code than with a linear strategy, but the two strategies contained an equal number of WM errors when tracing code with functions. We conclude with the implications of these findings for the design of programming tools: first, programs should be analyzed to identify and refactor human-memory-intensive sections of code. Second, programming environments should interactively visualize variable metadata to reduce WM load in accordance with a person's tracing strategy. Third, tools for program comprehension should enable externalizing program state while tracing.},
   video = {https://www.youtube.com/watch?v=-C1gQg07Jis}
@@ -103,8 +106,9 @@ and retrieve visual concepts on large visual datasets.}
   keywords = {ownership types, information flow, rust},
   location = {San Diego, CA, USA},
   series = {PLDI 2022},
+  archivePrefix = {arXiv},
   eprint = {2111.13662},
-  abstract = {Statically analyzing information flow, or how data influences other data within a program, is a challenging task in imperative languages. Analyzing pointers and mutations requires access to a program's complete source. However, programs often use pre-compiled dependencies where only type signatures are available. We demonstrate that ownership types can be used to soundly and precisely analyze information flow through function calls given only their type signature. From this insight, we built Flowistry, a system for analyzing information flow in Rust, an ownership-based language. We prove the system's soundness as a form of noninterference using the Oxide formal model of Rust. Then we empirically evaluate the precision of Flowistry, showing that modular flows are identical to whole-program flows in 94% of cases drawn from large Rust codebases. We illustrate the applicability of Flowistry by using it to implement prototypes of a program slicer and an information flow control system.},
+  abstract = {Statically analyzing information flow, or how data influences other data within a program, is a challenging task in imperative languages. Analyzing pointers and mutations requires access to a program's complete source. However, programs often use pre-compiled dependencies where only type signatures are available. We demonstrate that ownership types can be used to soundly and precisely analyze information flow through function calls given only their type signature. From this insight, we built Flowistry, a system for analyzing information flow in Rust, an ownership-based language. We prove the system's soundness as a form of noninterference using the Oxide formal model of Rust. Then we empirically evaluate the precision of Flowistry, showing that modular flows are identical to whole-program flows in 94\% of cases drawn from large Rust codebases. We illustrate the applicability of Flowistry by using it to implement prototypes of a program slicer and an information flow control system.},
   github = {https://github.com/willcrichton/flowistry/},
   artifact = {https://zenodo.org/records/6327882},
   video = {https://www.youtube.com/watch?v=M5_M_wSeaaA}
@@ -128,6 +132,7 @@ and retrieve visual concepts on large visual datasets.}
   articleno = {23},
   numpages = {28},
   keywords = {document languages, markup, templates},
+  archivePrefix = {arXiv},
   eprint = {2310.04368},
   artifact = {https://zenodo.org/records/8409115},
   github = {https://github.com/cognitive-engineering-lab/document-calculus},
@@ -147,8 +152,9 @@ and retrieve visual concepts on large visual datasets.}
   pages = {40–48},
   numpages = {9},
   keywords = {design patterns, domain-driven design, rust},
-  location = {<conf-loc>, <city>Seattle</city>, <state>WA</state>, <country>USA</country>, </conf-loc>},
+  location = {Seattle, WA, USA},
   series = {FUNARCH 2023},
+  archivePrefix = {arXiv},
   eprint = {2307.07069},
 }
 
@@ -158,6 +164,7 @@ and retrieve visual concepts on large visual datasets.}
   year = {2020},
   url = {http://reports-archive.adm.cs.cmu.edu/anon/isr2020/CMU-ISR-20-115E.pdf},
   series = {PLATEAU 2020},
+  archivePrefix = {arXiv},
   eprint = {2011.05600},
   abstract = {Automatic documentation generation tools, or auto docs, are widely used to visualize information about APIs. However, each auto doc tool comes with its own unique representation of API information. In this paper, I use an information visualization analysis of auto docs to generate potential design principles for improving their usability. Developers use auto docs as a reference by looking up relevant API primitives given partial information, or leads, about its name, type, or behavior. I discuss how auto docs can better support searching and scanning on these leads, e.g. by providing more information-dense visualizations of method signatures.},
   video = {https://www.youtube.com/watch?v=WIfuYjLq300},
@@ -170,6 +177,7 @@ and retrieve visual concepts on large visual datasets.}
   url = {http://dagstuhl.sunsite.rwth-aachen.de/volltexte/2019/10547/pdf/LIPIcs-SNAPL-2019-4.pdf},
   booktitle = {Proceedings of the 3rd Summit on Advanced in Programming Languages},
   series = {SNAPL 2019},
+  archivePrefix = {arXiv},
   eprint = {1904.06750},
   abstract = {I present a new approach to teaching a graduate-level programming languages course focused on using systems programming ideas and languages like WebAssembly and Rust to motivate PL theory. Drawing on students' prior experience with low-level languages, the course shows how type systems and PL theory are used to avoid tricky real-world errors that students encounter in practice. I reflect on the curricular design and lessons learned from two years of teaching at Stanford, showing that integrating systems ideas can provide students a more grounded and enjoyable education in programming languages. The curriculum, course notes, and assignments are freely available: https://stanford-cs242.github.io/f19/}
 }
@@ -199,6 +207,7 @@ and retrieve visual concepts on large visual datasets.}
   keywords = {machine learning, neural networks, program classification},
   location = {Virtual Event, USA},
   series = {SIGCSE '21},
+  archivePrefix = {arXiv},
   eprint = {2101.10087},
   video = {https://www.youtube.com/watch?v=yJ6mMGJWSTY}
 }
@@ -219,6 +228,7 @@ and retrieve visual concepts on large visual datasets.}
   keywords = {visual analysis at scale, screen time, cable news},
   location = {Virtual Event, Singapore},
   series = {KDD '21},
+  archivePrefix = {arXiv},
   eprint = {2008.06007}
 }
 
@@ -240,6 +250,7 @@ and retrieve visual concepts on large visual datasets.}
   articleno = {138},
   numpages = {13},
   keywords = {large-scale video processing},
+  archivePrefix = {arXiv},
   eprint = {1805.07339},
   github = {https://github.com/scanner-research/scanner},
   video = {https://www.youtube.com/watch?v=TUnVznAnbWU},
@@ -251,6 +262,7 @@ and retrieve visual concepts on large visual datasets.}
   year = {2020},  
   series = {HATRA 2020},
   abstract = {Ownership is the concept of tracking aliases and mutations to data, useful for both memory safety and system design. The Rust programming language implements ownership via the borrow checker, a static analyzer that extends the core type system. The borrow checker is a notorious learning barrier for new Rust users. In this paper, I focus on the gap between understanding ownership in theory versus its implementation in the borrow checker. As a sound and incomplete analysis, compiler errors may arise from either ownership-unsound behavior or limitations of the analyzer. Understanding this distinction is essential for fixing ownership errors. But how are users actually supposed to make the correct inference? Drawing on my experience with using and teaching Rust, I explore the many challenges in interpreting and responding to ownership errors. I also suggest educational and automated interventions that could improve the usability of ownership.},
+  archivePrefix = {arXiv},
   eprint = {2011.06171}
 }
 
@@ -258,6 +270,7 @@ and retrieve visual concepts on large visual datasets.}
   author = {Fu, Daniel Y. and Crichton, Will and Hong, James and Yao, Xinwei and Zhang, Haotian and Truong, Anh and Narayan, Avanika and Agrawala, Maneesh and Ré, Christopher and Fatahalian, Kayvon},
   title={Rekall: Specifying Video Events using Compositions of Spatiotemporal Labels},
   year={2019},
+  archivePrefix = {arXiv},
   eprint={1910.02993},
   series = {AI Systems 2019},
   abstract={Many real-world video analysis applications require the ability to identify domain-specific events in video, such as interviews and commercials in TV news broadcasts, or action sequences in film. Unfortunately, pre-trained models to detect all the events of interest in video may not exist, and training new models from scratch can be costly and labor-intensive. In this paper, we explore the utility of specifying new events in video in a more traditional manner: by writing queries that compose outputs of existing, pre-trained models. To write these queries, we have developed Rekall, a library that exposes a data model and programming model for compositional video event specification. Rekall represents video annotations from different sources (object detectors, transcripts, etc.) as spatiotemporal labels associated with continuous volumes of spacetime in a video, and provides operators for composing labels into queries that model new video events. We demonstrate the use of Rekall in analyzing video from cable TV news broadcasts, films, static-camera vehicular video streams, and commercial autonomous vehicle logs. In these efforts, domain experts were able to quickly (in a few hours to a day) author queries that enabled the accurate detection of new events (on par with, and in some cases much more accurate than, learned approaches) and to rapidly retrieve video clips for human-in-the-loop tasks such as video content curation and training data curation. Finally, in a user study, novice users of Rekall were able to author queries to retrieve new events in video given just one hour of query development time.}
@@ -274,12 +287,13 @@ and retrieve visual concepts on large visual datasets.}
   number = {OOPSLA},
   url = {https://doi.org/10.1145/3649812},
   doi = {10.1145/3649812},
-  abstract = {This paper documents a year-long experiment to "profile" the process of learning a programming language: gathering data to understand what makes a language hard to learn, and using that data to improve the learning process. We added interactive quizzes to The Rust Programming Language, the official textbook for learning Rust. Over 13 months, 62,526 readers answered questions 1,140,202 times. First, we analyze the trajectories of readers. We find that many readers drop-out of the book early when faced with difficult language concepts like Rust's ownership types. Second, we use classical test theory and item response theory to analyze the characteristics of quiz questions. We find that better questions are more conceptual in nature, such as asking why a program does not compile vs. whether a program compiles. Third, we performed 12 interventions into the book to help readers with difficult questions. We find that on average, interventions improved quiz scores on the targeted questions by +20%. Fourth, we show that our technique can likely generalize to languages with smaller user bases by simulating our statistical inferences on small N. These results demonstrate that quizzes are a simple and useful technique for understanding language learning at all scales.},
+  abstract = {This paper documents a year-long experiment to "profile" the process of learning a programming language: gathering data to understand what makes a language hard to learn, and using that data to improve the learning process. We added interactive quizzes to The Rust Programming Language, the official textbook for learning Rust. Over 13 months, 62,526 readers answered questions 1,140,202 times. First, we analyze the trajectories of readers. We find that many readers drop-out of the book early when faced with difficult language concepts like Rust's ownership types. Second, we use classical test theory and item response theory to analyze the characteristics of quiz questions. We find that better questions are more conceptual in nature, such as asking why a program does not compile vs. whether a program compiles. Third, we performed 12 interventions into the book to help readers with difficult questions. We find that on average, interventions improved quiz scores on the targeted questions by +20\%. Fourth, we show that our technique can likely generalize to languages with smaller user bases by simulating our statistical inferences on small N. These results demonstrate that quizzes are a simple and useful technique for understanding language learning at all scales.},
   journal = {Proc. ACM Program. Lang.},
   month = {apr},
   articleno = {95},
   numpages = {26},
   keywords = {digital textbooks, item response theory, rust education},
+  archivePrefix = {arXiv},
   eprint = {2401.01257},
   artifact = {https://zenodo.org/records/10798571}
 }
@@ -288,6 +302,7 @@ and retrieve visual concepts on large visual datasets.}
   author = {Gray, Gavin and Crichton, Will},
   title = {Debugging Trait Errors as Logic Programs},
   year = {2023},
+  archivePrefix = {arXiv},
   eprint  = {2309.05137},
   series = {HATRA 2023},
   abstract = {Rust uses traits to define units of shared behavior. Trait constraints build up an implicit set of first-order hereditary Harrop clauses which is executed by a powerful logic programming engine in the trait system. But that power comes at a cost: the number of traits in Rust libraries is increasing, which puts a growing burden on the trait system to help programmers diagnose errors. Beyond a certain size of trait constraints, compiler diagnostics fall off the edge of a complexity cliff, leading to useless error messages. Crate maintainers have created ad-hoc solutions to diagnose common domain-specific errors, but the problem of diagnosing trait errors in general is still open. We propose a trait debugger as a means of getting developers the information necessary to diagnose trait errors in any domain and at any scale. Our proposed tool will extract proof trees from the trait solver, and it will interactively visualize these proof trees to facilitate debugging of trait errors.}
