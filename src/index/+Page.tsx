@@ -164,9 +164,18 @@ let Header = () => (
         explains my current interests in greater detail.
       </p>
       <p>
-        I am starting as an assistant professor at Brown in Fall 2025.{" "}
+        I completed my PhD at Stanford University in 2022, advised by{" "}
+        <a href="https://amturing.acm.org/award_winners/hanrahan_4652251.cfm">
+          Pat Hanrahan
+        </a>{" "}
+        and{" "}
+        <a href="https://graphics.stanford.edu/~maneesh/">Maneesh Agrawala</a>.
+        I did a postdoc at Brown University working with{" "}
+        <a href="https://cs.brown.edu/~sk/">Shriram Krishnamurthi.</a> I am
+        starting as an assistant professor at Brown in Fall 2025.{" "}
         <strong>I am recruiting PhD students!</strong> If you are considering my
-        group, then talk to me in-person at either <abbr>OOPSLA</abbr> 2024, or you can contact me over email.
+        group, then talk to me in-person at <abbr>OOPSLA</abbr> 2024, or you can
+        contact me over email.
       </p>
     </div>
   </>
