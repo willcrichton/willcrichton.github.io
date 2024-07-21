@@ -139,8 +139,23 @@ let Header = () => (
         fields to make programming more usable, learnable, and powerful.
       </p>
       <p>
-        I am a <q>full-stack</q> <abbr>CS</abbr> researcher working primarily
-        between <abbr title="Programming Languages">PL</abbr> and{" "}
+        In Fall 2025, I am starting as an assistant professor at Brown
+        University, where I am founding the{" "}
+        <a href="https://cel.cs.brown.edu/">Cognitive Engineering Lab</a>.{" "}
+        <strong>I am recruiting PhD students!</strong> If you are considering my
+        group, then talk to me in-person at <abbr>OOPSLA</abbr> 2024, or contact
+        me over email. Previously, I completed my PhD at Stanford, advised by{" "}
+        <a href="https://amturing.acm.org/award_winners/hanrahan_4652251.cfm">
+          Pat Hanrahan
+        </a>{" "}
+        and{" "}
+        <a href="https://graphics.stanford.edu/~maneesh/">Maneesh Agrawala</a>.
+        I am currently finishing up my postdoc at Brown with{" "}
+        <a href="https://cs.brown.edu/~sk/">Shriram Krishnamurthi</a>.
+      </p>
+      <p>
+        I do research primarily between{" "}
+        <abbr title="Programming Languages">PL</abbr> and{" "}
         <abbr title="Human-Computer Interaction">HCI</abbr>. I build systems
         like{" "}
         <a href="https://github.com/willcrichton/flowistry/">program slicers</a>
@@ -162,20 +177,6 @@ let Header = () => (
         tools like <Ref id="sec-browser">the browser</Ref>. My Rust research has
         been used by over 100,000 developers to date. My research garden (below)
         explains my current interests in greater detail.
-      </p>
-      <p>
-        I completed my PhD at Stanford University in 2022, advised by{" "}
-        <a href="https://amturing.acm.org/award_winners/hanrahan_4652251.cfm">
-          Pat Hanrahan
-        </a>{" "}
-        and{" "}
-        <a href="https://graphics.stanford.edu/~maneesh/">Maneesh Agrawala</a>.
-        I did a postdoc at Brown University working with{" "}
-        <a href="https://cs.brown.edu/~sk/">Shriram Krishnamurthi.</a> I am
-        starting as an assistant professor at Brown in Fall 2025.{" "}
-        <strong>I am recruiting PhD students!</strong> If you are considering my
-        group, then talk to me in-person at <abbr>OOPSLA</abbr> 2024, or you can
-        contact me over email.
       </p>
     </div>
   </>
