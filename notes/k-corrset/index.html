@@ -90,12 +90,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 body {
   color: black;
   font-family: Palatino, 'Palatino Linotype', Georgia, Times, 'Times New Roman', serif;
-  font-size: 16px;
-  line-height: 1.7;
+  font-size: 14pt;
+  line-height: 1.5;
   padding: 1em;
   margin: auto;
   max-width: 800px;
   background: white;
+  text-wrap: pretty;
 }
 
 p {
@@ -223,14 +224,14 @@ mark {
 }
 
 sub, sup {
-  font-size: 75%;
+  font-size: 50%;
   line-height: 0;
   position: relative;
   vertical-align: baseline;
 }
 
 sup {
-  top: -0.5em;
+  top: -0.6em;
 }
 
 sub {
@@ -291,7 +292,7 @@ figcaption {
 
 table {
   margin-top: 2em;
-  margin-bottom: 3em;
+  margin-bottom: 2em;
   border-bottom: 1px solid #ddd;
   border-right: 1px solid #ddd;
   border-spacing: 0;
@@ -312,10 +313,13 @@ table td {
   vertical-align: top;
 }
 
+header {
+  margin-bottom: 2em;
+}
+
 .author {
   font-size: 1.2em;
-  text-align: center;
-  font-style: italic;
+  text-align: center;  
 }
 
 .date {
@@ -328,16 +332,17 @@ table td {
 
 @media only screen and (min-width: 480px) {
   body {
-    font-size: 16px;
+    font-size: 12pt;
   }
 }
 @media only screen and (min-width: 768px) {
   body {
-    font-size: 18px;
+    font-size: 14pt;
   }
 
   p {
     text-align: justify;
+    word-spacing: -1pt;
   }
 }
 
@@ -456,7 +461,6 @@ figure, body > div {
 }
 
   </style>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" />
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
   <![endif]-->
@@ -888,7 +892,7 @@ half of the updated code looks like this:</p>
 <div class="sourceCode" id="cb16"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> UserSet<span class="op">&lt;</span><span class="ot">&#39;a</span><span class="op">&gt;</span> <span class="op">=</span> IndexSet<span class="op">&lt;</span><span class="ot">&#39;a</span><span class="op">,</span> UserRef<span class="op">&lt;</span><span class="ot">&#39;a</span><span class="op">&gt;&gt;;</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">mut</span> q_to_score<span class="op">:</span> QuestionMap<span class="op">&lt;</span><span class="ot">&#39;_</span><span class="op">,</span> (UserSet<span class="op">&lt;</span><span class="ot">&#39;_</span><span class="op">&gt;,</span> UserMap<span class="op">&lt;</span><span class="ot">&#39;_</span><span class="op">,</span> <span class="dt">u32</span><span class="op">&gt;</span>)<span class="op">&gt;</span> <span class="op">=</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">mut</span> q_to_score<span class="op">:</span> QuestionMap<span class="op">&lt;</span><span class="ot">&#39;_</span><span class="op">,</span> (UserMap<span class="op">&lt;</span><span class="ot">&#39;_</span><span class="op">,</span> <span class="dt">u32</span><span class="op">&gt;,</span> UserSet<span class="op">&lt;</span><span class="ot">&#39;_</span><span class="op">&gt;</span>)<span class="op">&gt;</span> <span class="op">=</span> </span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="pp">QuestionMap::</span>new(<span class="op">&amp;</span>questions<span class="op">,</span> <span class="op">|</span>_<span class="op">|</span> (</span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="pp">UserMap::</span><span class="op">&lt;</span><span class="ot">&#39;_</span><span class="op">,</span> <span class="dt">u32</span><span class="op">&gt;</span><span class="pp">::</span>new(<span class="op">&amp;</span>users<span class="op">,</span> <span class="op">|</span>_<span class="op">|</span> <span class="dv">0</span>)<span class="op">,</span></span>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="pp">UserSet::</span>new(<span class="op">&amp;</span>users)<span class="op">,</span></span>
@@ -1323,7 +1327,7 @@ and <a href="https://news.ycombinator.com/item?id=37964161">HN</a>. I
 wanted to share a few things people have tried.</p>
 <ul>
 <li>Sidney Radcliffe showed how to match Rust’s performance using the <a
-href="https://numba.pydata.org/">Numba</a> JIT in the Numba subset of
+href="https://numba.pydata.org/">Numba</a> JIT with the Numba subset of
 Python. Check out the post <a
 href="https://sidsite.com/posts/python-corrset-optimization/">“Analyzing
 Data 170,000x Faster with Python”</a>. I added <a
@@ -1331,8 +1335,9 @@ href="https://github.com/willcrichton/corrset-benchmark/blob/main/python/corrset
 to the <code>python/</code> directory of the benchmark.</li>
 <li>katopz showed how to implement the Python example using the <a
 href="https://www.pola.rs/">polars</a> library (a Rust implementation of
-Pandas-like dataframes). This implementation seems to be about 3.5 times
-faster than the original Python baseline. I added <a
+Pandas-like dataframes). A quick-and-dirty timing test suggests that the
+polars version is 3.5 times faster than the original Python baseline. I
+added <a
 href="https://github.com/willcrichton/corrset-benchmark/blob/main/python/corrset_polars.py">corrset_polars.py</a>
 to the <code>python/</code> directory of the benchmark.</li>
 <li>cjcormier <a
