@@ -370,7 +370,7 @@ Previously, our `q_to_score` data structure mapped from questions to a user-inde
 ```rust
 type UserSet<'a> = IndexSet<'a, UserRef<'a>>;
 
-let mut q_to_score: QuestionMap<'_, (UserSet<'_>, UserMap<'_, u32>)> = 
+let mut q_to_score: QuestionMap<'_, (UserMap<'_, u32>, UserSet<'_>)> = 
   QuestionMap::new(&questions, |_| (
     UserMap::<'_, u32>::new(&users, |_| 0),
     UserSet::new(&users),
