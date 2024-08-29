@@ -171,7 +171,7 @@ fn main() {
   // Specify `Loud` once up front, and never again!
   let mut pets: PetList<Loud, Cat> = PetList::new();
   pets.push(Cat);
-  pets.everyones_yapping();
+  pets.everyone_is_yapping();
 }
 ```
 
