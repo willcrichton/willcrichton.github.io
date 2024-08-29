@@ -76,7 +76,7 @@ impl Noise<Loud> for Cat {
 }
 ```
 
-I characterize the trait parameter `M` as <q>tacit</q> because it's intended to be inferred from context. `M` seems to be the canonical name used for tactic parameters by crates like Bevy and Axum. That's because it stands for "marker" but "marker traits" already [mean something else in Rust](https://doc.rust-lang.org/std/marker/index.html), so I'm using a different term.
+I characterize the trait parameter `M` as <q>tacit</q> because it's intended to be inferred from context. `M` seems to be the canonical name used for tacit parameters by crates like Bevy and Axum. That's because it stands for "marker," but "marker traits" already [mean something else in Rust](https://doc.rust-lang.org/std/marker/index.html), so I'm using a different term.
 
 From Rust's perspective, `Noise<Quiet>` and `Noise<Loud>` are different traits, and so these implementations do not conflict (i.e., they are coherent). However, you don't often see APIs designed like this because it requires API clients to disambiguate which implementation they're using. If you try this:
 
@@ -107,7 +107,7 @@ fn main() {
 }
 ```
 
-## Disambiguating tactic parameters
+## Disambiguating tacit parameters
 
 To avoid this issue (as Axum and Bevy do), you have to carefully design your impl blocks such that an implementation can always be disambiguated from context. Concretely, imagine implementing `Noise` for functions like this:
 
@@ -129,16 +129,16 @@ The key observation is that the tacit trait parameter is a tuple of the function
 
 ```rust
 fn main() {
-  let f = |n: usize| { println!("{}", "BARK".repeat(n)); }
-  f.make_noise();
+  let dog = |n: usize| { println!("{}", "BARK".repeat(n)); }
+  dog.make_noise();
 }
 ```
 
-This code compiles! Of course, it panics at the `todo!()` because we haven't described how to generate a `usize` to provide the function. Frameworks like Axum and Bevy use this pattern when these values exist in a global store which can be injected on-demand into callbacks. That implementation detail is beyond the scope of this post, but I cover something similar in my note [<q>Types Over Strings: Extensible Architectures in Rust</q>](https://willcrichton.net/notes/types-over-strings/).
+This code compiles! Of course, it panics at the `todo!()` because we haven't described how to generate a `usize` to provide to the function. Frameworks like Axum and Bevy use this pattern when these values exist in a global store which can be injected on-demand into callbacks. That implementation detail is beyond the scope of this post, but I cover something similar in my note [<q>Types Over Strings: Extensible Architectures in Rust</q>](https://willcrichton.net/notes/types-over-strings/).
 
 ## Alternative applications
 
-I haven't seen any other uses of tacit trait parameters out in the wild. It seems like a feature to use carefully. Coherence is generally a good idea and should not be worked around lightly. 
+I haven't seen any other uses of tacit trait parameters out in the wild. It seems like a feature to use carefully. Coherence is generally a good idea and should not be worked around lightly. We don't want to rely on type inference too heavily.
 
 One interesting case is where having conflicting implementations for the same `Self` type, like `Noise<Quiet>` and `Noise<Loud>` would make for a fluent API. I imagine that it could work when you have some kind of context which always disambiguated the tacit trait parameter. For instance, imagine if we had a `PetList` which always held quiet or loud pets:
 
