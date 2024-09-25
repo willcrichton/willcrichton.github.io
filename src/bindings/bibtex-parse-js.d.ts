@@ -19,7 +19,8 @@ type TagName =
   | "artifact"
   | "github"
   | "video"
-  | "school";
+  | "school"
+  | "awards";
 
 type CitationType = "inproceedings" | "article" | "phdthesis" | "mastersthesis";
 

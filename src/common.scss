@@ -80,13 +80,8 @@ p {
 }
 
 p a, a.body {
-  color: inherit;
-  text-decoration: underline #ccc;
-  transition: 0.3s background-color;
-
-  &:visited {
-    text-decoration-color: #b689bd;
-  }
+  text-decoration: none;
+  transition: 0.2s background-color;
 
   &:hover {
     background-color: #eee;
@@ -95,7 +90,12 @@ p a, a.body {
 
 abbr {
   font-variant-caps: all-small-caps;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.04em;  
+
+  &[title] {
+    text-decoration: none;
+    cursor: help;
+  }
 }
 
 h1, h2, h3, h4, h5 {  

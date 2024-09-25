@@ -97,6 +97,11 @@ let BibMeta = ({ entry }: { entry: BibtexEntry }) => {
           </abbr>
         )}
         .{" "}
+        {tags.awards && (
+          <span className="awards">
+            {tags.awards}.{" "}
+          </span>
+        )}
         {tags.doi && (
           <span>
             <a className="body" href={`https://doi.org/${tags.doi}`}>
