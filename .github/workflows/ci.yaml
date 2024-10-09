@@ -13,7 +13,7 @@ jobs:
         with:
           lfs: true
       - name: Install Depot
-        run: curl https://raw.githubusercontent.com/cognitive-engineering-lab/depot/main/scripts/install.sh | sh -s b80ade679dba2212edfb8bd7826a5f90f3d5f9ec
+        run: curl https://raw.githubusercontent.com/cognitive-engineering-lab/depot/main/scripts/install.sh
       - name: Publish
         run: ./publish.sh
       - uses: peaceiris/actions-gh-pages@v3
