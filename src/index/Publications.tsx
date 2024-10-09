@@ -2,7 +2,7 @@ import bibtexParse from "@orcid/bibtex-parse-js";
 import _ from "lodash";
 import React from "react";
 
-import { ContextAnchor, ContextLink } from "./ContextPanel";
+import { ContextHeaderAnchor, ContextLink } from "./ContextPanel";
 import "./Publications.scss";
 import bibtexSrc from "./assets/papers.bib?raw";
 
@@ -96,12 +96,7 @@ let BibMeta = ({ entry }: { entry: BibtexEntry }) => {
             {entry.venue} {tags.year}
           </abbr>
         )}
-        .{" "}
-        {tags.awards && (
-          <span className="awards">
-            {tags.awards}.{" "}
-          </span>
-        )}
+        . {tags.awards && <span className="awards">{tags.awards}. </span>}
         {tags.doi && (
           <span>
             <a className="body" href={`https://doi.org/${tags.doi}`}>
@@ -159,7 +154,9 @@ let BibSummary = ({ entry }: { entry: BibtexEntry }) => {
   let tags = entry.tags;
   return (
     <div className="bib-summary">
-      <ContextAnchor id={entry.citationKey}>{tags.title}</ContextAnchor>
+      <ContextHeaderAnchor id={entry.citationKey}>
+        {tags.title}
+      </ContextHeaderAnchor>
       <BibMeta entry={entry} />
     </div>
   );

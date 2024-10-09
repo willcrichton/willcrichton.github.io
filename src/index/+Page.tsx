@@ -1,10 +1,9 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 import {
-  ContextPanel,
   ContextPanelView,
   PanelContext,
-  getMobileCutoff,
+  useContextPanel,
 } from "./ContextPanel";
 import {
   BibEntryView,
@@ -16,7 +15,7 @@ import headshotUrl from "./assets/headshot-mini.jpg?url";
 import githubIconUrl from "./assets/icon-github.png?url";
 import mastodonIconUrl from "./assets/icon-mastodon.svg?url";
 import twitterIconUrl from "./assets/icon-twitter.png?url";
-import { Ref } from "./components";
+import { IsMobileContext, Ref, useIsMobile } from "./components";
 import { ResearchGarden } from "./garden/Garden";
 import "./index.scss";
 
@@ -252,34 +251,20 @@ let IndexContent = () => (
   </div>
 );
 
-let Index = () => {
-  let panelRef = useRef(null);
-  let [state] = useState(() => new ContextPanel(panelRef));
-  let pubs = useMemo(() => new Publications(), []);
-  return (
-    <PanelContext.Provider value={state}>
-      <PublicationsContext.Provider value={pubs}>
-        <div className="frame">
-          <IndexContent />
-          <ContextPanelView />
-        </div>
-      </PublicationsContext.Provider>
-    </PanelContext.Provider>
-  );
-};
-
 export default () => {
-  // Hack: reset the entire site when we get resized around the threshold for switching logics.
-  let [key, setKey] = useState(0);
-  let cutoff = getMobileCutoff();
-  useEffect(() => {
-    let lastWidth = window.innerWidth;
-    function onResize() {
-      if (lastWidth < cutoff !== window.innerWidth < cutoff) setKey(key + 1);
-      lastWidth = window.innerWidth;
-    }
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [key, cutoff]);
-  return <Index key={key} />;
+  let panel = useContextPanel();
+  let pubs = useMemo(() => new Publications(), []);
+  let isMobile = useIsMobile();
+  return (
+    <IsMobileContext.Provider value={isMobile}>
+      <PanelContext.Provider value={panel}>
+        <PublicationsContext.Provider value={pubs}>
+          <div className="frame">
+            <IndexContent />
+            <ContextPanelView />
+          </div>
+        </PublicationsContext.Provider>
+      </PanelContext.Provider>
+    </IsMobileContext.Provider>
+  );
 };

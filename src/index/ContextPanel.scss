@@ -17,10 +17,23 @@
 }
 
 .context-link {  
-  > summary {
+  margin-block: 1em 0;  
+  
+  > div.summary { 
+    display: list-item;
+    list-style-type: disclosure-closed;
+
+    &.selected {
+      list-style-type: disclosure-open;
+    }
+
+    &::marker {
+      font-size: 70%;
+    }
+  }
+
+  > summary, > div.summary {    
     list-style-position: outside;
-    padding-left: 5px;
-    margin-left: -5px;
     
     // TODO: can we detect this without JS?
     // Causes flash when loading in Safari
@@ -33,13 +46,18 @@
       }
     }
 
-    @include mobile {
-      list-style-position: inside;
-
-      > div {
-        display: inline;
-      }
+    @include desktop {
+      padding-left: 5px;
+      margin-left: -5px;
     }
+
+    // @include mobile {
+    //   list-style-position: inside;
+
+    //   > div {
+    //     display: inline;
+    //   }
+    // }
   }
 
   .inline-content {
@@ -55,8 +73,9 @@
 .context-anchor {
   text-decoration: underline #ddd;
   cursor: pointer;
+  color: inherit;
 
-  &.selected {  
+  details[open] > summary &, .summary.selected & {
     background-color: rgb(255, 255, 194);
   }
 

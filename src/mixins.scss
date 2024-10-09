@@ -1,4 +1,5 @@
 $mobile-cutoff: 1400px;
+$desktop-cutoff: $mobile-cutoff + 1px;
 
 :root {
   --mobile-cutoff: #{$mobile-cutoff};
@@ -6,6 +7,12 @@ $mobile-cutoff: 1400px;
 
 @mixin mobile {
   @media screen and (max-width: $mobile-cutoff) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media screen and (min-width: $desktop-cutoff) {
     @content;
   }
 }

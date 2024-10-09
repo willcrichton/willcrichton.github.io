@@ -1,11 +1,17 @@
-import React from "react";
+import exenv from "exenv";
+import React, { useEffect, useMemo, useState } from "react";
 
-import { ContextAnchor, ContextLink } from "./ContextPanel";
+import { ContextHeaderAnchor, ContextLink } from "./ContextPanel";
 
-export let Ref: React.FC<React.PropsWithChildren<{ id: string }>> = ({
-  children,
-  id,
-}) => <a href={`#${id}`}>{children}</a>;
+export let Ref: React.FC<
+  React.PropsWithChildren<
+    { id: string } & React.HTMLAttributes<HTMLAnchorElement>
+  >
+> = ({ children, id, ...props }) => (
+  <a {...props} href={`#${id}`}>
+    {children}
+  </a>
+);
 
 export interface GardenSectionProps {
   id: string;
@@ -17,7 +23,7 @@ export let GardenSection: React.FC<
   <ContextLink
     contextId={id}
     className="garden-header"
-    summary={<ContextAnchor id={id}>{summary}</ContextAnchor>}
+    summary={<ContextHeaderAnchor id={id}>{summary}</ContextHeaderAnchor>}
     contextTitle={summary}
   >
     {children}
@@ -37,3 +43,26 @@ export let CollapsibleAside: React.FC<
     </details>
   </aside>
 );
+
+let getMobileCutoff = () => {
+  if (!exenv.canUseDOM) return 0;
+  let cutoffStr = getComputedStyle(document.body).getPropertyValue(
+    "--mobile-cutoff",
+  );
+  return Number.parseFloat(cutoffStr.replace(/px$/, ""));
+};
+
+export let useIsMobile = () => {
+  let mobileCutoff = useMemo(() => getMobileCutoff(), []);
+  let [isMobile, setIsMobile] = useState(
+    exenv.canUseDOM ? window.innerWidth <= mobileCutoff : true,
+  );
+  useEffect(() => {
+    let onResize = () => setIsMobile(window.innerWidth <= mobileCutoff);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  return isMobile;
+};
+
+export let IsMobileContext = React.createContext<boolean>(false);

@@ -23,7 +23,8 @@
       },
       "style": {
         "noNonNullAssertion": "off",
-        "useConst": "off"
+        "useConst": "off",
+        "noUselessElse": "off"
       },
       "suspicious": {"noArrayIndexKey": "off"}
     }
