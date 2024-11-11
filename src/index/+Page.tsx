@@ -14,7 +14,6 @@ import {
 import headshotUrl from "./assets/headshot-mini.jpg?url";
 import githubIconUrl from "./assets/icon-github.png?url";
 import mastodonIconUrl from "./assets/icon-mastodon.svg?url";
-import twitterIconUrl from "./assets/icon-twitter.png?url";
 import { IsMobileContext, Ref, useIsMobile } from "./components";
 import { ResearchGarden } from "./garden/Garden";
 import "./index.scss";
@@ -28,11 +27,6 @@ const linkDefs: React.FC<React.HTMLAttributes<HTMLAnchorElement>>[] = [
   props => (
     <a {...props} href="https://github.com/willcrichton/">
       <img alt="Github" src={githubIconUrl} />
-    </a>
-  ),
-  props => (
-    <a {...props} href="https://twitter.com/tonofcrates">
-      <img alt="Twitter" src={twitterIconUrl} />
     </a>
   ),
   props => (
