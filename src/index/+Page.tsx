@@ -135,9 +135,7 @@ let Header = () => (
         In Fall 2025, I am starting as an assistant professor at Brown
         University, where I am founding the{" "}
         <a href="https://cel.cs.brown.edu/">Cognitive Engineering Lab</a>.{" "}
-        <strong>I am recruiting PhD students!</strong> If you are considering my
-        group, then talk contact
-        me over email. Previously, I completed my PhD at Stanford, advised by{" "}
+        <strong>I am recruiting PhD students!</strong> Previously, I completed my PhD at Stanford, advised by{" "}
         <a href="https://amturing.acm.org/award_winners/hanrahan_4652251.cfm">
           Pat Hanrahan
         </a>{" "}
