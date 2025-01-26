@@ -1,0 +1,214 @@
+[[posts]]
+title = "Evaluating Human Factors Beyond Lines of Code"
+date = "2024-11-21"
+url = "https://blog.sigplan.org/2024/11/21/evaluating-human-factors-beyond-lines-of-code/"
+abstract = "Software systems researchers want to make human-centered claims, but don’t have the proper tools to do so. That’s how we ended up with the ubiquitous lines-of-code comparison found in evaluation sections everywhere. In this post, I explore: what can we reasonably expect researchers to do that’s higher quality than LOC but less effort than a full-blown user study?"
+venue = "SIGPLAN Blog"
+
+[[posts]]
+title = "Community of Practice / Community of Theory"
+date = "2023-08-03"
+url = "/notes/community-of-practice-community-of-theory/"
+
+[[posts]]
+title = "Analyzing Data 180,000x Faster with Rust"
+date = "2023-10-20"
+url = "/notes/k-corrset/"
+
+[[posts]]
+title = "Gradual Programming"
+date = "2018-03-30"
+url = "/notes/gradual-programming/"
+abstract = "Programming is a fundamentally incremental (or gradual) process, and our programming languages should reflect that. I show several ways in which program models transition over time and discuss how future research can further a human-centric vision for programming languages."
+
+[[posts]]
+title = "Idioms of Dynamic Languages"
+date = "2018-07-01"
+url = "/notes/idioms-of-dynamic-languages/"
+abstract = "Programmers think dynamic languages like Python are easier to use than static ones, but why? I look at uniquely dynamic programming idioms and their static alternatives, identifying a few broad trends that impact language usability."
+
+[[posts]]
+title = "The Future of Notebooks: Lessons from JupyterCon"
+date = "2018-08-24"
+url = "/notes/lessons-from-jupytercon/"
+abstract = "At JupyterCon, I learned three things: reactive notebooks are the future, Jupyter is the new Bash, and data science is a gateway drug."
+
+[[posts]]
+title = "Naming Conventions That Need to Die"
+date = "2018-11-17"
+url = "/notes/naming-conventions-that-need-to-die/"
+abstract = "Names are an important tool of thought. They provide a loose, lightweight way to manage and structure knowledge. However, bad names inhibit learning and impede progress. We should root out and destroy the processes that lead to bad names."
+
+[[posts]]
+title = "Partial Function Application as a Design Pattern"
+date = "2019-01-04"
+url = "/notes/partial-application-design-pattern/"
+abstract = "Partial function application, or currying, is omnipresent in the use of functional languages. I discuss its role as a design pattern, looking at three specific ways currying can improve the brevity and readability of an API."
+
+[[posts]]
+title = "The Inanity of Programming Language Benchmarks"
+date = "2018-09-18"
+url = "/notes/pl-benchmark-inanity"
+abstract = "Programming language performance benchmarks track the maximum performance of a program, when really we also care about how long it takes to get there."
+
+[[posts]]
+title = "Portable EPUBs"
+date = "2024-01-25"
+url = "/notes/portable-epubs/"
+abstract = "Despite decades of advances in document rendering technology, most of the world's documents are stuck in the 1990s due to the limitations of PDF. Yet, modern document formats like HTML have yet to provide a competitive alternative to PDF. This post explores what prevents HTML documents from being portable, and I propose a way forward based on the EPUB format. To demonstrate my ideas, this post is presented using a prototype EPUB reading system."
+
+[[posts]]
+title = "Programming in the Debugger"
+date = "2018-04-20"
+abstract = "Jupyter presents a unique programming style where the programmer can change her code while it's running, reducing the cost of mistakes and improving the interactivity of the programming process. I discuss the benefits and limitations of this approach along with the related work."
+url = "/notes/programming-in-the-debugger/"
+
+[[posts]]
+title = "Rapid Prototyping of Interactive Data Science Workflows in Jupyter"
+date = "2018-05-30"
+abstract = "Motivated by my experience in research on large-scale video analysis, I look at how Jupyter's web integration provides new opportunities for easily creating bespoke interactive data processing pipelines with a human in the loop."
+url = "/notes/rapid-prototyping-data-science-jupyter/"
+
+[[posts]]
+title = "Remarkable Gains on Cognitive Tasks"
+date = "2023-08-05"
+url = "/notes/remarkable-gains-on-cognitive-tasks/"
+
+[[posts]]
+title = "\"Do What I Mean\": Name Resolution in Programming Languages"
+date = "2018-09-16"
+url = "/notes/specificity-programming-languages/"
+abstract = "Resolving names is a hard problem that permeates many aspects of programming like variable scoping, structured control flow, and method resolution. I show how a few core ideas underlie seemingly disparate parts of programming language design."
+
+[[posts]]
+title = "What is Systems Programming, Really?"
+date = "2018-09-09"
+abstract = """
+I have a gripe with the phrase "systems programming." To me, it always seemed to unnecessarily combine two ideas: low-level programming (dealing with implementation details of the machine) and systems design (creating and managing a complex set of interoperating components). Why is that the case? How long has this been true? And what could we gain from redefining the idea of systems?
+"""
+url = "/notes/systems-programming/"
+
+[[posts]]
+title = "Type-directed metaprogramming in Rust"
+date = "2018-03-18"
+abstract = "I explore how to use Rust compiler internals to metaprogram Rust using information from the typechecker, e.g. to automatically insert garbage-collection into Rust code, and discuss the benefits and drawbacks of this approach."
+url = "/notes/type-directed-metaprogramming-in-rust"
+
+[[posts]]
+title = "Typography Misconceptions"
+date = "2024-02-10"
+url = "/notes/typography-misconceptions/"
+
+[[posts]]
+title = "Generic associated types encode higher-order functions on types"
+date = "2021-01-04"
+abstract = "GATs allow type parameters to associated types in traits. This feature enables total type-level functions to be associated to structs. I show how to use this pattern to implement higher-order type-level functions, and how to use specialization to make partial functions into total functions."
+url = "/notes/gats-are-hofs/"
+
+[[posts]]
+title = "Implementing a Type-safe printf in Rust"
+date = "2020-06-21"
+abstract = "I show how to use heterogeneous lists and traits to implement a type-safe printf in Rust. These mechanisms can ensure that two variadic argument lists share important properties, like the number of format string holes matches the number of printf arguments."
+url = "/notes/type-safe-printf/"
+
+[[posts]]
+title = "jQuery, but for types"
+date = "2020-05-14"
+abstract = "Using type-level programming, I show how to use a jQuery-like selector language to perform updates on nested types in Rust."
+url = "/notes/jquery-for-types/"
+
+[[posts]]
+title = "Type-level Programming in Rust"
+date = "2020-04-24"
+abstract = "I show how two domain-specific type systems, information flow control and two-party communication protocols, can be implemented in Rust using type-level programming. I explain how interesting properties of these domains can be verified at compile-time. Finally, I construct a general correspondence between type operators, logic programs, and their encoding in Rust."
+url = "/notes/type-level-programming/"
+
+[[posts]]
+title = "Types Over Strings: Extensible Architectures in Rust"
+date = "2020-04-12"
+abstract = "I show how to implement event listeners and dependency injection using Rust's type system to avoid common errors in stringly-typed versions of these extensible architectures."
+url = "/notes/types-over-strings/"
+
+[[posts]]
+title = "The Last Decade of Programming, According to Google Trends"
+date = "2020-03-29"
+abstract = "I explore programming trends through Google searches, like jQuery vs. React, Hadoop vs. Spark, RPi vs. Arduino, and more."
+url = "/notes/the-last-decade-of-programming/"
+
+[[posts]]
+title = "Probabilistic Programming with Variational Inference"
+date = "2019-06-11"
+abstract = "This note explains stochastic variational inference from the ground up using the Pyro probabilistic programming language. I explore the basics of probabilistic programming and the machinery underlying SVI, such as autodifferentiation, guide functions, and approximating the difference between probability distributions."
+url = "/notes/probabilistic-programming-under-the-hood/"
+
+[[posts]]
+title = "Compiling Knowledge into Probabilistic Models"
+date = "2019-03-23"
+abstract = "Turning procedural and structural knowledge into programs has established methodologies, but what about turning knowledge into probabilistic models? I explore a few examples of what such a process could look like."
+url = "/notes/compiling-knowledge-probability/"
+
+[[posts]]
+title = "Partial Function Application as a Design Pattern"
+date = "2019-01-04"
+abstract = "Partial function application, or currying, is omnipresent in the use of functional languages. I discuss its role as a design pattern, looking at three specific ways currying can improve the brevity and readability of an API."
+url = "/notes/partial-application-design-pattern/"
+
+[[posts]]
+title = "Memory Safety in Rust"
+date = "2018-02-02"
+abstract = "To demonstrate the value of Rust's memory safety rules, I contrast the implementation of a simple vector library in C and Rust, highlighting where and how Rust's static analysis can prevent tricky memory errors."
+url = "/notes/rust-memory-safety/"
+
+[[posts]]
+title = "What is a PL? Survey says: SQL yes, Excel maybe, HTML no"
+date = "2018-01-25"
+abstract = "Following up on the \"What is a programming language?\" survey, it appears there's a wide range of disagreement amongst my readers of what constitutes a programming language. I attempt to analyze possible sources of disagreement."
+url = "/notes/what-is-a-pl-survey/"
+
+[[posts]]
+title = "What is a programming language?"
+date = "2018-01-08"
+abstract = "What is or isn't a programming language is a surprisingly subjective question. In this note, I try to nail down the major factors (precision, composition, reuse) that make a language/model programmatic and clarify this definition vs. other related terminology likes libraries and data formats."
+url = "/notes/what-is-a-programming-language/"
+
+[[posts]]
+title = "Learning Through Goals in Computer Science"
+date = "2016-09-22"
+abstract = "Starting with my experiences as a young, naïve game developer, I argue the importance of learning programming and its tools through the lens of goals, methods, and metrics."
+url = "/notes/learning-through-goals-in-computer-science/"
+
+[[posts]]
+title = "Parsing Strategies in Rust"
+date = "2016-08-09"
+abstract = "I briefly analyze two competing parsing frameworks in Rust: nom, a parser combinator, and LALRPOP, an LR(1) parser generator. I show that LALRPOP can more succinctly and efficiently express grammars for text-based formats."
+url = "/notes/parsing-strategies-in-rust/"
+
+[[posts]]
+title = "Extensible Compilation: Goals and Related Work"
+date = "2016-07-30"
+abstract = "We need programming languages that can evolve with us as our requirements and coding styles change. I look at prior work in components of such an extensible compiler: combining static and dynamic types, breaking the GC/systems divide, and lowering the barrier to DSLs. I consider how we can combine these features into a single language, and argue for a few design decisions to underpin this new language."
+url = "/notes/extensible-compilation/"
+
+[[posts]]
+title = "Rust: The New LLVM"
+date = "2016-07-23"
+abstract = "New programming languages with a system-level compile target should choose Rust over LLVM. Targeting Rust can give new languages free package management, a type system, and memory safety while not imposing too many opinions on the language's runtime. With more work on languages, tooling, and Rust compiler development, we can create an ecosystem of beautifully interoperable programming languages."
+url = "/notes/rust-the-new-llvm/"
+
+[[posts]]
+title = "A Coming Revolution in Metaprogramming"
+date = "2016-06-19"
+abstract = "A single programming language is no longer enough. I predict that soon, the best programmers will fluently move between languages and the best languages will interoperate well with others. This interoperability will likely stem from strong metaprogramming facilities. I examine how we might build a programmable compiler and look at recent work toward that end."
+url = "/notes/the-coming-age-of-the-polyglot-programmer/"
+
+[[posts]]
+title = "Making the Most Out of CMU"
+date = "2016-05-16"
+abstract = "Carnegie Mellon is a big investment, so you should make the most out of it. If you don't pay attention, its opportunities can slip right past you. I recommend doing research, taking fewer classes, ignoring your diploma, and trying to TA a class. I also include a few quick tips for better life in Pittsburgh!"
+url = "/notes/making-the-most-out-of-cmu/"
+
+[[posts]]
+title = "Minimum effort investing"
+date = "2016-04-15"
+abstract = "If you don't have any investments, i.e. your money is sitting in a savings account, then you're missing out. Investing today is surprisingly easy with the advent of index funds, and I'll take you step by step through both the theory and the practical parts of settings up these investments for yourself. After reading this note and taking 30 minutes out of your day, you can be making 7-12% returns on your money with minimum effort."
+url = "/notes/minimum-effort-investing/"

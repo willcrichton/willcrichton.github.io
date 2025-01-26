@@ -23,9 +23,7 @@ export class BibtexEntry {
     this.type = entry.entryType;
     this.tags = _.fromPairs(
       Object.entries(entry.entryTags).map(([k, v]) => [k, stripTex(v)]),
-    ) as
-      // biome-ignore lint: lint/suspicious/noExplicitAny
-      any;
+    ) as any;
     this.authors = this.tags.author
       ? this.tags.author
           .split(" and ")
@@ -44,7 +42,7 @@ export class BibtexEntry {
   }
 
   isWorkshop() {
-    const WORKSHOPS = ["FUNARCH", "HATRA", "PLATEAU", "SNAPL"];
+    const WORKSHOPS = ["FUNARCH", "HATRA", "PLATEAU", "SNAPL", "AI Systems"];
     return !this.isDissertation() && WORKSHOPS.includes(this.venue);
   }
 

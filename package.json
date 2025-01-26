@@ -36,6 +36,7 @@
     "react-dom": "^18.2.0",
     "rollup": "npm:@rollup/wasm-node@^4.18.0",
     "sass": "^1.75.0",
+    "toml": "^3.0.0",
     "typedoc": "^0.25.13",
     "typescript": "^5.4.5",
     "vike": "^0.4.171",

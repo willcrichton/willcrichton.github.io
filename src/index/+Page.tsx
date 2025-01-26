@@ -17,6 +17,10 @@ import mastodonIconUrl from "./assets/icon-mastodon.svg?url";
 import { IsMobileContext, Ref, useIsMobile } from "./components";
 import { ResearchGarden } from "./garden/Garden";
 import "./index.scss";
+import { action } from "mobx";
+import { observer, useLocalObservable } from "mobx-react";
+import { POSTS, PostEntry } from "./Posts";
+import { TALKS, TalkEntry } from "./Talks";
 
 const linkDefs: React.FC<React.HTMLAttributes<HTMLAnchorElement>>[] = [
   props => (
@@ -45,27 +49,46 @@ const linkDefs: React.FC<React.HTMLAttributes<HTMLAnchorElement>>[] = [
     </a>
   ),
 ];
-let Headshot = () => {
-  let [mouseOver, setMouseOver] = useState<number | null>(null);
-  let [centerTheta, setCenterTheta] = useState(Math.PI / 2);
 
+let useAnimation = (
+  f: (delta: number) => void,
+  deps?: React.DependencyList,
+) => {
   useEffect(() => {
-    if (mouseOver === null) return;
+    let last = new Date().getTime();
     let req: number;
-    function update() {
-      let delta = new Date().getTime() - mouseOver!;
-      centerTheta += delta ** 1.6 / 1e8;
-      setCenterTheta(centerTheta);
-      req = requestAnimationFrame(update);
+    function callback() {
+      let current = new Date().getTime();
+      let delta = current - last;
+      last = current;
+      f(delta);
+      req = requestAnimationFrame(callback);
     }
-    req = requestAnimationFrame(update);
+    req = requestAnimationFrame(callback);
     return () => cancelAnimationFrame(req);
-  }, [mouseOver]);
+  }, deps);
+};
+
+let Headshot = observer(() => {
+  let state = useLocalObservable(() => ({
+    theta: Math.PI / 2,
+    mouseOver: false,
+    velocity: 0,
+  }));
+
+  useAnimation(
+    action(delta => {
+      if (state.mouseOver) state.velocity = state.velocity * 1.01 + 1;
+      else state.velocity = Math.max(state.velocity * 0.97 - 5, 0);
+      state.theta += state.velocity * delta * 1e-6;
+    }),
+    [],
+  );
 
   let iconSize = 20;
   let r = 60 + iconSize / 2 + 7;
   let spacing = Math.PI / 8;
-  let minTheta = centerTheta - ((linkDefs.length - 1) / 2) * spacing;
+  let minTheta = state.theta - ((linkDefs.length - 1) / 2) * spacing;
   let centerX = 60;
   let centerY = 60;
   let links = linkDefs.map((Link, i) => {
@@ -88,13 +111,17 @@ let Headshot = () => {
       <img
         alt="A headshot of Will"
         src={headshotUrl}
-        onMouseEnter={() => setMouseOver(new Date().getTime())}
-        onMouseLeave={() => setMouseOver(null)}
+        onMouseEnter={() => {
+          state.mouseOver = true;
+        }}
+        onMouseLeave={() => {
+          state.mouseOver = false;
+        }}
       />
       {links}
     </div>
   );
-};
+});
 
 let Header = () => (
   <>
@@ -135,7 +162,8 @@ let Header = () => (
         In Fall 2025, I am starting as an assistant professor at Brown
         University, where I am founding the{" "}
         <a href="https://cel.cs.brown.edu/">Cognitive Engineering Lab</a>.{" "}
-        <strong>I am recruiting PhD students!</strong> Previously, I completed my PhD at Stanford, advised by{" "}
+        <strong>I am recruiting PhD students!</strong> Previously, I completed
+        my PhD at Stanford, advised by{" "}
         <a href="https://amturing.acm.org/award_winners/hanrahan_4652251.cfm">
           Pat Hanrahan
         </a>{" "}
@@ -149,9 +177,23 @@ let Header = () => (
         <abbr title="Programming Languages">PL</abbr> and{" "}
         <abbr title="Human-Computer Interaction">HCI</abbr>. I build systems
         like{" "}
-        <a href="https://github.com/willcrichton/flowistry/">program slicers</a>
-        , <a href="https://nota-lang.org/">document languages</a>, and{" "}
-        <a href="https://cognitive-engineering-lab.github.io/aquascope/">
+        <a
+          href="https://github.com/willcrichton/flowistry/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          program slicers
+        </a>
+        ,{" "}
+        <a href="https://nota-lang.org/" target="_blank" rel="noreferrer">
+          document languages
+        </a>
+        , and{" "}
+        <a
+          href="https://cognitive-engineering-lab.github.io/aquascope/"
+          target="_blank"
+          rel="noreferrer"
+        >
           type system visualizers
         </a>
         . I develop theories like{" "}
@@ -235,10 +277,37 @@ let PublicationsView = () => {
   );
 };
 
+let CollapsibleList = ({ els }: { els: React.ReactElement[] }) => {
+  let [expanded, setExpanded] = useState(false);
+  return (
+    <div className="collapsible-list">
+      <ul>{expanded ? els : els.slice(0, 3)}</ul>
+      <button type="button" onClick={() => setExpanded(!expanded)}>
+        {expanded ? "Hide" : "See All"}
+      </button>
+    </div>
+  );
+};
+
 let IndexContent = () => (
   <div className="main">
     <Header />
     <ResearchGarden />
+
+    <section>
+      <h1>Talks</h1>
+      <CollapsibleList
+        els={TALKS.map(talk => <TalkEntry talk={talk} key={talk.title} />)}
+      />
+    </section>
+
+    <section>
+      <h1>Posts</h1>
+      <CollapsibleList
+        els={POSTS.map(post => <PostEntry post={post} key={post.title} />)}
+      />
+    </section>
+
     <PublicationsView />
   </div>
 );

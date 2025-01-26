@@ -1,0 +1,48 @@
+[[talks]]
+title = "Visualizing and Explaining Rust's Ownership Model"
+date = "2024-10-21"
+venue = "IWACO"
+url = "https://www.youtube.com/live/qOb2OYimabA?si=sOdPBRKx5lJHZOky&t=19411"
+abstract = "Rust has succeeded in breaking ownership out of academia. Yet, while there is a thriving community of Rust programmers, mounting evidence shows that Rust’s ownership model still poses a serious barrier to adoption both for new and experienced developers. This is an instance of a more general problem: when you invent a fancy type system, how are you supposed to teach it to people? In this talk, I will describe our method of improving the pedagogy of Rust’s type system. Specifically, we (a) investigated why developers struggle with ownership, (b) developed a new way to visualize how Rust’s ownership analyzer “sees” a program, and (c) integrated this visualization into a new pedagogy of ownership that can explain phenomena like soundness vs. completeness and field-sensitivity to the typical Rust learner. We evaluated this approach through a large-scale field deployment into a popular online Rust textbook, finding that the pedagogy improved learning outcomes by roughly one letter grade on an exam of difficult ownership-related questions."
+
+[[talks]]
+title = "How to Make Mathematicians Into Programmers (And Vice Versa)"
+date = "2024-08-22"
+venue = "Topos Institute Colloquium"
+url = "https://www.youtube.com/watch?v=ZOT5jQ8W2Nc"
+abstract = "Tools for formalized mathematics (FM), such as proof assistants and model checkers, are increasingly capable of handling the real-world problems of both mathematicians and software developers. Yet, these tools are only as effective as the people who use them. The FM community clearly needs to invest in better education and better tooling. But... which curricula are actually effective for learners? What tooling will actually make users more productive? In this talk, I will lay out some preliminary ideas for how to systematically investigate these questions, i.e., develop a science of human factors for FM. My core proposal is to combine experimental psychological methods (e.g., lab studies, IDE telemetry) and cognitive theories (e.g., working memory, mental models) to study how people use FM tools. Then that understanding can be applied to make principled predictions about the efficacy of curricula, tooling, and language design."
+
+[[talks]]
+title = "Type-Driven API Design in Rust"
+date = "2021-10-02"
+venue = "Strange Loop"
+url = "https://www.youtube.com/watch?v=bnnacleqg6k"
+abstract = "Rust is a unique programming language that blends imperative and functional concepts to make low-level systems safer. However, compared to other modern languages, designing APIs in Rust requires a fundamentally different mindset -- for example, designing without classes or inheritance. In this talk, I will live-code the design of a simple Rust API. Through the evolution of the API, I will demonstrate how Rust’s type system (especially traits) can be used to design interfaces that cleanly compose with existing code, and that help API clients catch mistakes at compile-time."
+
+[[talks]]
+title = "The Art and Science of Teaching Rust"
+date = "2023-09-14"
+venue = "RustConf"
+url = "https://www.youtube.com/watch?v=x5EbGrgmXKw"
+abstract = """
+Over the last 12 months, we conducted the largest study ever of how people learn Rust. We followed the paths of 20,000+ people through the Rust Book to understand why learners struggle with concepts like ownership, traits, modules, and more.
+
+Our goal was to apply these observations towards systematically making Rust easier to learn. That is to say: to develop a science of teaching Rust. Throughout the study, we deployed and evaluated a number of new explanations, analogies, and visualizations to improve the Rust Book.
+
+In this talk, I will describe the design, execution, and findings of this yearlong experiment. I will talk about which teaching strategies worked (and which didn't). And I will discuss the line where science ends and artistry begins in designing effective learning resources for Rust.
+"""
+
+[[talks]]
+title = "The Next Generation of Document Languages"
+date = "2023-11-27"
+venue = "UC Berkeley Programming Systems Seminar"
+url = "https://www.youtube.com/watch?v=tESqS6z6MdI"
+abstract = "The format of the average technical document has not changed for centuries: plain words wrapping static figures.  Advances in communication technology remain inaccessible to most authors, in part due to limitations of widely-used document languages like LaTeX and Markdown. In this talk, I will ask: what should we expect from the next generation of document languages? What kinds of document formats would be most helpful to readers? And how should we design document languages to make such documents easy to write? I will present my tentative answers, namely (a) enabling rich and interactive cross-references by (b) making Markdown more programmable, extensible, and referential than it is today. The broader goal of this talk is to stimulate a discussion about the actual technologies we expect to be using to write papers and articles in ten years’ time."
+
+[[talks]]
+title = "The Performance Engineer's Toolkit"
+subtitle = "A Case Study on Data Analytics with Rust"
+date = "2024-10-23"
+venue = "P99 CONF"
+url = "https://www.youtube.com/watch?v=SVw9nKfVPx4"
+abstract = "I optimized a Python data analytics pipeline, making it 180,000x faster with Rust! Using compiler optimizations, data structures, vectorization, parallelization, and more, I’ll share a case study on these techniques. Join me to explore the tools in a performance engineer’s toolkit."
