@@ -23,13 +23,15 @@ export const POSTS = loadPosts();
 
 export let PostEntry = ({ post }: { post: Post }) => (
   <li>
-    <a href={post.url}>{post.title}</a> [
-    {post.venue && (
-      <>
-        {post.venue}
-        {", "}
-      </>
-    )}
-    {post.date.getFullYear()}]
+    <p>
+      <a href={post.url}>{post.title}</a> [
+      {post.venue && (
+        <>
+          {post.venue}
+          {", "}
+        </>
+      )}
+      {post.date.getFullYear()}]
+    </p>
   </li>
 );

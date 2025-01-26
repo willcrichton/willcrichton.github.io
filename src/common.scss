@@ -153,6 +153,10 @@ ul, ol {
   // @include mobile {
   //   padding-left: 1em;
   // }
+
+  > li > p {
+    margin-block: 0.5em;
+  }
 }
 
 blockquote {

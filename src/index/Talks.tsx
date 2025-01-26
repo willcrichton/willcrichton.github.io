@@ -23,8 +23,10 @@ export const TALKS = loadTalks();
 
 export let TalkEntry = ({ talk }: { talk: Talk }) => (
   <li>
-    <a href={talk.url}>{talk.title}</a>
-    <br />
-    {talk.venue}, {talk.date.getFullYear()}
+    <p>
+      <a href={talk.url}>{talk.title}</a>
+      <br />
+      {talk.venue}, {talk.date.getFullYear()}
+    </p>
   </li>
 );
