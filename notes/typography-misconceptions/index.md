@@ -1,6 +1,6 @@
 ---
 title: Typography Misconceptions
-description: TODO
+description: Kerning is not letterspacing, title figures are not text figures, italic is not oblique, and display font is not fancy font.
 date: February 10, 2024
 author: Will Crichton
 ---
