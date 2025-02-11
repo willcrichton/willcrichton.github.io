@@ -24,7 +24,7 @@ import { TALKS, TalkEntry } from "./Talks";
 
 const linkDefs: React.FC<React.HTMLAttributes<HTMLAnchorElement>>[] = [
   props => (
-    <a {...props} href="mailto:crichton.will@gmail.com">
+    <a {...props} href="mailto:will_crichton@brown.edu">
       <span>✉️</span>
     </a>
   ),
