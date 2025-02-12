@@ -40,15 +40,9 @@ url = "/notes/naming-conventions-that-need-to-die/"
 abstract = "Names are an important tool of thought. They provide a loose, lightweight way to manage and structure knowledge. However, bad names inhibit learning and impede progress. We should root out and destroy the processes that lead to bad names."
 
 [[posts]]
-title = "Partial Function Application as a Design Pattern"
-date = "2019-01-04"
-url = "/notes/partial-application-design-pattern/"
-abstract = "Partial function application, or currying, is omnipresent in the use of functional languages. I discuss its role as a design pattern, looking at three specific ways currying can improve the brevity and readability of an API."
-
-[[posts]]
 title = "The Inanity of Programming Language Benchmarks"
 date = "2018-09-18"
-url = "/notes/pl-benchmark-inanity"
+url = "/notes/pl-benchmarks-inanity"
 abstract = "Programming language performance benchmarks track the maximum performance of a program, when really we also care about how long it takes to get there."
 
 [[posts]]

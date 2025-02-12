@@ -79,7 +79,7 @@ p {
   }  
 }
 
-p a, a.body {
+p a:not(.custom-link), a.body {
   text-decoration: none;
   transition: 0.2s background-color;
 

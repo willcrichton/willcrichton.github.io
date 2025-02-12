@@ -139,3 +139,27 @@ header {
 .collapsible-list {
   --nested-block-left-margin: 0;
 }
+
+.star-count {
+  display: inline-flex;
+  align-items:center;
+  vertical-align: text-bottom;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  height: 1em;
+  box-sizing: border-box;  
+  padding: 0 2px;
+  
+  .star-icon {
+    height: 0.6em;
+  }
+
+  .count {
+    height: 1em;
+    margin-left: -0.15em;
+    margin-right: -0.2em;
+    position: relative;
+    z-index: -1;
+  }
+}

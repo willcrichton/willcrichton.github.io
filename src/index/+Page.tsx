@@ -14,6 +14,7 @@ import {
 import headshotUrl from "./assets/headshot-mini.jpg?url";
 import githubIconUrl from "./assets/icon-github.png?url";
 import mastodonIconUrl from "./assets/icon-mastodon.svg?url";
+import starIconUrl from "./assets/star-icon.png?url";
 import { IsMobileContext, Ref, useIsMobile } from "./components";
 import { ResearchGarden } from "./garden/Garden";
 import "./index.scss";
@@ -21,6 +22,17 @@ import { action } from "mobx";
 import { observer, useLocalObservable } from "mobx-react";
 import { POSTS, PostEntry } from "./Posts";
 import { TALKS, TalkEntry } from "./Talks";
+
+let StarCount = ({ repo }: { repo: string }) => {
+  let shieldUrl = `https://img.shields.io/github/stars/${repo}?style=flat-square&logo=%20&label=%20&color=white`;
+  let githubUrl = `https://github.com/${repo}`;
+  return (
+    <a className="star-count custom-link" href={githubUrl}>
+      <img className="star-icon" src={starIconUrl} alt="Github star icon" />
+      <img className="count" src={shieldUrl} alt={`Star count for ${repo}`} />
+    </a>
+  );
+};
 
 const linkDefs: React.FC<React.HTMLAttributes<HTMLAnchorElement>>[] = [
   props => (
@@ -161,9 +173,8 @@ let Header = () => (
       <p>
         In Fall 2025, I am starting as an assistant professor at Brown
         University, where I am founding the{" "}
-        <a href="https://cel.cs.brown.edu/">Cognitive Engineering Lab</a>.{" "}
-        <strong>I am recruiting PhD students!</strong> Previously, I completed
-        my PhD at Stanford, advised by{" "}
+        <a href="https://cel.cs.brown.edu/">Cognitive Engineering Lab</a>.
+        Previously, I completed my PhD at Stanford, advised by{" "}
         <a href="https://amturing.acm.org/award_winners/hanrahan_4652251.cfm">
           Pat Hanrahan
         </a>{" "}
@@ -183,11 +194,11 @@ let Header = () => (
           rel="noreferrer"
         >
           program slicers
-        </a>
-        ,{" "}
+        </a>{" "}
+        <StarCount repo="willcrichton/flowistry" />,{" "}
         <a href="https://nota-lang.org/" target="_blank" rel="noreferrer">
           document languages
-        </a>
+        </a>{" "}<StarCount repo="nota-lang/nota" />
         , and{" "}
         <a
           href="https://cognitive-engineering-lab.github.io/aquascope/"
@@ -195,7 +206,7 @@ let Header = () => (
           rel="noreferrer"
         >
           type system visualizers
-        </a>
+        </a> <StarCount repo="cognitive-engineering-lab/aquascope" />
         . I develop theories like{" "}
         <Ref id="cah:wm-tracing">working memory for programmers</Ref>,{" "}
         <Ref id="ck:profiling-learning">
