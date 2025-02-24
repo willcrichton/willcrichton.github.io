@@ -110,6 +110,7 @@ function print() { __p += __j.call(arguments, '') }
   artifact = {https://zenodo.org/records/8317948},
   github = {https://github.com/cognitive-engineering-lab/aquascope/},
   video = {https://www.youtube.com/watch?v=NtQYUwf6mas},
+  awards = {SIGPLAN Research Highlight}
 }
 
 @inproceedings{zc:rust-discourse,
