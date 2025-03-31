@@ -12,6 +12,7 @@
   <meta property="og:description" content="How to hash, index, profile, multi-thread, and SIMD your way to incredible speeds." />
   <meta property="og:title" content="Analyzing Data 180,000x Faster with Rust" />
   <title>Analyzing Data 180,000x Faster with Rust</title> 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" />
   <style>pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -460,7 +461,11 @@ figure, body > div {
   margin: 0 auto;
 }
 
+.katex {
+  font-size: 1em;
+}
   </style>
+
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
   <![endif]-->
@@ -553,8 +558,10 @@ the synthetic data are:</p>
 <li>20% sparsity (i.e., 12,000 users answered each question)</li>
 <li>Each score is equally likely 1 or 0</li>
 </ul>
-<p>Our goal will be to compute k-CorrSet on this dataset for k = 5 in a
-reasonable amount of time on my 2021 M1 Macbook Pro. Note that there are
+<p>Our goal will be to compute k-CorrSet on this dataset for
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">k = 5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span>
+in a reasonable amount of time on my 2021 M1 Macbook Pro. Note that
+there are
 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo fence="true">(</mo><mfrac linethickness="0px"><mn>200</mn><mn>5</mn></mfrac><mo fence="true">)</mo></mrow><annotation encoding="application/x-tex">\binom{200}{5}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2451em;vertical-align:-0.35em;"></span><span class="mord"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size1">(</span></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8951em;"><span style="top:-2.355em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">5</span></span></span></span><span style="top:-3.144em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">200</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size1">)</span></span></span></span></span></span>
 = 2.5 billion combinations of questions, so we need the inner loop of
 the brute-force algorithm to be quite fast.</p>
