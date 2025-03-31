@@ -85,7 +85,7 @@ synthetic data that roughly matches the properties of my actual data. The proper
 * 20% sparsity (i.e., 12,000 users answered each question)
 * Each score is equally likely 1 or 0
 
-Our goal will be to compute k-CorrSet on this dataset for k = 5 in a reasonable amount of time on my 2021 M1 Macbook Pro. 
+Our goal will be to compute k-CorrSet on this dataset for $k = 5$ in a reasonable amount of time on my 2021 M1 Macbook Pro. 
 Note that there are $\binom{200}{5}$ = 2.5 billion combinations of questions, so we need the inner loop of the brute-force algorithm to be quite fast.
 
 Using Python's [`time.time()`] function, I computed the speed of the inner loop for 1,000 iterations running with CPython 3.9.17. 
