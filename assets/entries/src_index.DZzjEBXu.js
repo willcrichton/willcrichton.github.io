@@ -399,7 +399,8 @@ and retrieve visual concepts on large visual datasets.}
   archivePrefix = {arXiv},
   eprint = {2401.01257},
   artifact = {https://zenodo.org/records/10798571},
-  awards = {Distinguished Paper}
+  awards = {Distinguished Paper},
+  video = {https://www.youtube.com/watch?v=osigYESO_ew}
 }
 
 @inproceedings{gc:trait-errors-hatra,
