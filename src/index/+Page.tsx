@@ -234,6 +234,7 @@ let PublicationsView = () => {
   let [showAll, setShowAll] = useState(false);
   let allConf = pubs.entries.filter(entry => entry.isConference());
   let confSelections = [
+    "gck:interactive-trait-debugger",
     "ck:profiling-learning",
     "ck:document-calculus",
     "cgk:ownership-conceptual-model",

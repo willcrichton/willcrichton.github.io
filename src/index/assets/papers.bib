@@ -88,7 +88,8 @@ and retrieve visual concepts on large visual datasets.}
   archivePrefix = {arXiv},
   eprint = {2101.06305},
   abstract = {Program tracing, or mentally simulating a program on concrete inputs, is an important part of general program comprehension. Programs involve many kinds of virtual state that must be held in memory, such as variable/value pairs and a call stack. In this work, we examine the influence of short-term working memory (WM) on a person's ability to remember program state during tracing. We first confirm that previous findings in cognitive psychology transfer to the programming domain: people can keep about 7 variable/value pairs in WM, and people will accidentally swap associations between variables due to WM load. We use a restricted focus viewing interface to further analyze the strategies people use to trace through programs, and the relationship of tracing strategy to WM. Given a straight-line program, we find half of our participants traced a program from the top-down line-by-line (linearly), and the other half start at the bottom and trace upward based on data dependencies (on-demand). Participants with an on-demand strategy made more WM errors while tracing straight-line code than with a linear strategy, but the two strategies contained an equal number of WM errors when tracing code with functions. We conclude with the implications of these findings for the design of programming tools: first, programs should be analyzed to identify and refactor human-memory-intensive sections of code. Second, programming environments should interactively visualize variable metadata to reduce WM load in accordance with a person's tracing strategy. Third, tools for program comprehension should enable externalizing program state while tracing.},
-  video = {https://www.youtube.com/watch?v=-C1gQg07Jis}
+  video = {https://www.youtube.com/watch?v=-C1gQg07Jis},
+  awards = {Featured in the MIT PL Review}
 }
 
 
@@ -322,4 +323,26 @@ and retrieve visual concepts on large visual datasets.}
   series = {HATRA 2023},
   abstract = {Rust uses traits to define units of shared behavior. Trait constraints build up an implicit set of first-order hereditary Harrop clauses which is executed by a powerful logic programming engine in the trait system. But that power comes at a cost: the number of traits in Rust libraries is increasing, which puts a growing burden on the trait system to help programmers diagnose errors. Beyond a certain size of trait constraints, compiler diagnostics fall off the edge of a complexity cliff, leading to useless error messages. Crate maintainers have created ad-hoc solutions to diagnose common domain-specific errors, but the problem of diagnosing trait errors in general is still open. We propose a trait debugger as a means of getting developers the information necessary to diagnose trait errors in any domain and at any scale. Our proposed tool will extract proof trees from the trait solver, and it will interactively visualize these proof trees to facilitate debugging of trait errors.},
   video = {https://www.youtube.com/watch?v=z0mLhA5xfS4},
+}
+
+@article{gck:interactive-trait-debugger,
+  author = {Gray, Gavin and Crichton, Will and Krishnamurthi, Shriram},
+  title = {An Interactive Debugger for Rust Trait Errors},
+  year = {2025},
+  issue_date = {June 2025},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {9},
+  number = {PLDI},
+  journal = {Proc. ACM Program. Lang.},
+  month = {jun},
+  articleno = {199},
+  numpages = {22},
+  keywords = {Rust, type classes, traits, debugging},
+  abstract = {Compiler diagnostics for type inference failures are notoriously bad, and type classes only make the problem worse. By introducing a complex search process during inference, type classes can lead to wholly inscrutable or useless errors. We describe a system, Argus, for interactively visualizing type class inferences to help programmers debug inference failures, applied specifically to Rust's trait system. The core insight of Argus is to avoid the traditional model of compiler diagnostics as one-size-fits-all, instead providing the programmer with different views on the search tree corresponding to different debugging goals. Argus carefully uses defaults to improve debugging productivity, including interface design (e.g., not showing full paths of types by default) and heuristics (e.g., sorting obligations based on the expected complexity of fixing them). We evaluated Argus in a user study where N=25 participants debugged type inference failures in realistic Rust programs, finding that participants using Argus correctly localized 2.2× as many faults and localized 3.3× faster compared to not using Argus.},
+  github = {https://github.com/cognitive-engineering-lab/argus/},
+  doi = {10.1145/3729302},
+  artifact = {https://zenodo.org/records/15226307},
+  eprint = {2504.18704},
+  archivePrefix = {arXiv}
 }
