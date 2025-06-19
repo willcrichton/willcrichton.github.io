@@ -195,11 +195,11 @@ let Header = () => (
         >
           program slicers
         </a>{" "}
-        <StarCount repo="willcrichton/flowistry" />,{" "}
+        <span style={{ whiteSpace: "no-wrap" }}><StarCount repo="willcrichton/flowistry" />,</span>{" "}
         <a href="https://nota-lang.org/" target="_blank" rel="noreferrer">
           document languages
-        </a>{" "}<StarCount repo="nota-lang/nota" />
-        , and{" "}
+        </a>{" "}<span style={{ whiteSpace: "no-wrap" }}><StarCount repo="nota-lang/nota" />,</span>{" "}
+        and{" "}
         <a
           href="https://cognitive-engineering-lab.github.io/aquascope/"
           target="_blank"
