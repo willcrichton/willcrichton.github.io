@@ -2,6 +2,7 @@ import exenv from "exenv";
 import React, { useEffect, useMemo, useState } from "react";
 
 import { ContextHeaderAnchor, ContextLink } from "./ContextPanel";
+import starIconUrl from "./assets/star-icon.png?url";
 
 export let Ref: React.FC<
   React.PropsWithChildren<
@@ -66,3 +67,14 @@ export let useIsMobile = () => {
 };
 
 export let IsMobileContext = React.createContext<boolean>(false);
+
+export let StarCount = ({ repo }: { repo: string }) => {
+  let shieldUrl = `https://img.shields.io/github/stars/${repo}?style=flat-square&logo=%20&label=%20&color=white`;
+  let githubUrl = `https://github.com/${repo}`;
+  return (
+    <a className="star-count custom-link" href={githubUrl}>
+      <img className="star-icon" src={starIconUrl} alt="Github star icon" />
+      <img className="count" src={shieldUrl} alt={`Star count for ${repo}`} />
+    </a>
+  );
+};

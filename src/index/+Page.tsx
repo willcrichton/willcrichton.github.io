@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 
+import Blurb from "./Blurb.mdx";
 import {
   ContextPanelView,
   PanelContext,
@@ -14,25 +15,13 @@ import {
 import headshotUrl from "./assets/headshot-mini.jpg?url";
 import githubIconUrl from "./assets/icon-github.png?url";
 import mastodonIconUrl from "./assets/icon-mastodon.svg?url";
-import starIconUrl from "./assets/star-icon.png?url";
-import { IsMobileContext, Ref, useIsMobile } from "./components";
+import { IsMobileContext, useIsMobile } from "./components";
 import { ResearchGarden } from "./garden/Garden";
 import "./index.scss";
 import { action } from "mobx";
 import { observer, useLocalObservable } from "mobx-react";
 import { POSTS, PostEntry } from "./Posts";
 import { TALKS, TalkEntry } from "./Talks";
-
-let StarCount = ({ repo }: { repo: string }) => {
-  let shieldUrl = `https://img.shields.io/github/stars/${repo}?style=flat-square&logo=%20&label=%20&color=white`;
-  let githubUrl = `https://github.com/${repo}`;
-  return (
-    <a className="star-count custom-link" href={githubUrl}>
-      <img className="star-icon" src={starIconUrl} alt="Github star icon" />
-      <img className="count" src={shieldUrl} alt={`Star count for ${repo}`} />
-    </a>
-  );
-};
 
 const linkDefs: React.FC<React.HTMLAttributes<HTMLAnchorElement>>[] = [
   props => (
@@ -162,66 +151,7 @@ let Header = () => (
     </header>
 
     <div>
-      <p>
-        My goal is to empower people to use the full potential of computers
-        through programming. To reach that potential, we need to combine a
-        science of programming with a science of people. For me, these sciences
-        are <em>programming language theory</em> and{" "}
-        <em>cognitive psychology</em>, respectively. My research draws on these
-        fields to make programming more usable, learnable, and powerful.
-      </p>
-      <p>
-        In Fall 2025, I am starting as an assistant professor at Brown
-        University, where I am founding the{" "}
-        <a href="https://cel.cs.brown.edu/">Cognitive Engineering Lab</a>.
-        Previously, I completed my PhD at Stanford, advised by{" "}
-        <a href="https://amturing.acm.org/award_winners/hanrahan_4652251.cfm">
-          Pat Hanrahan
-        </a>{" "}
-        and{" "}
-        <a href="https://graphics.stanford.edu/~maneesh/">Maneesh Agrawala</a>.
-        I am currently finishing up my postdoc at Brown with{" "}
-        <a href="https://cs.brown.edu/~sk/">Shriram Krishnamurthi</a>.
-      </p>
-      <p>
-        I do research primarily between{" "}
-        <abbr title="Programming Languages">PL</abbr> and{" "}
-        <abbr title="Human-Computer Interaction">HCI</abbr>. I build systems
-        like{" "}
-        <a
-          href="https://github.com/willcrichton/flowistry/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          program slicers
-        </a>{" "}
-        <span style={{ whiteSpace: "no-wrap" }}><StarCount repo="willcrichton/flowistry" />,</span>{" "}
-        <a href="https://nota-lang.org/" target="_blank" rel="noreferrer">
-          document languages
-        </a>{" "}<span style={{ whiteSpace: "no-wrap" }}><StarCount repo="nota-lang/nota" />,</span>{" "}
-        and{" "}
-        <a
-          href="https://cognitive-engineering-lab.github.io/aquascope/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          type system visualizers
-        </a> <StarCount repo="cognitive-engineering-lab/aquascope" />
-        . I develop theories like{" "}
-        <Ref id="cah:wm-tracing">working memory for programmers</Ref>,{" "}
-        <Ref id="ck:profiling-learning">
-          psychometrics for programming languages
-        </Ref>
-        , and{" "}
-        <Ref id="ck:document-calculus">
-          type-safe templates for <span className="nobr">System F</span>
-        </Ref>
-        . I work on systems languages like <Ref id="sec-rust">Rust</Ref>, proof
-        assistants like <Ref id="sec-proofs">Lean</Ref>, and <abbr>UI</abbr>{" "}
-        tools like <Ref id="sec-browser">the browser</Ref>. My Rust research has
-        been used by over 100,000 developers to date. My research garden (below)
-        explains my current interests in greater detail.
-      </p>
+      <Blurb />
     </div>
   </>
 );
