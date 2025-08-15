@@ -346,3 +346,23 @@ and retrieve visual concepts on large visual datasets.}
   eprint = {2504.18704},
   archivePrefix = {arXiv}
 }
+
+@inproceedings{a*:paralegal,
+  author       = {Adam, Justus and Zech, Carolyn and Zhu, Livia and Rajesh, Sreshtaa and Harbison, Nathan and Jethwa, Mithi and Crichton, Will and Krishnamurthi, Shriram and Schwarzkopf, Malte},
+  editor       = {Lidong Zhou and
+                  Yuanyuan Zhou},
+  title        = {Paralegal: Practical Static Analysis for Privacy Bugs},
+  abstract = {Finding privacy bugs in software today usually requires onerous manual audits. Code analysis tools could help, but existing tools aren’t sufficiently practical and ergonomic to be used. Paralegal is a static analysis tool to find privacy bugs in Rust programs. Key to Paralegal’s practicality is its distribution of work between the program analyzer, privacy engineers, and application developers. Privacy engineers express a high-level privacy policy over markers, which application developers then apply to source code entities. Paralegal extracts a Program Dependence Graph (PDG) from the program, leveraging Rust’s ownership type system to model the behavior of library code. Paralegal augments the PDG with the developers’ markers and checks privacy policies against the marked PDG. In an evaluation on eight real-world applications, Paralegal found real privacy bugs, including two previously unknown ones. Paralegal supports a broader range of policies than information flow control (IFC) and CodeQL, a widely-used code analysis engine. Paralegal is fast enough to deploy interactively, and its markers are easy to maintain as code evolves.},
+  booktitle    = {19th {USENIX} Symposium on Operating Systems Design and Implementation,
+                  {OSDI} 2025, Boston, MA, USA, July 7-9, 2025},
+  pages        = {957--978},
+  publisher    = {{USENIX} Association},
+  series =       {OSDI 2025},
+  year         = {2025},
+  url          = {https://www.usenix.org/conference/osdi25/presentation/adam},
+  timestamp    = {Thu, 17 Jul 2025 16:58:23 +0200},
+  biburl       = {https://dblp.org/rec/conf/osdi/AdamZZRHJCKS25.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org},
+  github = {https://github.com/brownsys/paralegal},
+  artifact = {https://zenodo.org/records/15374862}  
+}
