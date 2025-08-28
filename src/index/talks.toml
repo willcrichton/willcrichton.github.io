@@ -1,4 +1,18 @@
 [[talks]]
+title = "Rust for Everyone!"
+date = "2025-08-04"
+venue = "Jane Street"
+url = "https://www.youtube.com/watch?v=R0dP-QR5wQo"
+abstract = """
+Rust promises to empower everyone to build reliable software, but its unique features create steep learning curves. In this talk, Will Crichton presents four years of research into evidence-based tools that help both novices and experts work more effectively with Rust's complexity, including:
+- Ownership visualization: Interactive diagrams showing permissions (read/write/own) that help students understand borrowing better than rule-based explanations
+- Trait debugging: A graphical tool for navigating complex trait inference trees when compiler errors become unreadably long
+- Program slicing: Using Rust's type system to automatically highlight only code relevant to specific variables
+
+All tools discussed are open source and available for use.
+"""
+
+[[talks]]
 title = "Visualizing and Explaining Rust's Ownership Model"
 date = "2024-10-21"
 venue = "IWACO"
