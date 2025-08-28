@@ -873,6 +873,20 @@ title = "Minimum effort investing"
 date = "2016-04-15"
 abstract = "If you don't have any investments, i.e. your money is sitting in a savings account, then you're missing out. Investing today is surprisingly easy with the advent of index funds, and I'll take you step by step through both the theory and the practical parts of settings up these investments for yourself. After reading this note and taking 30 minutes out of your day, you can be making 7-12% returns on your money with minimum effort."
 url = "/notes/minimum-effort-investing/"`;function W_(){let o=av.parse(B_).posts.map(s=>({...s,date:new Date(s.date)}));return kd.sortBy(o,s=>-s.date)}const H_=W_();let V_=({post:o})=>p.jsx("li",{children:p.jsxs("p",{children:[p.jsx("a",{href:o.url,children:o.title})," [",o.venue&&p.jsxs(p.Fragment,{children:[o.venue,", "]}),o.date.getFullYear(),"]"]})});const q_=`[[talks]]
+title = "Rust for Everyone!"
+date = "2025-08-04"
+venue = "Jane Street"
+url = "https://www.youtube.com/watch?v=R0dP-QR5wQo"
+abstract = """
+Rust promises to empower everyone to build reliable software, but its unique features create steep learning curves. In this talk, Will Crichton presents four years of research into evidence-based tools that help both novices and experts work more effectively with Rust's complexity, including:
+- Ownership visualization: Interactive diagrams showing permissions (read/write/own) that help students understand borrowing better than rule-based explanations
+- Trait debugging: A graphical tool for navigating complex trait inference trees when compiler errors become unreadably long
+- Program slicing: Using Rust's type system to automatically highlight only code relevant to specific variables
+
+All tools discussed are open source and available for use.
+"""
+
+[[talks]]
 title = "Visualizing and Explaining Rust's Ownership Model"
 date = "2024-10-21"
 venue = "IWACO"
