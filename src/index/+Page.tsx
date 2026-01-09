@@ -173,6 +173,7 @@ let PublicationsView = () => {
     "cah:wm-tracing",
   ].map(k => pubs.entry(k));
   let wsSelections = [
+    "c*:watchat",
     "c:rust-design-patterns",
     "c:pl-medium",
     "c:docgen-infoviz",

@@ -42,8 +42,18 @@ export class BibtexEntry {
   }
 
   isWorkshop() {
-    const WORKSHOPS = ["FUNARCH", "HATRA", "PLATEAU", "SNAPL", "AI Systems"];
-    return !this.isDissertation() && WORKSHOPS.includes(this.venue);
+    const WORKSHOPS = [
+      "FUNARCH",
+      "HATRA",
+      "PLATEAU",
+      "SNAPL",
+      "AI Systems",
+      "NLR & SE",
+    ];
+    return (
+      !this.isDissertation() &&
+      WORKSHOPS.some(workshop => this.venue.startsWith(workshop))
+    );
   }
 
   isConference() {

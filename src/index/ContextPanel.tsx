@@ -10,7 +10,9 @@ import { IsMobileContext, Ref } from "./components";
 export class ContextPanel {
   selected: string | null = null;
 
-  constructor(readonly panelRef: React.RefObject<HTMLDivElement>) {
+  constructor(
+    readonly panelRef: React.MutableRefObject<HTMLDivElement | null>,
+  ) {
     makeAutoObservable(this);
   }
 
@@ -24,7 +26,7 @@ export class ContextPanel {
 }
 
 export let useContextPanel = () => {
-  let panelRef = useRef(null);
+  let panelRef = useRef<HTMLDivElement>(null);
   let [panel] = useState(() => new ContextPanel(panelRef));
   useEffect(() => {
     panel.updateSelection(window.location.href);

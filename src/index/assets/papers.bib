@@ -20,7 +20,7 @@
   artifact = {https://zenodo.org/records/8317948},
   github = {https://github.com/cognitive-engineering-lab/aquascope/},
   video = {https://www.youtube.com/watch?v=NtQYUwf6mas},
-  awards = {SIGPLAN Research Highlight}
+  awards = {Featured in the SIGPLAN and Communications of the ACM Research Highlights}
 }
 
 @inproceedings{zc:rust-discourse,
@@ -156,7 +156,7 @@ and retrieve visual concepts on large visual datasets.}
   numpages = {9},
   keywords = {design patterns, domain-driven design, rust},
   location = {Seattle, WA, USA},
-  series = {FUNARCH 2023},
+  series = {FUNARCH @ SPLASH 2023},
   archivePrefix = {arXiv},
   eprint = {2307.07069},
   video = {https://www.youtube.com/watch?v=mB2ZhK8tB8Y},
@@ -191,7 +191,7 @@ and retrieve visual concepts on large visual datasets.}
   title = {A New Medium for Communicating Research on Programming Languages},
   year = {2021},
   url = {https://willcrichton.net/nota/},
-  series = {HATRA 2021},
+  series = {HATRA @ SPLASH 2021},
   abstract = {Papers about programming languages involve complex notations, systems, and proofs. Static PDFs offer little support in understanding such concepts. I describe Nota, a framework for academic papers that uses the browser's interactive capabilities to support comprehension in context. Nota uses hover effects, tooltips, expandable sections, toggleable explanations, and other interactions to help readers understand a language's syntax and semantics. I demonstrate the use of Nota by rewriting a PL paper using its primitives, and also by writing this paper in Nota.}
 
 }
@@ -277,7 +277,7 @@ and retrieve visual concepts on large visual datasets.}
   year = {2019},
   archivePrefix = {arXiv},
   eprint = {1909.12281},
-  series = {PLATEAU 2019},
+  series = {PLATEAU @ SPLASH 2019},
   abstract = {Program synthesis techniques offer significant new capabilities in searching for programs that satisfy high-level specifications. While synthesis has been thoroughly explored for input/output pair specifications (programming-by-example), this paper asks: what does program synthesis look like beyond examples? What actual issues in day-to-day development would stand to benefit the most from synthesis? How can a human-centric perspective inform the exploration of alternative specification languages for synthesis? I sketch a human-centric vision for program synthesis where programmers explore and learn languages and APIs aided by a synthesis tool.}}
 
 @inproceedings{f+:rekall,
@@ -286,7 +286,7 @@ and retrieve visual concepts on large visual datasets.}
   year={2019},
   archivePrefix = {arXiv},
   eprint={1910.02993},
-  series = {AI Systems 2019},
+  series = {AI Systems @ SOSP 2019},
   abstract={Many real-world video analysis applications require the ability to identify domain-specific events in video, such as interviews and commercials in TV news broadcasts, or action sequences in film. Unfortunately, pre-trained models to detect all the events of interest in video may not exist, and training new models from scratch can be costly and labor-intensive. In this paper, we explore the utility of specifying new events in video in a more traditional manner: by writing queries that compose outputs of existing, pre-trained models. To write these queries, we have developed Rekall, a library that exposes a data model and programming model for compositional video event specification. Rekall represents video annotations from different sources (object detectors, transcripts, etc.) as spatiotemporal labels associated with continuous volumes of spacetime in a video, and provides operators for composing labels into queries that model new video events. We demonstrate the use of Rekall in analyzing video from cable TV news broadcasts, films, static-camera vehicular video streams, and commercial autonomous vehicle logs. In these efforts, domain experts were able to quickly (in a few hours to a day) author queries that enabled the accurate detection of new events (on par with, and in some cases much more accurate than, learned approaches) and to rapidly retrieve video clips for human-in-the-loop tasks such as video content curation and training data curation. Finally, in a user study, novice users of Rekall were able to author queries to retrieve new events in video given just one hour of query development time.}
 }
 
@@ -365,4 +365,17 @@ and retrieve visual concepts on large visual datasets.}
   bibsource    = {dblp computer science bibliography, https://dblp.org},
   github = {https://github.com/brownsys/paralegal},
   artifact = {https://zenodo.org/records/15374862}  
+}
+
+@misc{c*:watchat,
+    author={Chandra, Kartik and Collins, Katherine M. and Crichton, Will and Chen, Tony and Li, Tzu-Mao and Weller, Adrian and Nigam, Rachit and Tenenbaum, Joshua and Ragan-Kelley, Jonathana},
+    title={WatChat: Explaining perplexing programs by debugging mental models}, 
+    abstract = {Often, a good explanation for a program's unexpected behavior is a bug in the programmer's code. But sometimes, an even better explanation is a bug in the programmer's mental model of the language or API they are using. Instead of merely debugging our current code ("giving the programmer a fish"), what if our tools could directly debug our mental models ("teaching the programmer to fish")? In this paper, we apply recent ideas from computational cognitive science to offer a principled framework for doing exactly that. Given a "why?" question about a program, we automatically infer potential misconceptions about the language/API that might cause the user to be surprised by the program's behavior -- and then analyze those misconceptions to provide explanations of the program's behavior. Our key idea is to formally represent misconceptions as counterfactual (erroneous) semantics for the language/API, which can be inferred and debugged using program synthesis techniques. We demonstrate our framework, WatChat, by building systems for explanation in two domains: JavaScript type coercion, and the Git version control system. We evaluate WatChatJS and WatChatGit by comparing their outputs to experimentally-collected human-written explanations in these two domains: we show that WatChat's explanations exhibit key features of human-written explanation, unlike those of a state-of-the-art language model.},
+    year={2024},    
+    number={NLR & SE @ ACL},
+    eprint={2403.05334},
+    archivePrefix={arXiv},
+    primaryClass={cs.PL},
+    url={https://arxiv.org/abs/2403.05334}, 
+    github = {https://github.com/kach/watchat}
 }

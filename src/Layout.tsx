@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
+import type { Config } from "vike/types";
 
-export let Layout: React.FC<React.PropsWithChildren> = ({ children }) => {
+export let Layout: Config["Layout"] = ({ children }) => {
   useEffect(() => {
     let isFirefox = navigator.userAgent.toLowerCase().includes("firefox");
     let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
