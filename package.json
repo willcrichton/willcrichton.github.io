@@ -27,7 +27,7 @@
     "classnames": "^2.5.1",
     "exenv": "^1.2.2",
     "jsdom": "^27.4.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "mobx": "^6.15.0",
     "mobx-react": "^9.2.1",
     "normalize.css": "^8.0.1",
