@@ -79,7 +79,7 @@ p {
   }  
 }
 
-p a:not(.custom-link), a.body {
+p a:not(.custom-link), li a:not(.custom-link), a.body {
   text-decoration: none;
   transition: 0.2s background-color;
 
@@ -137,7 +137,7 @@ pre, code {
 }
 
 details {
-  margin-block: 1em 0;  
+  margin-block: 1em; 
 
   > summary::marker, > summary::-webkit-details-marker {
     font-size: 70%;

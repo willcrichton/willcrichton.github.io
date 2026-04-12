@@ -21,6 +21,11 @@
   background-color: #fafafa;
   padding: 0 1em; 
   border-radius: 8px;
+  margin-block-start: 1em;
+
+  div.summary {
+    list-style-position: inside;
+  }
 }
 
 header {

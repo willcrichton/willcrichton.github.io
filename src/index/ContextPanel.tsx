@@ -53,40 +53,53 @@ export let ContextPanelView = observer(() => {
 
 export let ContextAnchor: React.FC<React.PropsWithChildren<{ id: string }>> =
   observer(({ children, id }) => {
-    let ctx = useContext(PanelContext)!;
+    let ctx = useContext(PanelContext);
+    if (!ctx) return null;
+
+    let isMobile = useContext(IsMobileContext);
     let selected = ctx.selected === id;
-    return (
-      <a
-        id={id}
-        href={`#${id}`}
-        className={classNames("context-anchor", { selected })}
-        onClick={e => {
-          e.preventDefault();
-        }}
-      >
-        {children}
-      </a>
-    );
+    let className = classNames("context-anchor", { selected });
+    let hash = `#${id}`;
+    if (isMobile) {
+      return (
+        <span className={className} id={id}>
+          {children}
+        </span>
+      );
+    } else {
+      return (
+        <a
+          id={id}
+          href={hash}
+          className={className}
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            let oldURL = window.location.href;
+            let newURL = new URL(window.location.href);
+            if (window.location.hash === hash) {
+              newURL.hash = "";
+            } else {
+              newURL.hash = hash;
+            }
+            window.history.pushState({}, "", newURL);
+            window.dispatchEvent(
+              new HashChangeEvent("hashchange", {
+                oldURL,
+                newURL: newURL.href,
+              }),
+            );
+          }}
+        >
+          {children}
+        </a>
+      );
+    }
   });
 
 export let ContextHeaderAnchor: React.FC<
   React.PropsWithChildren<{ id: string }>
-> = ({ children, id }) => {
-  let isMobile = useContext(IsMobileContext);
-  if (isMobile) {
-    return (
-      <span className="context-anchor" id={id}>
-        {children}
-      </span>
-    );
-  } else {
-    return (
-      <Ref className="context-anchor" id={id}>
-        {children}
-      </Ref>
-    );
-  }
-};
+> = ContextAnchor;
 
 export interface ContextLinkProps {
   summary: React.ReactNode;
@@ -98,7 +111,9 @@ export let ContextLink: React.FC<
     ContextLinkProps & React.HTMLAttributes<HTMLDetailsElement>
   >
 > = observer(({ summary, contextTitle, children, contextId, ...attrs }) => {
-  let ctx = useContext(PanelContext)!;
+  let ctx = useContext(PanelContext);
+  if (!ctx) return null;
+
   let currentlySelected = ctx.selected === contextId;
   let isMobile = useContext(IsMobileContext);
 
