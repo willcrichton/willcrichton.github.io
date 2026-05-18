@@ -239,6 +239,14 @@ let IndexContent = () => (
     <ResearchGarden />
 
     <section>
+      <h1>Teaching</h1>
+      <ul className="collapsible-list">
+        <li><abbr>CSCI 1377</abbr>: Tools for Thought (<a href="https://cel.cs.brown.edu/csci-1377-f26/"><abbr>F26</abbr></a>, <a href="https://cel.cs.brown.edu/csci-1377-s26/"><abbr>S26</abbr></a>)</li>
+        <li><abbr>CSCI 1951Q</abbr>: Topics in Programming Languages (<a href="https://cel.cs.brown.edu/csci-1951q-f25/"><abbr>F25</abbr></a>)</li>
+      </ul>
+    </section>
+
+    <section>
       <h1>Talks</h1>
       <CollapsibleList
         els={TALKS.map(talk => <TalkEntry talk={talk} key={talk.title} />)}
