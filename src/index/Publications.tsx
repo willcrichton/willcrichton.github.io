@@ -49,6 +49,7 @@ export class BibtexEntry {
       "SNAPL",
       "AI Systems",
       "NLR & SE",
+      "PLOS"
     ];
     return (
       !this.isDissertation() &&

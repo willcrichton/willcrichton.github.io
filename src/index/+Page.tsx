@@ -164,7 +164,7 @@ let PublicationsView = () => {
   let [showAll, setShowAll] = useState(false);
   let allConf = pubs.entries.filter(entry => entry.isConference());
   let confSelections = [
-    "a*:paralegal",
+    "gck:async-await",
     "gck:interactive-trait-debugger",
     "ck:profiling-learning",
     "ck:document-calculus",
@@ -193,12 +193,12 @@ let PublicationsView = () => {
       <p>
         {showAll ? (
           <>
-            This is an exhaustive list of my publications. Click the button
+            This is an <strong>exhaustive</strong> list of my publications. Click the button
             above to see a selected subset.
           </>
         ) : (
           <>
-            This is a representative set of my publications. Click the button
+            This is a <strong>representative</strong> set of my publications. Click the button
             above to see an exhaustive list.
           </>
         )}
@@ -243,6 +243,7 @@ let IndexContent = () => (
       <ul className="collapsible-list">
         <li><abbr>CSCI 1377</abbr>: Tools for Thought (<a href="https://cel.cs.brown.edu/csci-1377-f26/"><abbr>F26</abbr></a>, <a href="https://cel.cs.brown.edu/csci-1377-s26/"><abbr>S26</abbr></a>)</li>
         <li><abbr>CSCI 1951Q</abbr>: Topics in Programming Languages (<a href="https://cel.cs.brown.edu/csci-1951q-f25/"><abbr>F25</abbr></a>)</li>
+        <li><abbr>CS 242</abbr>: Programming Languages (<a href="https://stanford-cs242.github.io/f19/"><abbr>F19</abbr></a>, <a href="https://stanford-cs242.github.io/f18/"><abbr>F18</abbr></a>, <a href="https://stanford-cs242.github.io/f17/"><abbr>F17</abbr></a>)</li>
       </ul>
     </section>
 

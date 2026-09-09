@@ -20,7 +20,7 @@
   artifact = {https://zenodo.org/records/8317948},
   github = {https://github.com/cognitive-engineering-lab/aquascope/},
   video = {https://www.youtube.com/watch?v=NtQYUwf6mas},
-  awards = {Featured in the SIGPLAN and Communications of the ACM Research Highlights}
+  awards = {Recognized as a SIGPLAN Research Highlight and CACM Research Highlight}
 }
 
 @inproceedings{zc:rust-discourse,
@@ -43,11 +43,11 @@
   month = {Sep},
   url = {https://willcrichton.net/assets/pdf/dissertation.pdf},
   abstract = {Program slicing is the technique of automatically identifying the subset of a program that is relevant to a particular piece of code. In theory, slicing addresses one of the core challenges of modern-day programming: sorting through large quantities of information to find what is relevant to the task at hand. However, very little is known about how people would actually use a slicer while programming. This dearth of evidence is compounded by the fact that no practical program slicer exists for programmers to use today.
-  
-  This dissertation contributes to the theoretical and practical foundations of program slicing in three ways. First, I provide evidence for the cognitive basis of slicing. I report on a series of experiments that demonstrate how a person’s working memory significantly limits their ability to remember information about a program while engaging in a variety of comprehension tasks. These experiments support the design of tools to reduce working memory load while programming, such as program slicing. 
-  
-  Second, I describe the theory and implementation of a modular program slicer for the Rust programming language. This slicer is based on a novel information flow analysis, Flowistry, that leverages Rust’s type system, namely ownership types, to approximate the behavior of unknown code solely from its static type. With these approximations, code can be analyzed more efficiently (no whole-program analysis) and robustly (no library source code needed). I show that this approximation is provably sound and reasonably precise in practice. 
-  
+
+  This dissertation contributes to the theoretical and practical foundations of program slicing in three ways. First, I provide evidence for the cognitive basis of slicing. I report on a series of experiments that demonstrate how a person’s working memory significantly limits their ability to remember information about a program while engaging in a variety of comprehension tasks. These experiments support the design of tools to reduce working memory load while programming, such as program slicing.
+
+  Second, I describe the theory and implementation of a modular program slicer for the Rust programming language. This slicer is based on a novel information flow analysis, Flowistry, that leverages Rust’s type system, namely ownership types, to approximate the behavior of unknown code solely from its static type. With these approximations, code can be analyzed more efficiently (no whole-program analysis) and robustly (no library source code needed). I show that this approximation is provably sound and reasonably precise in practice.
+
   Finally, I describe the design of a new program slicing interface, Focus Mode, that interactively visualizes slices as the user changes their focus in a program. I report on a user study of Rust developers debugging programs with Focus Mode.},
   video = {https://www.youtube.com/watch?v=BrVk97PhWmM}
 }
@@ -264,7 +264,7 @@ and retrieve visual concepts on large visual datasets.}
 @inproceedings{c:ownership-usability,
   author = {Crichton, Will},
   title = {The Usability of Ownership},
-  year = {2020},  
+  year = {2020},
   series = {HATRA 2020},
   abstract = {Ownership is the concept of tracking aliases and mutations to data, useful for both memory safety and system design. The Rust programming language implements ownership via the borrow checker, a static analyzer that extends the core type system. The borrow checker is a notorious learning barrier for new Rust users. In this paper, I focus on the gap between understanding ownership in theory versus its implementation in the borrow checker. As a sound and incomplete analysis, compiler errors may arise from either ownership-unsound behavior or limitations of the analyzer. Understanding this distinction is essential for fixing ownership errors. But how are users actually supposed to make the correct inference? Drawing on my experience with using and teaching Rust, I explore the many challenges in interpreting and responding to ownership errors. I also suggest educational and automated interventions that could improve the usability of ownership.},
   archivePrefix = {arXiv},
@@ -344,7 +344,8 @@ and retrieve visual concepts on large visual datasets.}
   doi = {10.1145/3729302},
   artifact = {https://zenodo.org/records/15226307},
   eprint = {2504.18704},
-  archivePrefix = {arXiv}
+  archivePrefix = {arXiv},
+  awards = {Featured in the MIT PL Review}
 }
 
 @inproceedings{a*:paralegal,
@@ -364,18 +365,50 @@ and retrieve visual concepts on large visual datasets.}
   biburl       = {https://dblp.org/rec/conf/osdi/AdamZZRHJCKS25.bib},
   bibsource    = {dblp computer science bibliography, https://dblp.org},
   github = {https://github.com/brownsys/paralegal},
-  artifact = {https://zenodo.org/records/15374862}  
+  artifact = {https://zenodo.org/records/15374862}
 }
 
 @misc{c*:watchat,
     author={Chandra, Kartik and Collins, Katherine M. and Crichton, Will and Chen, Tony and Li, Tzu-Mao and Weller, Adrian and Nigam, Rachit and Tenenbaum, Joshua and Ragan-Kelley, Jonathana},
-    title={WatChat: Explaining perplexing programs by debugging mental models}, 
+    title={WatChat: Explaining perplexing programs by debugging mental models},
     abstract = {Often, a good explanation for a program's unexpected behavior is a bug in the programmer's code. But sometimes, an even better explanation is a bug in the programmer's mental model of the language or API they are using. Instead of merely debugging our current code ("giving the programmer a fish"), what if our tools could directly debug our mental models ("teaching the programmer to fish")? In this paper, we apply recent ideas from computational cognitive science to offer a principled framework for doing exactly that. Given a "why?" question about a program, we automatically infer potential misconceptions about the language/API that might cause the user to be surprised by the program's behavior -- and then analyze those misconceptions to provide explanations of the program's behavior. Our key idea is to formally represent misconceptions as counterfactual (erroneous) semantics for the language/API, which can be inferred and debugged using program synthesis techniques. We demonstrate our framework, WatChat, by building systems for explanation in two domains: JavaScript type coercion, and the Git version control system. We evaluate WatChatJS and WatChatGit by comparing their outputs to experimentally-collected human-written explanations in these two domains: we show that WatChat's explanations exhibit key features of human-written explanation, unlike those of a state-of-the-art language model.},
-    year={2024},    
+    year={2024},
     number={NLR & SE @ ACL},
     eprint={2403.05334},
     archivePrefix={arXiv},
     primaryClass={cs.PL},
-    url={https://arxiv.org/abs/2403.05334}, 
+    url={https://arxiv.org/abs/2403.05334},
     github = {https://github.com/kach/watchat}
 }
+
+@article{gck:async-await,
+  author = {Gray, Gavin and Crichton, Will and Krishnamurthi, Shriram},
+  title = {A Design Space Exploration of {Async/Await}},
+  year = {2026},
+  issue_date = {October 2026},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {10},
+  number = {OOPSLA},
+  journal = {Proc. ACM Program. Lang.},
+  month = {oct},
+  keywords = {asynchronous programming, async/await, structured concurrency},
+  abstract = {Many modern programming languages include some form of asynchronous programming. In particular, a growing number now have what we call straight-line asynchrony: attempts to provide asynchronous functions that look similar to synchronous functions, thereby enabling asynchrony without introducing complex control. These languages often share construct names like "async" and "await," which suggests that they have deep semantic similarities. Yet, a close examination reveals that these languages are quite different along several dimensions, often subtly. These differences have real semantic consequences: similar-looking programs can exhibit divergent behavior, confusing developers and language designers alike. This paper therefore presents a design space exploration of straight-line asynchrony. We dissect several existing languages, and show how no two of them agree as a whole on design decisions that affect the presence and ordering of execution. We articulate a design space with nine dimensions covering the full lifecycle of an asynchronous computation, covering questions such as: What precise guarantees does a language give upon calling an asynchronous function? What happens at the end of a task's life? How can a task handle being cancelled? We explore these questions through concrete examples, informal design discussion, and a formal semantics. Our ultimate goal is to help programmers, language designers, and language theorists all better understand the emerging landscape of straight-line asynchrony.},
+  % doi = {https://doi.org/10.1145/3839519},
+  artifact = {https://doi.org/10.5281/zenodo.21765917},
+  eprint = {2608.20677},
+  archivePrefix = {arXiv}
+}
+
+@misc{c*:rust-safety,
+  author = {Tiffany, Corinn and Agvanian, Artem and Song, Ziyun and Szabo, Isabella and Dak Albab, Kinan and Crichton, Will and Levis, Philip and Narayan, Akshay and Raghavan, Deepti and Schwarzkopf, Malte},
+  title = {We Need to Talk About the Actual Guarantees of Rust-based Systems},
+  year = {2026},
+  number = {PLOS @ SOSP 2026}
+}
+
+@misc{k*:explorable-theorems,
+  author = {Kambhamettu, Hita and Crichton, Will and Welleck, Sean and Goldstein, Harrison and Head, Andrew},
+  title = {Explorable Theorems: Making Written Theorems Explorable by Grounding Them in Formal Representations},
+  year = {2026},
+  number = {UIST}}
